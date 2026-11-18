@@ -1,0 +1,22 @@
+# Vercel & Deployment
+.vercel
+.vercelignore
+
+# Environment & Credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.cert
+
+# Logs & Temporary files
+*.log
+scratch/
+tmp/
+
+# OS and Editor metadata
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

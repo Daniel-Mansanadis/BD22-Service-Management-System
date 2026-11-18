@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Operations - BD22 Fire System & Builders Inc.</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/portal.css">
+  <link rel="shortcut icon" href="assets/images/bd22-logo.png" type="image/png">
+</head>
+<body>
+
+  <div class="portal-layout">
+    
+    <!-- Admin Sidebar (Mockups 27 to 49) -->
+    <aside class="sidebar admin-sidebar">
+      <a href="index.html" class="sidebar-brand">
+        <img src="assets/images/bd22-logo.png" alt="BD22" class="sidebar-brand-logo">
+        <span class="sidebar-brand-title">BD22 Admin</span>
+      </a>
+
+      <div class="admin-sidebar-divider"></div>
+
+      <!-- 11 Admin Navigation Links -->
+      <nav class="sidebar-nav">
+        <a href="#admin-dashboard" class="sidebar-nav-link active" data-view="admin-dashboard">
+          Dashboard
+        </a>
+        <a href="#admin-inquiries" class="sidebar-nav-link" data-view="admin-inquiries">
+          Customer Inquiries
+        </a>
+        <a href="#admin-service-requests" class="sidebar-nav-link" data-view="admin-service-requests">
+          Service Requests
+        </a>
+        <a href="#admin-projects" class="sidebar-nav-link" data-view="admin-projects">
+          Project Management
+        </a>
+        <a href="#admin-inventory" class="sidebar-nav-link" data-view="admin-inventory">
+          Equipment & Inventory
+        </a>
+        <a href="#admin-payments" class="sidebar-nav-link" data-view="admin-payments">
+          Payment & Billing
+        </a>
+        <a href="#admin-warranties" class="sidebar-nav-link" data-view="admin-warranties">
+          Warranty Tracking
+        </a>
+        <a href="#admin-maintenance" class="sidebar-nav-link" data-view="admin-maintenance">
+          Maintenance Schedule
+        </a>
+        <a href="#admin-history" class="sidebar-nav-link" data-view="admin-history">
+          Service History
+        </a>
+        <a href="#admin-notifications" class="sidebar-nav-link" data-view="admin-notifications">
+          System Notifications
+        </a>
+        <a href="#admin-profile" class="sidebar-nav-link" data-view="admin-profile">
+          Profile & Settings
+        </a>
+      </nav>
+
+      <!-- Admin User Footer -->
+      <div class="admin-sidebar-footer">
+        <div>Operations: <span class="user-label">BD22 Operations</span></div>
+        <div>Role: <span style="color:#e2e8f0; font-weight:700;">System Administrator</span></div>
+      </div>
+    </aside>
+
+    <!-- Mobile Sidebar Backdrop Overlay -->
+    <div class="sidebar-backdrop" id="adminSidebarBackdrop"></div>
+
+    <!-- Main Admin Wrapper -->
+    <div class="main-wrapper">
+      
+      <!-- Topbar Header (Mockup 27) -->
+      <header class="topbar">
+        <div style="display:flex; align-items:center; gap:0.85rem;">
+          <button class="topbar-icon-btn topbar-mobile-btn" id="adminMobileSidebarToggle" aria-label="Toggle Menu" style="display:none; font-size:1.4rem; padding:0.25rem; cursor:pointer;">☰</button>
+          <div class="topbar-header-info">
+            <span class="topbar-kicker">OPERATIONS MANAGEMENT</span>
+            <h1 class="topbar-title" id="topbarPageTitle">Admin Dashboard</h1>
+          </div>
+        </div>
+
+        <div class="topbar-actions">
+          <!-- Notification Bell -->
+          <button class="topbar-icon-btn" id="adminNotifBell" title="System Alerts" aria-label="System Alerts" onclick="document.querySelector('[data-view=admin-notifications]').click();">
+            🔔
+            <span class="notification-badge"></span>
+          </button>
+
+          <!-- Admin Avatar -->
+          <div class="avatar-circle" id="adminAvatarBtn" title="Admin Account">
+            🛡️
+          </div>
+
+          <!-- Admin Menu Dropdown -->
+          <div class="user-menu-dropdown" id="adminUserMenu">
+            <div style="padding: 0.65rem 1.25rem; font-weight:700; color:#1e293b; border-bottom:1px solid #f1f5f9;">
+              BD22 Operations
+              <div style="font-size:0.8rem; font-weight:500; color:#64748b;">Administrator</div>
+            </div>
+            <a href="#admin-profile" class="user-menu-item" onclick="document.querySelector('[data-view=admin-profile]').click();">👤 Profile & Settings</a>
+            <a href="customer-portal.html" class="user-menu-item"> Customer Portal</a>
+            <div class="user-menu-divider"></div>
+            <a href="login.html" class="user-menu-item" style="color:#b91c14;"> Sign Out</a>
+          </div>
+        </div>
+      </header>
+
+      <!-- Workspace Content (Admin Views 27 to 49) -->
+      <main class="workspace-content">
+        
+        <!-- ================================================================= -->
+        <!-- VIEW 1: ADMIN DASHBOARD (Mockup 27) -->
+        <!-- ================================================================= -->
+        <div class="portal-view active" id="view-admin-dashboard">
+          
+          <!-- 8 Stat Cards in 4x2 Grid (Mockup 27) -->
+          <div class="stats-grid-8">
+            <div class="stat-card admin-card align-start">
+              <div class="stat-value" id="adminStatInquiries">14</div>
+              <div class="stat-label">Total Inquiries</div>
+            </div>
+            <div class="stat-card admin-card align-start">
+              <div class="stat-value" id="adminStatServiceReqs">8</div>
+              <div class="stat-label">Service Requests</div>
+            </div>
+            <div class="stat-card admin-card align-start">
+              <div class="stat-value" id="adminStatProjects">5</div>
+              <div class="stat-label">Active Projects</div>
+            </div>
+            <div class="stat-card admin-card align-start">
+              <div class="stat-value" id="adminStatBalance">₱48.5K</div>
+              <div class="stat-label">Outstanding Balance</div>
+            </div>
+            <div class="stat-card admin-card align-start">
+              <div class="stat-value" id="adminStatWarranties">12</div>
+              <div class="stat-label">Active Warranties</div>
+            </div>
+            <div class="stat-card admin-card align-start">
+              <div class="stat-value" id="adminStatMaint">3</div>
+              <div class="stat-label">Maintenance Due</div>
+            </div>
+            <div class="stat-card admin-card align-start">
+              <div class="stat-value" id="adminStatInventory">42</div>
+              <div class="stat-label">Inventory Items</div>
+            </div>
+            <div class="stat-card admin-card align-start">
+              <div class="stat-value">2</div>
+              <div class="stat-label">Inactive Customers</div>
+            </div>
+          </div>
+
+          <!-- Admin 2-Column Grid: Chart + Priority Alerts (Mockup 27) -->
+          <div class="admin-dashboard-grid">
+            
+            <!-- Styled Bar Chart (Mockup 27) -->
+            <div class="chart-card">
+              <div class="chart-header">
+                <div>
+                  <h3 class="widget-title">Service Requests & Activity</h3>
+                  <div style="font-size:0.9rem; color:#64748b; margin-top:0.25rem;">Weekly dispatch volume across all branches</div>
+                </div>
+                <div class="growth-badge-teal">+18% VS LAST MONTH</div>
+              </div>
+
+              <!-- Visual 7-Week Bar Chart matching mockup proportions -->
+              <div class="bar-chart-container">
+                <div class="bar-col">
+                  <div class="bar-pill bar-red-solid" style="height: 48%;"></div>
+                  <span style="font-size:0.8rem; color:#64748b; margin-top:0.5rem; font-weight:600;">W1</span>
+                </div>
+                <div class="bar-col">
+                  <div class="bar-pill bar-salmon" style="height: 72%;"></div>
+                  <span style="font-size:0.8rem; color:#64748b; margin-top:0.5rem; font-weight:600;">W2</span>
+                </div>
+                <div class="bar-col">
+                  <div class="bar-pill bar-red-solid" style="height: 38%;"></div>
+                  <span style="font-size:0.8rem; color:#64748b; margin-top:0.5rem; font-weight:600;">W3</span>
+                </div>
+                <div class="bar-col">
+                  <div class="bar-pill bar-salmon" style="height: 85%;"></div>
+                  <span style="font-size:0.8rem; color:#64748b; margin-top:0.5rem; font-weight:600;">W4</span>
+                </div>
+                <div class="bar-col">
+                  <div class="bar-pill bar-red-solid" style="height: 60%;"></div>
+                  <span style="font-size:0.8rem; color:#64748b; margin-top:0.5rem; font-weight:600;">W5</span>
+                </div>
+                <div class="bar-col">
+                  <div class="bar-pill bar-salmon" style="height: 92%;"></div>
+                  <span style="font-size:0.8rem; color:#64748b; margin-top:0.5rem; font-weight:600;">W6</span>
+                </div>
+                <div class="bar-col">
+                  <div class="bar-pill bar-red-solid" style="height: 68%;"></div>
+                  <span style="font-size:0.8rem; color:#64748b; margin-top:0.5rem; font-weight:600;">W7</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Priority Alerts Card (Mockup 27) -->
+            <div class="priority-alerts-card">
+              <h3 class="widget-title">Priority Alerts</h3>
+              <div class="priority-list" id="adminPriorityAlertsList">
+                <!-- Rendered dynamically via admin.js -->
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+        <div class="portal-view" id="view-admin-inquiries">
+          <div class="table-container-card">
+            <div class="table-toolbar">
+              <input type="text" class="search-input-pill" id="adminInquirySearch" placeholder="Search inquiries by customer, service, ref, or staff...">
+              <select class="filter-dropdown-pill" id="adminInquiryStatusFilter">
+                <option value="All">All Inquiries</option>
+                <option value="Pending Review">Pending Review</option>
+                <option value="Scheduled">Scheduled</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Completed">Completed</option>
+              </select>
+            </div>
+
+            <div style="overflow-x:auto;">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Customer</th>
+                    <th>Service</th>
+                    <th>Date Submitted</th>
+                    <th>Status</th>
+                    <th>Assigned Staff</th>
+                    <th>Last Update</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="adminInquiriesTableBody">
+                  <!-- Rendered via admin.js -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+       
+        <div class="portal-view" id="view-admin-service-requests">
+          <div class="table-container-card">
+            <div style="margin-bottom:1.5rem; display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <h3 style="font-size:1.35rem; font-weight:800; color:#1e293b;">Active Dispatch & Service Requests</h3>
+                <p style="font-size:0.9rem; color:#64748b;">Technician assignments and urgency rankings</p>
+              </div>
+            </div>
+
+            <div style="overflow-x:auto;">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Customer</th>
+                    <th>Service</th>
+                    <th>Date Submitted</th>
+                    <th>Status</th>
+                    <th>Assigned Staff</th>
+                    <th>Last Update</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="adminServiceRequestsTableBody">
+                  <!-- Rendered via admin.js -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="portal-view" id="view-admin-projects">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
+            <div>
+              <h2 style="font-size:1.5rem; font-weight:800; color:#1e293b;">Engineering Projects Portfolio</h2>
+              <p style="color:#64748b; font-size:0.95rem;">Track milestone velocity, project managers, and target turn-over dates</p>
+            </div>
+            <!-- + New Project Button (Mockup 39) -->
+            <button class="btn btn-primary-red" id="btnOpenNewProject">
+              + New Project
+            </button>
+          </div>
+
+          <div class="projects-cards-grid" id="adminProjectsGrid">
+            <!-- Rendered via admin.js -->
+          </div>
+        </div>
+
+        <div class="portal-view" id="view-admin-inventory">
+          <div class="table-container-card">
+            <div style="margin-bottom:1.5rem; display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <h3 style="font-size:1.35rem; font-weight:800; color:#1e293b;">Equipment & Parts Inventory</h3>
+                <p style="font-size:0.9rem; color:#64748b;">Control panel components, sprinkler valves, and maintenance cycles</p>
+              </div>
+            </div>
+
+            <div style="overflow-x:auto;">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Equipment Name</th>
+                    <th>Type</th>
+                    <th>Qty</th>
+                    <th>Customer / Project</th>
+                    <th>Service Status</th>
+                    <th>Next Maintenance</th>
+                    <th>Stock Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="adminInventoryTableBody">
+                  <!-- Rendered via admin.js -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- VIEW 6: PAYMENT & BILLING (Mockup 43) -->
+        <!-- ================================================================= -->
+        <div class="portal-view" id="view-admin-payments">
+          <div class="stats-grid-4">
+            <div class="stat-card">
+              <div class="stat-value">₱130.9K</div>
+              <div class="stat-label">Total Billed</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value" style="color:#15803d;">₱82.4K</div>
+              <div class="stat-label">Total Received</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value">₱48.5K</div>
+              <div class="stat-label">Total Outstanding</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value" style="color:#b91c14;">2</div>
+              <div class="stat-label">Overdue Invoices</div>
+            </div>
+          </div>
+
+          <div class="table-container-card">
+            <h3 style="font-size:1.35rem; font-weight:800; color:#1e293b; margin-bottom:1.5rem;">Client Invoices & Settlement Monitor</h3>
+            <div style="overflow-x:auto;">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Invoice #</th>
+                    <th>Customer</th>
+                    <th>Project</th>
+                    <th>Amount</th>
+                    <th>Due Date</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="adminPaymentsTableBody">
+                  <!-- Rendered via admin.js -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- VIEW 7: WARRANTY TRACKING (Mockup 44) -->
+        <!-- ================================================================= -->
+        <div class="portal-view" id="view-admin-warranties">
+          <div class="tab-nav-row" id="adminWarrantyTabs">
+            <button class="tab-btn active" data-tab="Active">Active Warranties</button>
+            <button class="tab-btn" data-tab="Expiring Soon">Expiring Soon</button>
+            <button class="tab-btn" data-tab="Expired">Expired</button>
+            <button class="tab-btn" data-tab="All">All Records</button>
+          </div>
+
+          <div class="portal-list-cards" id="adminWarrantiesList">
+            <!-- Rendered via admin.js -->
+          </div>
+        </div>
+
+        <div class="portal-view" id="view-admin-maintenance">
+          <div class="tab-nav-row" id="adminMaintTabs">
+            <button class="tab-btn active" data-tab="All">All Schedules</button>
+            <button class="tab-btn" data-tab="Overdue">Overdue</button>
+            <button class="tab-btn" data-tab="Due">Due This Week</button>
+            <button class="tab-btn" data-tab="Upcoming">Upcoming</button>
+          </div>
+
+          <div class="portal-list-cards" id="adminMaintenanceList">
+            <!-- Rendered via admin.js -->
+          </div>
+        </div>
+
+       
+        <div class="portal-view" id="view-admin-history">
+          <div class="timeline-card" id="adminHistoryTimeline">
+            <!-- Rendered via admin.js -->
+          </div>
+        </div>
+
+        <div class="portal-view" id="view-admin-notifications">
+          <div class="messages-card" id="adminNotificationsList">
+            <!-- Rendered via admin.js -->
+          </div>
+        </div>
+
+        
+        <div class="portal-view" id="view-admin-profile">
+          
+          <!-- View Mode Card (Mockup 48) -->
+          <div class="profile-card" id="adminProfileViewMode">
+            <div class="profile-header-row">
+              <div class="profile-brand-group">
+                <img src="assets/images/bd22-logo.png" alt="BD22" style="height: 48px;">
+                <div>
+                  <h3 style="font-size:1.35rem; font-weight:800; color:#1e293b;" id="viewAdminName">BD22 Operations</h3>
+                  <span class="badge-status badge-completed" id="viewAdminRole">ADMIN</span>
+                </div>
+              </div>
+              <div class="profile-btn-group">
+                <button type="button" class="btn-profile-edit" id="btnToggleProfileEdit">EDIT</button>
+              </div>
+            </div>
+
+            <div class="profile-details-list">
+              <div class="profile-detail-row">
+                <span class="icon">👤</span>
+                <span id="viewAdminFullName">BD22 Operations</span>
+              </div>
+              <div class="profile-detail-row">
+                <span class="icon">📞</span>
+                <span id="viewAdminPhone">+63598641292</span>
+              </div>
+              <div class="profile-detail-row">
+                <span class="icon">✉️</span>
+                <span id="viewAdminEmail">bd22@gmail.com</span>
+              </div>
+              <div class="profile-detail-row">
+                <span class="icon">📅</span>
+                <span id="viewAdminDate">August 1, 2026</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Edit Mode Card (Mockup 49) -->
+          <div class="profile-card" id="adminProfileEditMode" style="display:none;">
+            <div class="profile-header-row">
+              <div class="profile-brand-group">
+                <img src="assets/images/bd22-logo.png" alt="BD22" style="height: 48px;">
+                <h3 style="font-size:1.35rem; font-weight:800; color:#1e293b;">Edit Admin Profile</h3>
+              </div>
+              <div class="profile-btn-group">
+                <button type="button" class="btn btn-outline btn-sm" id="btnCancelProfile">Cancel</button>
+                <button type="button" class="btn-profile-save" id="btnSaveProfile">SAVE</button>
+              </div>
+            </div>
+
+            <form id="adminEditProfileForm">
+              <div class="form-group" style="margin-bottom:1.25rem;">
+                <label class="form-label" for="editAdminFirstName">First Name</label>
+                <input type="text" id="editAdminFirstName" class="form-control" value="Operations" required>
+              </div>
+
+              <div class="form-group" style="margin-bottom:1.25rem;">
+                <label class="form-label" for="editAdminLastName">Last Name</label>
+                <input type="text" id="editAdminLastName" class="form-control" value="Manager" required>
+              </div>
+
+              <div class="form-group" style="margin-bottom:1.25rem;">
+                <label class="form-label" for="editAdminPhone">Contact Phone Number</label>
+                <input type="tel" id="editAdminPhone" class="form-control" value="+63598641292" required>
+              </div>
+
+              <div class="form-group" style="margin-bottom:1.5rem;">
+                <label class="form-label" for="editAdminEmail">Email Address</label>
+                <input type="email" id="editAdminEmail" class="form-control" value="bd22@gmail.com" required>
+              </div>
+            </form>
+          </div>
+
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+
+  <!-- Modal 1: Inquiries Edit with Dropdowns (Mockups 30, 31, 32) -->
+  <div class="modal-overlay" id="adminInquiryModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">Manage Customer Inquiry</h3>
+        <button class="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 2rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem; background:#f8fafc; padding:1rem; border-radius:8px;">
+          <div>
+            <div style="font-weight:700; color:#1e293b;" id="modalInqCustomer">Arden Manufacturing Ltd.</div>
+            <div style="font-size:0.85rem; color:#64748b;"><span id="modalInqEmail">arden.mfg@example.com</span> • <span id="modalInqPhone">+63 917 555 1048</span></div>
+          </div>
+          <div style="font-weight:800; color:#a61c14; font-size:1.1rem;" id="modalInqRef">INQ-2026-1048</div>
+        </div>
+
+        <form id="adminInquiryForm">
+          <!-- Dropdown 1: Service (Mockup 30) -->
+          <div class="form-group">
+            <label class="form-label" for="modalInqServiceSelect">Service Category *</label>
+            <select id="modalInqServiceSelect" class="form-control" required>
+              <option value="Sprinkler Retrofit">Sprinkler Retrofit</option>
+              <option value="Annual Fire Alarm Inspection">Annual Fire Alarm Inspection</option>
+              <option value="Emergency Lighting Service">Emergency Lighting Service</option>
+              <option value="Extinguisher Maintenance">Extinguisher Maintenance</option>
+              <option value="Clean Agent FM-200 Suppression">Clean Agent FM-200 Suppression</option>
+              <option value="Special Hazards System">Special Hazards System</option>
+            </select>
+          </div>
+
+          <!-- Dropdown 2: Status (Mockup 31) -->
+          <div class="form-group">
+            <label class="form-label" for="modalInqStatusSelect">Workflow Status *</label>
+            <select id="modalInqStatusSelect" class="form-control" required>
+              <option value="Pending Review">Pending Review</option>
+              <option value="Scheduled">Scheduled</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Completed">Completed</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+          </div>
+
+          <!-- Dropdown 3: Assigned Staff (Mockup 32) -->
+          <div class="form-group">
+            <label class="form-label" for="modalInqStaffSelect">Assigned Lead Technician / Engineer *</label>
+            <select id="modalInqStaffSelect" class="form-control" required>
+              <option value="M. Velasco">M. Velasco (Lead Sprinkler Specialist)</option>
+              <option value="J. Ramos">J. Ramos (Fire Alarm Systems Lead)</option>
+              <option value="A. Dela Cruz">A. Dela Cruz (Electrical & Suppression Engineer)</option>
+              <option value="L. Santos">L. Santos (Extinguisher & Fleet Specialist)</option>
+              <option value="R. Bautista">R. Bautista (Senior Commissioning Inspector)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="modalInqNotes">Internal Dispatch / Tracking Note</label>
+            <textarea id="modalInqNotes" class="form-control" rows="3" placeholder="Add technical notes, date of inspection visit, or required parts..."></textarea>
+          </div>
+
+          <div style="display:flex; justify-content:flex-end; gap:1rem; border-top:1px solid #e2e8f0; padding-top:1.5rem; margin-top:1.5rem;">
+            <button type="button" class="btn btn-outline btn-modal-close">Close</button>
+            <button type="button" class="btn btn-primary-red" id="btnSaveInquiry">Save Inquiry Changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 2: New Project Creation (Mockup 39) -->
+  <div class="modal-overlay" id="adminNewProjectModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">Create New Fire Protection Project</h3>
+        <button class="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 2rem;">
+        <form id="newProjectForm">
+          <div class="form-group">
+            <label class="form-label" for="newProjName">Project Title *</label>
+            <input type="text" id="newProjName" class="form-control" placeholder="e.g. Rockwell Center Clean Agent Upgrade" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="newProjCustomer">Client / Property Group *</label>
+            <input type="text" id="newProjCustomer" class="form-control" placeholder="e.g. Rockwell Land Corporation" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="newProjDate">Target Completion Date *</label>
+            <input type="text" id="newProjDate" class="form-control" placeholder="e.g. Dec 20, 2026" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="newProjMilestones">Scope & Key Milestones</label>
+            <textarea id="newProjMilestones" class="form-control" rows="3" placeholder="Survey, hydraulic calculations, BFP approval, installation, and final testing..."></textarea>
+          </div>
+
+          <div style="display:flex; justify-content:flex-end; gap:1rem; border-top:1px solid #e2e8f0; padding-top:1.5rem; margin-top:1.5rem;">
+            <button type="button" class="btn btn-outline btn-modal-close">Cancel</button>
+            <button type="submit" class="btn btn-primary-red">Create Project</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 3: Project Detail (Mockup 40) -->
+  <div class="modal-overlay" id="adminProjectDetailModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalProjName">Project Details</h3>
+        <button class="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 2rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem;">
+          <div>
+            <div style="font-size:1.1rem; font-weight:700; color:#1e293b;" id="modalProjCustomer">Customer Name</div>
+            <div style="font-size:0.85rem; color:#64748b;">Target Date: <strong id="modalProjTarget">Target Date</strong></div>
+          </div>
+          <div style="font-size:1.25rem; font-weight:800; color:#a61c14;" id="modalProjProgressVal">68%</div>
+        </div>
+
+        <div class="progress-track" style="margin-bottom:1.5rem;">
+          <div class="progress-fill" id="modalProjProgressFill" style="width: 68%;"></div>
+        </div>
+
+        <div style="background:#f8fafc; border-radius:10px; padding:1.25rem; margin-bottom:1.5rem;">
+          <div style="font-weight:700; color:#1e293b; margin-bottom:0.4rem;">Assigned Engineering Division:</div>
+          <p style="font-size:0.95rem; color:#475569;" id="modalProjTeam">Ramos Fire Systems</p>
+          <div style="font-weight:700; color:#1e293b; margin-top:0.75rem; margin-bottom:0.4rem;">Scope & Milestones:</div>
+          <p style="font-size:0.9rem; color:#64748b; line-height:1.6;" id="modalProjMilestones">
+            Survey, engineering review, procurement, installation, commissioning, and turnover. Related equipment: addressable panel, sprinkler riser, valve assemblies.
+          </p>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end;">
+          <button class="btn btn-outline btn-modal-close">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 4: Equipment & Quantity Stepper (Mockup 42) -->
+  <div class="modal-overlay" id="adminEquipmentModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">Equipment Inventory & Stock</h3>
+        <button class="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 2rem;">
+        <form id="equipmentForm">
+          <div class="form-group">
+            <label class="form-label" for="modalEqName">Equipment / Component Name</label>
+            <input type="text" id="modalEqName" class="form-control" required>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label class="form-label" for="modalEqType">Category</label>
+              <input type="text" id="modalEqType" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="modalEqMaintenance">Next Maintenance</label>
+              <input type="text" id="modalEqMaintenance" class="form-control" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="modalEqProject">Customer / Associated Facility</label>
+            <input type="text" id="modalEqProject" class="form-control" required>
+          </div>
+
+          <!-- Quantity Stepper (+ and - buttons matching Mockup 42) -->
+          <div class="form-group">
+            <label class="form-label" style="display:block;">Stock Quantity (Units Available)</label>
+            <div class="quantity-stepper">
+              <button type="button" class="stepper-btn" id="stepperMinus">-</button>
+              <span class="stepper-value" id="stepperValue">4</span>
+              <button type="button" class="stepper-btn" id="stepperPlus">+</button>
+            </div>
+          </div>
+
+          <div style="display:flex; justify-content:flex-end; gap:1rem; border-top:1px solid #e2e8f0; padding-top:1.5rem; margin-top:1.5rem;">
+            <button type="button" class="btn btn-outline btn-modal-close">Cancel</button>
+            <button type="button" class="btn btn-primary-red" id="btnSaveEquipment">Save Inventory</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

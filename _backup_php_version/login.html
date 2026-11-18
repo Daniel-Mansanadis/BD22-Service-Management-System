@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - BD22 Fire System & Builders Inc.</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="shortcut icon" href="assets/images/bd22-logo.png" type="image/png">
+</head>
+<body style="background-color: #f6f4ed; min-height: 100vh; display: flex; flex-direction: column;">
+
+  <!-- Header Navigation -->
+  <header class="site-header">
+    <div class="header-container">
+      <a href="index.html" class="logo-link">
+        <img src="assets/images/bd22-logo.png" alt="BD22 Fire System & Builders Inc." class="logo-img">
+      </a>
+
+      <nav>
+        <ul class="nav-menu" id="navMenu">
+          <li><a href="index.html" class="nav-link">Home</a></li>
+          <li><a href="about.html" class="nav-link">About Us</a></li>
+          <li><a href="services.html" class="nav-link">Services</a></li>
+          <li><a href="projects.html" class="nav-link">Projects</a></li>
+          <li><a href="faq.html" class="nav-link">FAQ</a></li>
+          <li><a href="contacts.html" class="nav-link">Contacts</a></li>
+        </ul>
+      </nav>
+
+      <div class="header-actions">
+        <a href="login.html" class="login-link active">Log In</a>
+        <a href="login.html" class="btn-primary-red">Customer Portal</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Login Card Container (Mockup 11) -->
+  <main style="flex-grow: 1; display: flex; align-items: center; justify-content: center; padding: 3rem 1.5rem;">
+    <div class="auth-card" style="background: #ffffff; border-radius: 20px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.08); padding: 3rem 2.5rem; width: 100%; max-width: 480px; text-align: center;">
+      
+      <div style="margin-bottom: 1.75rem;">
+        <img src="assets/images/bd22-logo.png" alt="BD22 Fire System & Builders Inc." style="height: 64px; margin: 0 auto 1.25rem;">
+        <h1 style="font-size: 1.75rem; font-weight: 800; color: #111827; margin-bottom: 0.35rem;">Sign in to BD22 Portal</h1>
+        <p style="font-size: 0.95rem; color: #64748b;">Access your project records, warranties, and service requests.</p>
+      </div>
+
+      <form id="loginForm" style="text-align: left;">
+        <div id="authAlert" style="display: none; background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; padding: 0.75rem 1rem; border-radius: 8px; font-size: 0.9rem; margin-bottom: 1.25rem; line-height: 1.4;"></div>
+
+        <div class="form-group" style="margin-bottom: 1.25rem;">
+          <label class="form-label" for="loginEmail" style="display:block; font-size:0.9rem; font-weight:600; color:#1e293b; margin-bottom:0.4rem;">Email Address</label>
+          <input type="email" id="loginEmail" class="form-control" placeholder="name@company.com" required style="width:100%; padding:0.75rem 1rem; border:1px solid #cbd5e1; border-radius:8px; font-size:1rem;">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1.25rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+            <label class="form-label" for="loginPassword" style="font-size:0.9rem; font-weight:600; color:#1e293b; margin-bottom:0;">Password</label>
+            <a href="#" style="font-size: 0.85rem; color: #a61c14; font-weight: 600;" onclick="showToast('Password reset link has been dispatched to your email.'); return false;">Forgot password?</a>
+          </div>
+          <input type="password" id="loginPassword" class="form-control" placeholder="••••••••" required style="width:100%; padding:0.75rem 1rem; border:1px solid #cbd5e1; border-radius:8px; font-size:1rem;">
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.75rem;">
+          <input type="checkbox" id="rememberMe" checked style="width:16px; height:16px; accent-color:#a61c14;">
+          <label for="rememberMe" style="font-size: 0.9rem; color: #475569; cursor: pointer;">Remember my credentials</label>
+        </div>
+
+        <button type="submit" class="btn-primary-red" style="width:100%; font-size:1.05rem; padding:0.85rem; justify-content:center;">
+          Sign In
+        </button>
+      </form>
+
+      <div style="margin-top: 1.75rem; padding-top: 1.5rem; border-top: 1px solid #f1f5f9; font-size: 0.95rem; color: #64748b;">
+        Don't have an account? <a href="register.html" style="color: #a61c14; font-weight: 700;">Create an account</a>
+      </div>
+
+      <div style="margin-top: 1rem;">
+        <a href="index.html" style="font-size: 0.85rem; color: #64748b; text-decoration: none;">← Back to Homepage</a>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="footer-bottom">
+      <p>© 2026 BD22 Fire System & Builders Inc. All rights reserved. System Integration and Application Project.</p>
+    </div>
+  </footer>
+
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const emailInput = document.getElementById('loginEmail');
+      const passInput = document.getElementById('loginPassword');
+      const loginForm = document.getElementById('loginForm');
+      const rememberCheckbox = document.getElementById('rememberMe');
+      const authAlert = document.getElementById('authAlert');
+
+      function showError(msg) {
+        if (authAlert) {
+          authAlert.textContent = msg;
+          authAlert.style.display = 'block';
+        }
+        if (typeof showToast === 'function') {
+          showToast(msg);
+        }
+      }
+
+      function hideError() {
+        if (authAlert) {
+          authAlert.style.display = 'none';
+          authAlert.textContent = '';
+        }
+      }
+
+      if (loginForm) {
+        loginForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          hideError();
+
+          const email = emailInput.value.trim();
+          const password = passInput.value;
+
+          if (!email || !password) {
+            showError('Please enter both email and password.');
+            return;
+          }
+
+          const submitBtn = loginForm.querySelector('button[type="submit"]');
+          const originalText = submitBtn ? submitBtn.textContent : 'Sign In';
+          if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Signing In...';
+          }
+
+          try {
+            const res = await fetch('api/auth.php?action=login', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                email: email,
+                password: password,
+                remember: rememberCheckbox ? rememberCheckbox.checked : false
+              })
+            });
+
+            const data = await res.json();
+
+            if (res.ok && data.success) {
+              if (window.BD22_DB) {
+                BD22_DB.clearUserData();
+                if (data.data && data.data.user) {
+                  BD22_DB.set('currentUser', data.data.user);
+                }
+              }
+              const target = (data.data && data.data.redirect) ? data.data.redirect : 'customer-portal.html';
+              window.location.href = target;
+              return;
+            } else {
+              showError(data.error || 'Invalid email or password.');
+              if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+              }
+            }
+          } catch (err) {
+            console.error('Login error:', err);
+            showError('Unable to connect to authentication server. Please check your internet or server connection.');
+            if (submitBtn) {
+              submitBtn.disabled = false;
+              submitBtn.textContent = originalText;
+            }
+          }
+        });
+      }
+    });
+  </script>
+</body>
+</html>

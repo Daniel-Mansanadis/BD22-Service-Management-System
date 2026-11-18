@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Projects - BD22 Fire System & Builders Inc.</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="shortcut icon" href="assets/images/bd22-logo.png" type="image/png">
+</head>
+<body>
+
+  <!-- Header Navigation -->
+  <header class="site-header">
+    <div class="header-container">
+      <a href="index.html" class="logo-link">
+        <img src="assets/images/bd22-logo.png" alt="BD22 Fire System & Builders Inc." class="logo-img">
+      </a>
+
+      <nav>
+        <ul class="nav-menu" id="navMenu">
+          <li><a href="index.html" class="nav-link">Home</a></li>
+          <li><a href="about.html" class="nav-link">About Us</a></li>
+          <li><a href="services.html" class="nav-link">Services</a></li>
+          <li><a href="projects.html" class="nav-link active">Projects</a></li>
+          <li><a href="faq.html" class="nav-link">FAQ</a></li>
+          <li><a href="contacts.html" class="nav-link">Contacts</a></li>
+        </ul>
+      </nav>
+
+      <div class="header-actions">
+        <a href="login.html" class="login-link">Log In</a>
+        <a href="login.html" class="btn-primary-red">Customer Portal</a>
+        <button class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Toggle navigation">
+          <img src="assets/images/icons/menu.svg" alt="Menu" style="width: 24px; height: 24px; display: block;">
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Breadcrumb Bar (Mockup 7) -->
+  <div class="breadcrumb-bar">
+    <a href="index.html">Home</a>
+    <span class="separator">/</span>
+    <span class="current">Projects</span>
+  </div>
+
+  <!-- Main Projects Content -->
+  <main style="padding: 2.5rem 2.5rem 5rem; max-width: 1440px; margin: 0 auto; width: 100%;">
+    <div class="section-kicker red">ENGINEERING PORTFOLIO</div>
+    <h1 class="section-title">Completed and Active Fire Protection Projects</h1>
+    <p class="section-subtitle">
+      Explore our verified track record across commercial logistics, residential high-rises, and industrial facilities in Metro Manila.
+    </p>
+
+    <!-- Projects Grid (Mockup 7) -->
+    <div class="projects-grid">
+      
+      <!-- Project 1 -->
+      <div class="project-card">
+        <div class="project-card-image" style="background: linear-gradient(135deg, #07151e 0%, #1e293b 100%);">
+          <div style="text-align: center; padding: 1.5rem;">
+            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;"></div>
+            <div style="font-size: 1.1rem; font-weight: 700; color: #f8fafc;">North Harbor Logistics</div>
+            <span style="font-size: 0.8rem; background: #a61c14; padding: 0.2rem 0.6rem; border-radius: 9999px;">18,000 SQM</span>
+          </div>
+        </div>
+        <div class="project-card-body">
+          <div class="project-tag">COMMERCIAL LOGISTICS • COMPLETED</div>
+          <h3 class="project-title">North Harbor Warehouse Sprinkler Retrofit</h3>
+          <p class="project-desc">
+            Full wet-pipe retrofit and booster pump overhaul across 18,000 sqm distribution center with zero interruption to active warehousing.
+          </p>
+          <a href="#" class="project-action-link view-project-btn" data-project-id="proj-1">View project details →</a>
+        </div>
+      </div>
+
+      <!-- Project 2 -->
+      <div class="project-card">
+        <div class="project-card-image" style="background: linear-gradient(135deg, #0b1f2e 0%, #1e293b 100%);">
+          <div style="text-align: center; padding: 1.5rem;">
+            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;"></div>
+            <div style="font-size: 1.1rem; font-weight: 700; color: #f8fafc;">Meridian Commercial Tower</div>
+            <span style="font-size: 0.8rem; background: #0284c7; padding: 0.2rem 0.6rem; border-radius: 9999px;">24 FLOORS</span>
+          </div>
+        </div>
+        <div class="project-card-body">
+          <div class="project-tag">COMMERCIAL HIGH-RISE • COMPLETED</div>
+          <h3 class="project-title">Meridian Tower Fire Alarm Upgrade</h3>
+          <p class="project-desc">
+            Installation of multi-loop intelligent addressable fire detection, beam detectors in atrium, and integration with building HVAC and elevator homing.
+          </p>
+          <a href="#" class="project-action-link view-project-btn" data-project-id="proj-2">View project details →</a>
+        </div>
+      </div>
+
+      <!-- Project 3 -->
+      <div class="project-card">
+        <div class="project-card-image" style="background: linear-gradient(135deg, #1c1407 0%, #291e0a 100%);">
+          <div style="text-align: center; padding: 1.5rem;">
+            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;"></div>
+            <div style="font-size: 1.1rem; font-weight: 700; color: #f8fafc;">Cedar Grove Residences</div>
+            <span style="font-size: 0.8rem; background: #d97706; padding: 0.2rem 0.6rem; border-radius: 9999px;">ACTIVE RETROFIT</span>
+          </div>
+        </div>
+        <div class="project-card-body">
+          <div class="project-tag">MULTI-FAMILY RESIDENTIAL • IN PROGRESS</div>
+          <h3 class="project-title">Cedar Grove Complex Annual Audit</h3>
+          <p class="project-desc">
+            Turnkey fire suppression engineering, standpipe risers, emergency exit illumination, and fire department Siamese connections.
+          </p>
+          <a href="#" class="project-action-link view-project-btn" data-project-id="proj-3">View project details →</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Project Detail Modal (Mockup 8) -->
+  <div class="modal-overlay" id="projectDetailModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalProjectName">Project Specifications</h3>
+        <button class="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+          <span style="font-size: 1.1rem; font-weight: 700; color: #1e293b;" id="modalProjectClient">Client Name</span>
+          <span class="badge-status badge-completed" id="modalProjectStatus">Completed</span>
+        </div>
+        
+        <p style="font-size: 1rem; color: #475569; line-height: 1.6; margin-bottom: 1.5rem;" id="modalProjectDesc">
+          Comprehensive project milestone description.
+        </p>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; background: #f8fafc; border-radius: 12px; padding: 1.25rem; margin-bottom: 1.5rem;">
+          <div>
+            <div style="font-size: 0.85rem; color: #64748b;">Target / Completion Date:</div>
+            <div style="font-size: 1rem; font-weight: 700; color: #1e293b;" id="modalProjectDate">Nov 18, 2026</div>
+          </div>
+          <div>
+            <div style="font-size: 0.85rem; color: #64748b;">Assigned Engineering Team:</div>
+            <div style="font-size: 1rem; font-weight: 700; color: #1e293b;" id="modalProjectTeam">Ramos Fire Systems</div>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+          <h4 style="font-size: 0.95rem; font-weight: 700; color: #1e293b; margin-bottom: 0.5rem;">Milestones Completed:</h4>
+          <p style="font-size: 0.9rem; color: #64748b; line-height: 1.5;" id="modalProjectMilestones">
+            Survey, engineering review, procurement, installation, commissioning, and turnover. Related equipment: addressable panel, sprinkler riser, valve assemblies.
+          </p>
+        </div>
+
+        <div style="display:flex; justify-content: flex-end; border-top: 1px solid #e2e8f0; padding-top: 1.25rem;">
+          <button class="btn btn-primary-red btn-modal-close">Close Details</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="footer-container">
+      <div class="footer-col">
+        <div class="footer-brand">
+          <img src="assets/images/bd22-logo.png" alt="BD22 Fire System & Builders Inc." style="height: 52px; margin-bottom: 1rem;">
+          <h4 style="color:#ffffff; font-size:1.15rem; font-weight:800; margin-bottom:0.5rem;">BD22 Fire System & Builders Inc.</h4>
+          <p style="color:#94a3b8; font-size:0.95rem; line-height:1.6;">
+            Certified fire protection engineering, suppression systems, and preventative maintenance contractors committed to building safety across the Philippines.
+          </p>
+        </div>
+      </div>
+
+      <div class="footer-col">
+        <h4 class="footer-heading">Quick Links</h4>
+        <ul class="footer-links">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="about.html">About Us</a></li>
+          <li><a href="services.html">Services</a></li>
+          <li><a href="projects.html">Projects</a></li>
+          <li><a href="faq.html">FAQ</a></li>
+          <li><a href="contacts.html">Contacts</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4 class="footer-heading">Services</h4>
+        <ul class="footer-links">
+          <li><a href="services.html">Sprinkler Retrofit & Design</a></li>
+          <li><a href="services.html">Clean Agent FM-200 Systems</a></li>
+          <li><a href="services.html">Deluge & Foam Suppression</a></li>
+          <li><a href="services.html">Standpipe & Hose Stations</a></li>
+          <li><a href="services.html">Annual Maintenance Contracts</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4 class="footer-heading">Portals & Access</h4>
+        <ul class="footer-links">
+          <li><a href="login.html">Client & Staff Sign In</a></li>
+          <li><a href="login.html">Customer Dashboard</a></li>
+          <li><a href="admin.html">Admin Operations</a></li>
+          <li><a href="register.html">Account Registration</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>© 2026 BD22 Fire System & Builders Inc. All rights reserved. System Integration and Application Project.</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-config.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/public.js"></script>
+</body>
+</html>

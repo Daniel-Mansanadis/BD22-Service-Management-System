@@ -1,0 +1,1633 @@
+/* ==========================================================================
+   BD22 FIRE SYSTEM & BUILDERS INC. - MAIN STYLESHEET
+   Accurately crafted to replicate mockups 1-12 (Public-Facing Website)
+   ========================================================================== */
+
+:root {
+  --primary-red: #a61c14;
+  --primary-red-hover: #8c170f;
+  --primary-red-light: #fce8e6;
+  --primary-gold: #c97a14;
+  --primary-gold-hover: #b4680d;
+  --dark-navy: #07151e;
+  --dark-navy-lighter: #0d1e28;
+  --footer-dark: #040d12;
+  --bg-cream: #f6f4ed;
+  --bg-white: #ffffff;
+  --text-dark: #111827;
+  --text-muted: #596773;
+  --text-light: #94a3b8;
+  --border-subtle: #e2e8f0;
+  --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 4px 10px -2px rgba(0, 0, 0, 0.04);
+  --card-shadow-hover: 0 16px 30px -5px rgba(0, 0, 0, 0.12), 0 6px 14px -2px rgba(0, 0, 0, 0.06);
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-pill: 9999px;
+  --font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Inter', Roboto, Helvetica, Arial, sans-serif;
+  --transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--bg-cream);
+  color: var(--text-dark);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+/* ==========================================================================
+   NAVIGATION BAR (Header)
+   ========================================================================== */
+.site-header {
+  background-color: #ffffff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  width: 100%;
+}
+
+.header-container {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0.75rem 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.logo-img {
+  height: 60px;
+  width: auto;
+  object-fit: contain;
+}
+
+.nav-menu {
+  display: flex;
+  align-items: center;
+  gap: 2.25rem;
+  list-style: none;
+}
+
+.nav-link {
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #1a202c;
+  position: relative;
+  padding: 0.35rem 0;
+  transition: var(--transition);
+}
+
+.nav-link:hover {
+  color: var(--primary-gold);
+}
+
+.nav-link.active {
+  color: var(--primary-gold);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1.75rem;
+}
+
+.login-link {
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #1a202c;
+  transition: var(--transition);
+}
+
+.login-link:hover, .login-link.active {
+  color: var(--primary-gold);
+}
+
+.btn-primary-red {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--primary-red);
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 0.65rem 1.6rem;
+  border-radius: var(--radius-md);
+  border: none;
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: 0 4px 12px rgba(166, 28, 20, 0.25);
+  white-space: nowrap;
+}
+
+.btn-primary-red:hover {
+  background-color: var(--primary-red-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(166, 28, 20, 0.35);
+  color: #ffffff;
+}
+
+.btn-primary-red:active {
+  transform: translateY(0);
+}
+
+/* Mobile Nav Toggle */
+.mobile-nav-toggle {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 1.75rem;
+  color: var(--text-dark);
+  cursor: pointer;
+  padding: 0.25rem;
+}
+
+/* ==========================================================================
+   BREADCRUMB BAR (Mockups 4, 5, 7, 9, 10)
+   ========================================================================== */
+.breadcrumb-bar {
+  padding: 1.25rem 2.5rem 0.5rem;
+  max-width: 1440px;
+  margin: 0 auto;
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  width: 100%;
+}
+
+.breadcrumb-bar a {
+  color: var(--text-muted);
+}
+
+.breadcrumb-bar a:hover {
+  color: var(--primary-red);
+}
+
+.breadcrumb-bar .separator {
+  margin: 0 0.5rem;
+  color: var(--text-muted);
+}
+
+.breadcrumb-bar .current {
+  color: var(--primary-red);
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   HERO BANNER & SLIDER (Mockup 1)
+   ========================================================================== */
+.hero-slider-section {
+  background-color: var(--dark-navy);
+  color: #ffffff;
+  position: relative;
+  overflow: hidden;
+  padding: 6rem 2.5rem 7rem;
+  min-height: 520px;
+  display: flex;
+  align-items: center;
+}
+
+.hero-container {
+  max-width: 1440px;
+  margin: 0 auto;
+  width: 100%;
+  position: relative;
+  z-index: 2;
+}
+
+.hero-slide {
+  max-width: 800px;
+  display: none;
+  animation: fadeIn 0.4s ease;
+}
+
+.hero-slide.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.hero-kicker {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 1.25rem;
+  letter-spacing: 0.02em;
+}
+
+.hero-title {
+  font-size: 3.25rem;
+  font-weight: 800;
+  line-height: 1.15;
+  color: #ffffff;
+  margin-bottom: 1.5rem;
+}
+
+.hero-description {
+  font-size: 1.15rem;
+  line-height: 1.6;
+  color: #cbd5e1;
+  margin-bottom: 2.25rem;
+  max-width: 650px;
+}
+
+.hero-buttons {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.btn-white-gold {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffffff;
+  color: var(--primary-gold);
+  font-size: 0.95rem;
+  font-weight: 700;
+  padding: 0.65rem 1.6rem;
+  border-radius: var(--radius-md);
+  border: none;
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  white-space: nowrap;
+}
+
+.btn-white-gold:hover {
+  background-color: #f8fafc;
+  color: var(--primary-gold-hover);
+  transform: translateY(-1px);
+}
+
+/* Slider arrows */
+.slider-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.7);
+  background: transparent;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+  z-index: 10;
+}
+
+.slider-arrow:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+  border-color: #ffffff;
+}
+
+.slider-prev {
+  left: 2rem;
+}
+
+.slider-next {
+  right: 2rem;
+}
+
+/* ==========================================================================
+   PAGE HERO BANNER (About page - Mockup 4)
+   ========================================================================== */
+.page-hero-banner {
+  background-color: var(--dark-navy);
+  color: #ffffff;
+  padding: 3.5rem 2.5rem;
+}
+
+.page-hero-container {
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+.page-hero-title {
+  font-size: 2.75rem;
+  font-weight: 800;
+  margin-bottom: 0.75rem;
+}
+
+.page-hero-subtitle {
+  font-size: 1.15rem;
+  color: #cbd5e1;
+  max-width: 800px;
+}
+
+/* ==========================================================================
+   SERVICES PREVIEW SECTION (Home - Mockup 2)
+   ========================================================================== */
+.services-section {
+  padding: 4.5rem 2.5rem 3rem;
+  max-width: 1440px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.section-header-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 2.5rem;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.section-kicker {
+  color: var(--primary-gold);
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 0.35rem;
+}
+
+.section-kicker.red {
+  color: var(--primary-red);
+}
+
+.section-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--text-dark);
+  line-height: 1.2;
+}
+
+.section-subtitle {
+  font-size: 1.1rem;
+  color: var(--text-muted);
+  margin-top: 0.5rem;
+  max-width: 750px;
+}
+
+.services-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  margin-bottom: 3.5rem;
+}
+
+.dark-service-card {
+  background-color: var(--dark-navy);
+  color: #ffffff;
+  border-radius: var(--radius-xl);
+  padding: 2.5rem 2.25rem 2.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 260px;
+  box-shadow: var(--card-shadow);
+  transition: var(--transition);
+}
+
+.dark-service-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--card-shadow-hover);
+}
+
+.dark-card-title {
+  font-size: 1.45rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.dark-card-text {
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: #94a3b8;
+  margin-bottom: 2rem;
+}
+
+.dark-card-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.dark-card-link .arrow-icon {
+  color: var(--primary-red);
+  font-size: 1.35rem;
+  transition: var(--transition);
+}
+
+.dark-card-link:hover .arrow-icon {
+  transform: translateX(5px);
+}
+
+/* ==========================================================================
+   SERVICES FULL GRID (Services Page - Mockup 5)
+   ========================================================================== */
+.services-full-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  margin-top: 2.5rem;
+  margin-bottom: 4rem;
+}
+
+.white-service-card {
+  background-color: #ffffff;
+  border-radius: var(--radius-lg);
+  padding: 2rem 2rem 1.75rem;
+  box-shadow: var(--card-shadow);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 220px;
+  transition: var(--transition);
+  cursor: pointer;
+  border: 1px solid rgba(0, 0, 0, 0.03);
+}
+
+.white-service-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--card-shadow-hover);
+}
+
+.card-top-icon {
+  color: var(--primary-red);
+  font-size: 1.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.white-card-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 0.75rem;
+}
+
+.white-card-desc {
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--text-muted);
+  margin-bottom: 1.5rem;
+}
+
+.card-action-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--primary-red);
+  margin-top: auto;
+}
+
+.card-action-link:hover {
+  color: var(--primary-red-hover);
+}
+
+/* ==========================================================================
+   PROJECTS SECTION (Projects Page - Mockup 7)
+   ========================================================================== */
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  margin-top: 2.5rem;
+  margin-bottom: 4rem;
+}
+
+.project-card {
+  background-color: #ffffff;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--card-shadow);
+  transition: var(--transition);
+  display: flex;
+  flex-direction: column;
+}
+
+.project-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--card-shadow-hover);
+}
+
+.project-card-image {
+  height: 220px;
+  background-color: var(--dark-navy);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+}
+
+.project-card-body {
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.project-tag {
+  color: var(--primary-red);
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.02em;
+}
+
+.project-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 0.5rem;
+}
+
+.project-desc {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin-bottom: 1.25rem;
+}
+
+.project-action-link {
+  margin-top: auto;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.project-action-link .arrow-icon {
+  color: var(--primary-red);
+}
+
+/* ==========================================================================
+   FAQ SECTION (FAQ Page - Mockup 9)
+   ========================================================================== */
+.faq-section {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 3rem 2.5rem 5rem;
+  width: 100%;
+}
+
+.faq-category {
+  margin-bottom: 2.5rem;
+}
+
+.faq-category-title {
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 1.25rem;
+}
+
+.faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.faq-item {
+  background-color: #ffffff;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--card-shadow);
+  overflow: hidden;
+  transition: var(--transition);
+}
+
+.faq-question {
+  width: 100%;
+  padding: 1.4rem 1.75rem;
+  background: none;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  text-align: left;
+  cursor: pointer;
+}
+
+.faq-chevron {
+  transition: transform 0.3s ease;
+  font-size: 1.25rem;
+  color: #1a202c;
+}
+
+.faq-item.open .faq-chevron {
+  transform: rotate(180deg);
+}
+
+.faq-answer {
+  padding: 0 1.75rem 1.4rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  font-size: 1rem;
+  display: none;
+}
+
+.faq-item.open .faq-answer {
+  display: block;
+}
+
+/* ==========================================================================
+   ABOUT US PAGE LAYOUT (Mockup 4)
+   ========================================================================== */
+.about-content-section {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 3.5rem 2.5rem 4rem;
+  width: 100%;
+}
+
+.about-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3.5rem;
+  align-items: center;
+  margin-bottom: 3rem;
+}
+
+.about-cards-col {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.about-card {
+  background-color: #ffffff;
+  border-radius: var(--radius-lg);
+  padding: 1.75rem 2rem;
+  box-shadow: var(--card-shadow);
+}
+
+.about-card-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 0.35rem;
+}
+
+.about-card-desc {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.about-showcase-box {
+  background-color: #ffffff;
+  border-radius: var(--radius-xl);
+  min-height: 380px;
+  box-shadow: var(--card-shadow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.about-cta-center {
+  text-align: center;
+  margin-top: 2rem;
+}
+
+/* ==========================================================================
+   CONTACT / REQUEST A SERVICE SECTION (Mockups 2, 3, 10)
+   ========================================================================== */
+.contact-section {
+  padding: 4rem 2.5rem 5rem;
+  max-width: 1440px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.contact-layout {
+  display: grid;
+  grid-template-columns: 1fr 1.15fr;
+  gap: 4rem;
+  align-items: flex-start;
+}
+
+.contact-info-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.contact-kicker {
+  color: var(--primary-red);
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.5rem;
+}
+
+.contact-headline {
+  font-size: 2.75rem;
+  font-weight: 800;
+  color: var(--text-dark);
+  margin-bottom: 1rem;
+  line-height: 1.15;
+}
+
+.contact-subtext {
+  font-size: 1.05rem;
+  color: var(--text-muted);
+  margin-bottom: 2.5rem;
+  line-height: 1.55;
+  max-width: 520px;
+}
+
+.contact-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.5rem;
+  margin-bottom: 1.75rem;
+}
+
+.contact-icon {
+  font-size: 1.6rem;
+  color: var(--primary-red);
+  margin-top: 0.2rem;
+  width: 28px;
+  text-align: center;
+}
+
+.contact-item-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+.contact-item-val {
+  font-size: 1.05rem;
+  color: var(--text-muted);
+  margin-top: 0.15rem;
+}
+
+.map-container {
+  margin-top: 2rem;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--border-subtle);
+  background: #ffffff;
+}
+
+.map-container img {
+  width: 100%;
+  height: 240px;
+  object-fit: cover;
+}
+
+/* Request Form Card (Mockups 2, 3, 10) */
+.form-card {
+  background-color: #ffffff;
+  border-radius: var(--radius-xl);
+  padding: 3rem 2.75rem;
+  box-shadow: var(--card-shadow);
+  border: 1px solid rgba(0, 0, 0, 0.03);
+}
+
+.form-card-title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--text-dark);
+  margin-bottom: 0.35rem;
+}
+
+.form-card-subtitle {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  margin-bottom: 2rem;
+}
+
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.form-group {
+  margin-bottom: 1.25rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 0.5rem;
+}
+
+.form-input, .form-select, .form-textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #cbd5e1;
+  border-radius: var(--radius-sm);
+  background-color: #ffffff;
+  color: var(--text-dark);
+  outline: none;
+  transition: var(--transition);
+  font-size: 0.95rem;
+}
+
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  border-color: var(--primary-red);
+  box-shadow: 0 0 0 3px rgba(166, 28, 20, 0.12);
+}
+
+.form-textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.form-btn-submit {
+  width: 100%;
+  margin-top: 1rem;
+  padding: 0.85rem;
+  font-size: 1.05rem;
+}
+
+/* ==========================================================================
+   AUTH PAGES - LOGIN & REGISTER (Mockups 11 & 12)
+   ========================================================================== */
+.auth-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 1.5rem;
+  flex-grow: 1;
+}
+
+.auth-card {
+  background-color: #ffffff;
+  border-radius: var(--radius-xl);
+  padding: 3.5rem 3.5rem;
+  box-shadow: var(--card-shadow);
+  width: 100%;
+  max-width: 520px;
+}
+
+.auth-title {
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: var(--text-dark);
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+.auth-subtitle {
+  font-size: 1.05rem;
+  color: var(--text-muted);
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.auth-checkbox-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.25rem;
+  margin-bottom: 1.75rem;
+  font-size: 0.95rem;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  color: var(--text-dark);
+}
+
+.auth-link {
+  color: var(--primary-red);
+  font-weight: 600;
+}
+
+.auth-link:hover {
+  text-decoration: underline;
+}
+
+.auth-footer-text {
+  text-align: center;
+  margin-top: 2rem;
+  font-size: 0.95rem;
+  color: var(--text-muted);
+}
+
+/* ==========================================================================
+   FOOTER (Mockup 3)
+   ========================================================================== */
+.site-footer {
+  background-color: var(--footer-dark);
+  color: #ffffff;
+  padding: 3rem 2.5rem 2rem;
+  margin-top: auto;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.footer-container {
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+.footer-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.footer-logo {
+  height: 55px;
+  width: auto;
+}
+
+.footer-socials {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.social-icon-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  color: #ffffff;
+  transition: var(--transition);
+}
+
+.social-fb { background-color: #1877f2; }
+.social-ig { background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285aeb 90%); }
+.social-mail { background: linear-gradient(135deg, #ea4335, #fbbc05); }
+.social-x { background-color: #000000; border: 1px solid #333; }
+
+.social-icon-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+}
+
+.footer-links-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 2.5rem;
+}
+
+.footer-link {
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: #e2e8f0;
+  transition: var(--transition);
+}
+
+.footer-link:hover {
+  color: var(--primary-gold);
+}
+
+.footer-bottom {
+  text-align: center;
+  font-size: 0.95rem;
+  color: #94a3b8;
+  padding-top: 1rem;
+}
+
+/* ==========================================================================
+   MODAL WINDOWS (Mockups 6, 8, 15, 17, 19, 20, 22, etc.)
+   ========================================================================== */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1.5rem;
+}
+
+.modal-overlay.active {
+  display: flex;
+  animation: modalFadeIn 0.25s ease forwards;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-dialog {
+  background-color: #ffffff;
+  border-radius: var(--radius-xl);
+  max-width: 620px;
+  width: 100%;
+  padding: 2.75rem 2.5rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  position: relative;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: modalSlideUp 0.25s ease forwards;
+}
+
+@keyframes modalSlideUp {
+  from { transform: translateY(12px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 1.75rem;
+  right: 1.75rem;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 2px solid #1a202c;
+  background: transparent;
+  color: #1a202c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.15rem;
+  font-weight: 700;
+  transition: var(--transition);
+}
+
+.modal-close-btn:hover {
+  background-color: #f1f5f9;
+  transform: rotate(90deg);
+}
+
+.modal-kicker {
+  color: var(--primary-red);
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+.modal-title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--text-dark);
+  margin-bottom: 1.5rem;
+  padding-right: 2.5rem;
+}
+
+.modal-content-text {
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: #334155;
+  margin-bottom: 2rem;
+}
+
+.modal-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.btn-modal-close {
+  background: transparent;
+  color: #1a202c;
+  border: 1.5px solid #1a202c;
+  border-radius: var(--radius-md);
+  padding: 0.65rem 1.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.btn-modal-close:hover {
+  background-color: #f1f5f9;
+}
+
+/* Alert Toast */
+.toast-container {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  pointer-events: none;
+}
+
+.toast {
+  background-color: #1e293b;
+  color: #ffffff;
+  padding: 0.9rem 1.4rem;
+  border-radius: var(--radius-md);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.95rem;
+  pointer-events: auto;
+  animation: toastIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  border-left: 4px solid var(--primary-red);
+}
+
+@keyframes toastIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN RULES
+   ========================================================================== */
+@media (max-width: 1024px) {
+  .hero-title {
+    font-size: 2.5rem;
+  }
+  .services-grid-3, .services-full-grid, .projects-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .contact-layout, .about-grid {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .header-container {
+    padding: 0.75rem 1.5rem;
+  }
+  .mobile-nav-toggle {
+    display: block;
+  }
+  .nav-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: #ffffff;
+    flex-direction: column;
+    padding: 1.5rem;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    gap: 1.25rem;
+  }
+  .nav-menu.open {
+    display: flex;
+  }
+  .header-actions {
+    display: none;
+  }
+  .hero-title {
+    font-size: 2rem;
+  }
+  .services-grid-3, .services-full-grid, .projects-grid {
+    grid-template-columns: 1fr;
+  }
+  .form-grid-2 {
+    grid-template-columns: 1fr;
+  }
+  .slider-arrow {
+    display: none;
+  }
+  .form-card, .auth-card {
+    padding: 2rem 1.5rem;
+  }
+}
+
+/* ==========================================================================
+   PATCH: MISSING CSS DEFINITIONS — Applied Phase 2 UI/UX Refinement
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   BUTTON BASE SYSTEM
+   All <button> and <a> elements using .btn classes need a base definition.
+   -------------------------------------------------------------------------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 0.65rem 1.6rem;
+  border-radius: var(--radius-md);
+  border: none;
+  cursor: pointer;
+  transition: var(--transition);
+  white-space: nowrap;
+  text-decoration: none;
+  line-height: 1;
+}
+
+.btn.btn-primary-red,
+button.btn-primary-red {
+  background-color: var(--primary-red);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(166, 28, 20, 0.25);
+}
+
+.btn.btn-primary-red:hover,
+button.btn-primary-red:hover {
+  background-color: var(--primary-red-hover);
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(166, 28, 20, 0.35);
+}
+
+.btn-outline {
+  background: transparent;
+  color: #1a202c;
+  border: 1.5px solid #cbd5e1;
+  border-radius: var(--radius-md);
+  padding: 0.65rem 1.6rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.btn-outline:hover {
+  background-color: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+.btn-sm {
+  padding: 0.45rem 1rem;
+  font-size: 0.85rem;
+}
+
+/* --------------------------------------------------------------------------
+   FORM CONTROL — Universal alias for .form-input / .form-select / .form-textarea
+   HTML uses class="form-control" throughout; CSS only defined .form-input etc.
+   -------------------------------------------------------------------------- */
+.form-control {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #cbd5e1;
+  border-radius: var(--radius-sm);
+  background-color: #ffffff;
+  color: var(--text-dark);
+  outline: none;
+  transition: var(--transition);
+  font-size: 0.95rem;
+  font-family: inherit;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.form-control:focus {
+  border-color: var(--primary-red);
+  box-shadow: 0 0 0 3px rgba(166, 28, 20, 0.12);
+}
+
+textarea.form-control {
+  min-height: 120px;
+  resize: vertical;
+}
+
+/* --------------------------------------------------------------------------
+   FORM LAYOUT HELPERS
+   -------------------------------------------------------------------------- */
+.form-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+/* --------------------------------------------------------------------------
+   CONTACT SECTION LAYOUT (Mockup 3, 10)
+   HTML structure: .contact-section > .contact-container > .contact-grid
+                   (.contact-info-panel + .inquiry-form-card)
+   -------------------------------------------------------------------------- */
+.contact-section {
+  background-color: var(--bg-cream);
+  padding: 5rem 2.5rem;
+}
+
+.contact-container {
+  max-width: 1440px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.contact-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 3rem;
+  margin-top: 3rem;
+  align-items: start;
+}
+
+.contact-info-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.info-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.1rem;
+  background-color: #ffffff;
+  border-radius: var(--radius-md);
+  padding: 1.1rem 1.25rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.info-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+.info-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.2rem;
+}
+
+.info-value {
+  font-size: 0.95rem;
+  color: var(--text-dark);
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+.map-container {
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  margin-top: 0.5rem;
+}
+
+.map-img {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  display: block;
+}
+
+.inquiry-form-card {
+  background-color: #ffffff;
+  border-radius: var(--radius-xl);
+  padding: 2.5rem 2.25rem;
+  box-shadow: var(--card-shadow);
+  border: 1px solid rgba(0, 0, 0, 0.03);
+}
+
+.form-title {
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: var(--text-dark);
+  margin-bottom: 0.4rem;
+}
+
+.form-subtitle {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  margin-bottom: 1.75rem;
+  line-height: 1.5;
+}
+
+/* --------------------------------------------------------------------------
+   FOOTER GRID LAYOUT (Mockup 3)
+   HTML: .site-footer > .footer-container > 4x .footer-col + .footer-bottom
+   The existing .footer-container has no display:grid, so columns collapse.
+   -------------------------------------------------------------------------- */
+.footer-container {
+  max-width: 1440px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 1fr 1fr;
+  gap: 3rem;
+  padding-bottom: 2.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 1.5rem;
+}
+
+.footer-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.footer-heading {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin-bottom: 1.25rem;
+}
+
+.footer-links {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.footer-links li a {
+  font-size: 0.95rem;
+  color: #94a3b8;
+  transition: var(--transition);
+}
+
+.footer-links li a:hover {
+  color: var(--primary-gold);
+}
+
+/* Override footer-bottom to ensure proper spacing */
+.site-footer .footer-bottom {
+  text-align: center;
+  font-size: 0.875rem;
+  color: #64748b;
+  padding-top: 0;
+}
+
+/* --------------------------------------------------------------------------
+   MODAL CARD STRUCTURE (used throughout all pages)
+   HTML pattern: .modal-overlay > .modal-card > .modal-header + .modal-body
+   CSS only had .modal-dialog; the actual HTML uses .modal-card structure.
+   -------------------------------------------------------------------------- */
+.modal-card {
+  background-color: #ffffff;
+  border-radius: var(--radius-xl);
+  max-width: 600px;
+  width: 100%;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.28);
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: modalSlideUp 0.25s ease forwards;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid #f1f5f9;
+  flex-shrink: 0;
+}
+
+.modal-header .modal-title {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--text-dark);
+  margin-bottom: 0;
+  padding-right: 0;
+}
+
+/* Close button inside .modal-header — reset from absolute positioning */
+.modal-header .modal-close-btn {
+  position: static;
+  top: auto;
+  right: auto;
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1.5px solid #cbd5e1;
+  background: transparent;
+  color: #475569;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 700;
+  transition: var(--transition);
+}
+
+.modal-header .modal-close-btn:hover {
+  background-color: #f1f5f9;
+  border-color: #94a3b8;
+  color: var(--text-dark);
+  transform: rotate(90deg);
+}
+
+.modal-body {
+  padding: 1.75rem 2rem 2rem;
+  flex-grow: 1;
+}
+
+/* ==========================================================================
+   RESPONSIVE CONTACT, FOOTER, MODAL PATCHES
+   ========================================================================== */
+@media (max-width: 960px) {
+  .contact-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .footer-container {
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+
+  .form-row-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .contact-section {
+    padding: 3.5rem 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer-container {
+    grid-template-columns: 1fr;
+    gap: 1.75rem;
+  }
+
+  .inquiry-form-card {
+    padding: 1.75rem 1.25rem;
+  }
+
+  .modal-card {
+    border-radius: var(--radius-lg);
+  }
+
+  .modal-header {
+    padding: 1.25rem 1.25rem;
+  }
+
+  .modal-body {
+    padding: 1.25rem 1.25rem 1.5rem;
+  }
+}

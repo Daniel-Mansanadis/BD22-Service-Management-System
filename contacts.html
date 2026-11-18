@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contacts - BD22 Fire System & Builders Inc.</title>
+  <link rel="stylesheet" href="css/style.css?v=20261117_responsive_modals">
+  <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css">
+  <link rel="shortcut icon" href="assets/images/bd22-logo.png" type="image/png">
+</head>
+<script
+  src="https://www.tuqlas.com/chatbot.js"
+  data-key="tq_live_0593c97e18d328e86f98f33fc5df615c9ce0db5e"
+  data-api="https://www.tuqlas.com"
+  defer
+></script>
+<body>
+
+  <!-- Header Navigation -->
+  <header class="site-header">
+    <div class="header-container">
+      <a href="index.html" class="logo-link">
+        <img src="assets/images/bd22-logo.png" alt="BD22 Fire System & Builders Inc." class="logo-img">
+      </a>
+
+      <nav>
+        <ul class="nav-menu" id="navMenu">
+          <li><a href="index.html" class="nav-link">Home</a></li>
+          <li><a href="about.html" class="nav-link">About Us</a></li>
+          <li><a href="services.html" class="nav-link">Services</a></li>
+          <li><a href="projects.html" class="nav-link">Projects</a></li>
+          <li><a href="faq.html" class="nav-link">FAQ</a></li>
+          <li><a href="contacts.html" class="nav-link active">Contacts</a></li>
+        </ul>
+      </nav>
+
+      <div class="header-actions">
+        <a href="index.html#inquirySection" class="btn-primary-red header-booking-link">Book an Appointment</a>
+        <a href="login.html" class="btn-outline landing-login-link">Client Login</a>
+        <button class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Toggle navigation" aria-expanded="false">
+          <img src="assets/images/icons/menu.svg" alt="Menu" style="width: 24px; height: 24px; display: block;">
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Contact Section Container -->
+  <main style="padding: 2.5rem 2.5rem 5rem; max-width: 1440px; margin: 0 auto; width: 100%;">
+    <div class="section-kicker red">REACH OUR SPECIALISTS</div>
+    <h1 class="section-title">Contact Us & Service Inquiries</h1>
+    <p class="section-subtitle">
+      Reach out to BD22 Fire System & Builders Inc. for site inspections, quotation requests, preventative maintenance contracts, or urgent engineering support.
+    </p>
+
+    <div class="contact-grid" style="margin-top: 3rem;">
+      <div class="contact-info-panel" data-aos="fade-up">
+        <div class="info-card">
+          <div class="info-icon"></div>
+          <div>
+            <div class="info-label">Main Office & Operations</div>
+            <div class="info-value">#5436 Saniwares St., SNKI Agape, Camarin, Caloocan City, Philippines</div>
+          </div>
+        </div>
+
+        <div class="info-card">
+          <div class="info-icon"></div>
+          <div>
+            <div class="info-label">Contact No.</div>
+            <div class="info-value">+63 916 388 4301</div>
+          </div>
+        </div>
+
+        <div class="info-card">
+          <div class="info-icon"></div>
+          <div>
+            <div class="info-label">Landline</div>
+            <div class="info-value">82942684</div>
+          </div>
+        </div>
+
+        <div class="info-card">
+          <div class="info-icon"></div>
+          <div>
+            <div class="info-label">Email Inquiries</div>
+            <div class="info-value">bd22firepro@gmail.com</div>
+          </div>
+        </div>
+        <div class="map-container">
+          <iframe
+            src="https://www.google.com/maps?q=%235436+Saniwares+St.,+SNKI+Agape,+Camarin,+Caloocan+City,+Philippines&output=embed"
+            title="BD22 office location at #5436 Saniwares St., Camarin, Caloocan City"
+            class="map-embed"
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            allowfullscreen>
+          </iframe>
+        </div>
+      </div>
+
+      <div class="inquiry-form-card" data-aos="fade-up" data-aos-delay="150">
+        <h3 class="form-title">Submit a Detailed Service Request</h3>
+        <p class="form-subtitle">Fill out the fields below. A reference number will be generated immediately for portal tracking.</p>
+
+        <form id="publicInquiryForm">
+          <div class="form-group">
+            <label class="form-label" for="inqCustomerName">Client / Company Name *</label>
+            <input type="text" id="inqCustomerName" class="form-control" placeholder="e.g. Arden Manufacturing Ltd. / Engr. Alex" minlength="2" maxlength="150" required>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label class="form-label" for="inqEmail">Email Address *</label>
+              <input type="email" id="inqEmail" class="form-control" placeholder="facilities@company.com" maxlength="191" autocomplete="email" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="inqPhone">Mobile / Telephone *</label>
+              <input type="tel" id="inqPhone" class="form-control" placeholder="+63 917 000 0000" pattern="^\+?[0-9\s\x28\x29\x2d]{7,20}$" inputmode="tel" autocomplete="tel" maxlength="25" title="Enter a valid phone number with 7 to 15 digits." required>
+              <div id="inqPhoneHint" class="form-error-hint" style="display:none;">Letters are not allowed in contact number.</div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="inqServiceType">Requested Service Category *</label>
+            <select id="inqServiceType" class="form-control" required>
+              <option value="" disabled selected>Choose a fire protection service</option>
+              <option value="Fire Sprinkler System">Fire Sprinkler System</option>
+              <option value="FM-200 Fire Suppression System">FM-200 Fire Suppression System</option>
+              <option value="NOVEC 1230 Fire Suppression System">NOVEC 1230 Fire Suppression System</option>
+              <option value="Preaction System">Preaction System</option>
+              <option value="Deluge Water Spray System">Deluge Water Spray System</option>
+              <option value="Deluge Foam Sprinkler System">Deluge Foam Sprinkler System</option>
+              <option value="Kitchen Suppression System">Kitchen Suppression System</option>
+              <option value="Fire Detection &amp; Alarm System">Fire Detection &amp; Alarm System</option>
+              <option value="Fire Pumps">Fire Pumps</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="inqMessage">Site Location & Project Scope *</label>
+            <textarea id="inqMessage" class="form-control" rows="5" minlength="10" placeholder="Specify your property location, building occupancy classification, number of floors, and any existing BFP inspection findings..." required></textarea>
+          </div>
+
+          <button type="submit" class="btn-primary-red" style="width:100%; font-size:1.05rem; padding:0.85rem;">
+            Submit Service Request
+          </button>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <!-- Submission Confirmation Modal -->
+  <div class="modal-overlay" id="inquirySuccessModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">Inquiry Submitted Successfully</h3>
+        <button class="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body modal-success-body" style="text-align: center;">
+        <div style="margin-bottom: 1.25rem;">
+          <img src="assets/images/icons/check-badge.svg" alt="Success" style="width: 64px; height: 64px; margin: 0 auto; display: block;">
+        </div>
+        <p style="font-size: 1.1rem; color: #1e293b; margin-bottom: 0.5rem;">
+          Thank you! Your fire protection service request has been logged into the BD22 dispatch queue.
+        </p>
+        <p style="color: #64748b; font-size: 0.95rem; margin-bottom: 1.5rem;">
+          Your reference code is: <strong id="modalSuccessRef" style="color: #a61c14; font-size: 1.25rem;"></strong>
+        </p>
+        <p style="font-size: 0.9rem; color: #475569; margin-bottom: 1.75rem;">
+          Our technical engineering coordinator will review your site requirements and contact you within 24 hours.
+        </p>
+        <div class="modal-actions">
+          <a href="customer-portal.html#inquiries" class="btn-primary-red">Open Customer Portal</a>
+          <button class="btn btn-outline btn-modal-close">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="site-footer landing-footer">
+    <div class="footer-container landing-footer-grid">
+      <div class="footer-col">
+        <div class="footer-brand">
+          <img src="assets/images/bd22-logo.png" alt="" class="landing-footer-logo">
+          <h4 class="landing-footer-name">BD22 Fire System &amp; Builders Inc.</h4>
+        </div>
+      </div>
+
+      <div class="footer-col">
+        <div class="landing-footer-subsection">
+          <h4 class="footer-heading">Legal</h4>
+          <ul class="footer-links">
+            <li><a class="legal-policy-link" href="#privacy-policy" data-legal-tab="privacy">Privacy Policy</a></li>
+            <li><a class="legal-policy-link" href="#terms-and-conditions" data-legal-tab="terms">Terms and Conditions</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-col landing-footer-contact">
+        <h4 class="footer-heading">Contact Information</h4>
+        <ul class="footer-links">
+          <li><span>Address: #5436 Saniwares St., SNKI Agape, Camarin, Caloocan City, Philippines</span></li>
+          <li><a href="tel:+639163884309">Mobile: +63 916 388 4309</a></li>
+          <li><a href="tel:82942684">Landline: 82942684</a></li>
+          <li><a href="mailto:bd22firepro@gmail.com">Email: bd22firepro@gmail.com</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>&copy; 2026 BD22 Fire System &amp; Builders Inc. All Rights Reserved.</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-config.js?v=20261025_v14"></script>
+  <script src="js/app.js?v=20261025_v14"></script>
+  <script src="js/public.js?v=20261117_shared_legal_modal"></script>
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script>
+    AOS.init({ duration: 700, easing: 'ease-out-cubic', once: true, offset: 80 });
+  </script>
+</body>
+</html>

@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register - BD22 Fire System & Builders Inc.</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css">
+  <link rel="shortcut icon" href="assets/images/bd22-logo.png" type="image/png">
+</head>
+<body style="background-color: #f6f4ed; min-height: 100vh; display: flex; flex-direction: column;">
+
+  <!-- Header Navigation -->
+  <header class="site-header">
+    <div class="header-container">
+      <a href="index.html" class="logo-link">
+        <img src="assets/images/bd22-logo.png" alt="BD22 Fire System & Builders Inc." class="logo-img">
+      </a>
+
+      <nav>
+        <ul class="nav-menu" id="navMenu">
+          <li><a href="index.html" class="nav-link">Home</a></li>
+          <li><a href="about.html" class="nav-link">About Us</a></li>
+          <li><a href="services.html" class="nav-link">Services</a></li>
+          <li><a href="projects.html" class="nav-link">Projects</a></li>
+          <li><a href="faq.html" class="nav-link">FAQ</a></li>
+          <li><a href="contacts.html" class="nav-link">Contacts</a></li>
+        </ul>
+      </nav>
+
+      <div class="header-actions">
+        <a href="index.html#inquirySection" class="btn-primary-red header-booking-link">Book an Appointment</a>
+        <a href="login.html" class="btn-outline landing-login-link">Client Login</a>
+        <button class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Toggle navigation" aria-expanded="false">
+          <img src="assets/images/icons/menu.svg" alt="" style="width: 24px; height: 24px; display: block;">
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main style="flex-grow: 1; display: flex; align-items: center; justify-content: center; padding: 3rem 1.5rem;">
+    <div class="auth-card" data-aos="fade-up" style="background: #ffffff; border-radius: 20px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.08); padding: 3rem 2.5rem; width: 100%; max-width: 540px; text-align: center;">
+      
+      <div style="margin-bottom: 1.75rem;">
+        <img src="assets/images/bd22-logo.png" alt="BD22 Fire System & Builders Inc." style="height: 64px; margin: 0 auto 1.25rem;">
+        <h1 style="font-size: 1.75rem; font-weight: 800; color: #111827; margin-bottom: 0.35rem;">Create Customer Account</h1>
+      </div>
+
+      <form id="registerForm" style="text-align: left;">
+        <div id="authAlert" style="display: none; background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; padding: 0.75rem 1rem; border-radius: 8px; font-size: 0.9rem; margin-bottom: 1.25rem; line-height: 1.4;"></div>
+
+        <div class="form-row-2" style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom: 1.15rem;">
+          <div class="form-group">
+            <label class="form-label" for="regFullName" style="display:block; font-size:0.9rem; font-weight:600; color:#1e293b; margin-bottom:0.4rem;">Full Name *</label>
+            <input type="text" id="regFullName" class="form-control" placeholder="Enter your full name" pattern="^[a-zA-Z\u00C0-\u024F\s.\-']+$" minlength="2" maxlength="100" autocomplete="name" title="Full Name cannot contain numbers. Use letters, spaces, dots, hyphens, and apostrophes only." required style="width:100%; padding:0.75rem 1rem; border:1px solid #cbd5e1; border-radius:8px; font-size:1rem;">
+            <div id="regFullNameHint" class="form-error-hint" style="display:none;">Numbers are not allowed in Full Name.</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="regCompany" style="display:block; font-size:0.9rem; font-weight:600; color:#1e293b; margin-bottom:0.4rem;">Company / Facility *</label>
+            <input type="text" id="regCompany" class="form-control" placeholder="Enter your company name" minlength="2" maxlength="150" autocomplete="organization" required style="width:100%; padding:0.75rem 1rem; border:1px solid #cbd5e1; border-radius:8px; font-size:1rem;">
+          </div>
+        </div>
+
+        <div class="form-row-2" style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom: 1.15rem;">
+          <div class="form-group">
+            <label class="form-label" for="regEmail" style="display:block; font-size:0.9rem; font-weight:600; color:#1e293b; margin-bottom:0.4rem;">Email Address *</label>
+            <input type="email" id="regEmail" class="form-control" placeholder="email@gmail.com" maxlength="191" autocomplete="email" required style="width:100%; padding:0.75rem 1rem; border:1px solid #cbd5e1; border-radius:8px; font-size:1rem;">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="regPhone" style="display:block; font-size:0.9rem; font-weight:600; color:#1e293b; margin-bottom:0.4rem;">Mobile Phone *</label>
+            <input type="tel" id="regPhone" class="form-control" placeholder="+63 917 123 4567" pattern="^\+?[0-9\s\x28\x29\x2d]{7,20}$" inputmode="tel" autocomplete="tel" maxlength="25" title="Enter a valid phone number with 7 to 15 digits." required style="width:100%; padding:0.75rem 1rem; border:1px solid #cbd5e1; border-radius:8px; font-size:1rem;">
+            <div id="regPhoneHint" class="form-error-hint" style="display:none;">Letters are not allowed in mobile phone number.</div>
+          </div>
+        </div>
+
+        <div class="form-row-2" style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom: 1.25rem;">
+          <div class="form-group">
+            <label class="form-label" for="regPassword" style="display:block; font-size:0.9rem; font-weight:600; color:#1e293b; margin-bottom:0.4rem;">Password *</label>
+            <input type="password" id="regPassword" class="form-control" placeholder="Create a password" minlength="6" maxlength="128" autocomplete="new-password" required style="width:100%; padding:0.75rem 1rem; border:1px solid #cbd5e1; border-radius:8px; font-size:1rem;">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="regConfirmPassword" style="display:block; font-size:0.9rem; font-weight:600; color:#1e293b; margin-bottom:0.4rem;">Confirm Password *</label>
+            <input type="password" id="regConfirmPassword" class="form-control" placeholder="Confirm your password" minlength="6" maxlength="128" autocomplete="new-password" required style="width:100%; padding:0.75rem 1rem; border:1px solid #cbd5e1; border-radius:8px; font-size:1rem;">
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: flex-start; gap: 0.5rem; margin-bottom: 1.75rem;">
+          <input type="checkbox" id="agreeTerms" required style="width:16px; height:16px; accent-color:#a61c14; margin-top:3px;">
+          <label for="agreeTerms" style="font-size: 0.85rem; color: #475569; line-height: 1.4; cursor: pointer;">
+            I agree to the BD22 Fire System & Builders Inc. <a class="legal-policy-link" data-legal-tab="terms" href="#terms-and-conditions" style="color: #a61c14; text-decoration: underline;">terms of conditions</a> and authorized equipment service records access
+          </label>
+        </div>
+
+        <button type="submit" class="btn-primary-red" style="width:100%; font-size:1.05rem; padding:0.85rem; justify-content:center;">
+          Create Account
+        </button>
+      </form>
+
+      <div style="margin-top:1.25rem;">
+        <div id="googleSignInButton" style="display:flex; justify-content:center;"></div>
+        <div id="googleAuthSetupNotice" style="display:none; color:#64748b; font-size:0.82rem; margin-top:0.5rem;"></div>
+      </div>
+
+      <div style="margin-top: 1.75rem; padding-top: 1.5rem; border-top: 1px solid #f1f5f9; font-size: 0.95rem; color: #64748b;">
+        Already registered? <a href="login.html" style="color: #a61c14; font-weight: 700;">Sign in to Portal</a>
+      </div>
+
+      <div style="margin-top: 1rem;">
+        <a href="index.html" style="font-size: 0.85rem; color: #64748b; text-decoration: none;"> Back to Homepage</a>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="site-footer landing-footer">
+    <div class="footer-container landing-footer-grid">
+      <div class="footer-col">
+        <div class="footer-brand">
+          <img src="assets/images/bd22-logo.png" alt="" class="landing-footer-logo">
+          <h4 class="landing-footer-name">BD22 Fire System &amp; Builders Inc.</h4>
+        </div>
+      </div>
+
+      <div class="footer-col">
+        <div class="landing-footer-subsection">
+          <h4 class="footer-heading">Legal</h4>
+          <ul class="footer-links">
+            <li><a class="legal-policy-link" href="#privacy-policy" data-legal-tab="privacy">Privacy Policy</a></li>
+            <li><a class="legal-policy-link" href="#terms-and-conditions" data-legal-tab="terms">Terms and Conditions</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-col landing-footer-contact">
+        <h4 class="footer-heading">Contact Information</h4>
+        <ul class="footer-links">
+          <li><span>Address: #5436 Saniwares St., SNKI Agape, Camarin, Caloocan City, Philippines</span></li>
+          <li><a href="tel:+639163884309">Mobile: +63 916 388 4309</a></li>
+          <li><a href="tel:82942684">Landline: 82942684</a></li>
+          <li><a href="mailto:bd22firepro@gmail.com">Email: bd22firepro@gmail.com</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>&copy; 2026 BD22 Fire System &amp; Builders Inc. All Rights Reserved.</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-config.js?v=20261025_v14"></script>
+  <script src="js/app.js?v=20261025_v14"></script>
+  <script src="js/public.js?v=20261117_shared_legal_modal"></script>
+  <script src="js/google-auth.js?v=20261028_google"></script>
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script>
+    AOS.init({ duration: 700, easing: 'ease-out-cubic', once: true, offset: 80 });
+  </script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const regForm = document.getElementById('registerForm');
+      const authAlert = document.getElementById('authAlert');
+
+      function showError(msg) {
+        if (authAlert) {
+          authAlert.textContent = msg;
+          authAlert.style.display = 'block';
+        }
+        if (typeof showToast === 'function') {
+          showToast(msg);
+        }
+      }
+
+      function hideError() {
+        if (authAlert) {
+          authAlert.style.display = 'none';
+          authAlert.textContent = '';
+        }
+      }
+
+      // Real-time Input Sanitization and Feedback
+      const regFullNameInput = document.getElementById('regFullName');
+      const regFullNameHint = document.getElementById('regFullNameHint');
+      if (regFullNameInput) {
+        regFullNameInput.addEventListener('input', () => {
+          if (/\d/.test(regFullNameInput.value)) {
+            regFullNameInput.value = regFullNameInput.value.replace(/\d/g, '');
+            if (regFullNameHint) {
+              regFullNameHint.style.display = 'block';
+              setTimeout(() => { if (regFullNameHint) regFullNameHint.style.display = 'none'; }, 3500);
+            }
+          }
+        });
+      }
+
+      const regPhoneInput = document.getElementById('regPhone');
+      const regPhoneHint = document.getElementById('regPhoneHint');
+      if (regPhoneInput) {
+        regPhoneInput.addEventListener('input', () => {
+          if (/[a-zA-Z]/.test(regPhoneInput.value)) {
+            regPhoneInput.value = regPhoneInput.value.replace(/[a-zA-Z]/g, '');
+            if (regPhoneHint) {
+              regPhoneHint.style.display = 'block';
+              setTimeout(() => { if (regPhoneHint) regPhoneHint.style.display = 'none'; }, 3500);
+            }
+          }
+        });
+      }
+
+      if (regForm) {
+        regForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          hideError();
+
+          const fullName = document.getElementById('regFullName').value.trim();
+          const company = document.getElementById('regCompany').value.trim();
+          const email = document.getElementById('regEmail').value.trim();
+          const phone = document.getElementById('regPhone').value.trim();
+          const p1 = document.getElementById('regPassword').value;
+          const p2 = document.getElementById('regConfirmPassword').value;
+
+          if (!fullName || !company || !email || !phone || !p1) {
+            showError('Please fill in all required fields.');
+            return;
+          }
+
+          // Full Name Validation (No numbers allowed)
+          if (/\d/.test(fullName)) {
+            showError('Full Name cannot contain numbers. Please use letters only.');
+            return;
+          }
+          const nameValidRegex = /^[a-zA-Z\u00C0-\u024F\s.\-']+$/;
+          const letterCount = fullName.replace(/[^a-zA-Z\u00C0-\u024F]/g, '').length;
+          if (!nameValidRegex.test(fullName) || letterCount < 2) {
+            showError('Please enter a valid full name with at least 2 letters (no numbers or special symbols).');
+            return;
+          }
+
+          // Company Validation
+          if (company.length < 2) {
+            showError('Company / Facility name must be at least 2 characters long.');
+            return;
+          }
+
+          // Email Validation
+          const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+          if (!emailRegex.test(email)) {
+            showError('Please enter a valid email address (e.g. alex@gmail.com).');
+            return;
+          }
+
+          // Phone Validation
+          if (/[a-zA-Z]/.test(phone)) {
+            showError('Mobile phone number cannot contain letters. Please enter numbers only.');
+            return;
+          }
+          const cleanPhoneDigits = phone.replace(/\D/g, '');
+          if (cleanPhoneDigits.length < 7 || cleanPhoneDigits.length > 15) {
+            showError('Please enter a valid phone number (between 7 and 15 digits, e.g. +63 917 123 4567).');
+            return;
+          }
+
+          // Password Validation
+          if (p1.length < 6) {
+            showError('Password must be at least 6 characters long.');
+            return;
+          }
+          if (p1.length > 128) {
+            showError('Password cannot exceed 128 characters.');
+            return;
+          }
+          if (p1 !== p2) {
+            showError('Passwords do not match. Please verify.');
+            return;
+          }
+
+          const agree = document.getElementById('agreeTerms');
+          if (agree && !agree.checked) {
+            showError('Please agree to the Terms of Service to continue.');
+            return;
+          }
+
+          const submitBtn = regForm.querySelector('button[type="submit"]');
+          const originalText = submitBtn ? submitBtn.textContent : 'Create Account';
+          if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Creating Account...';
+          }
+
+          try {
+            if (!window.supabaseClient) {
+              throw new Error('Supabase authentication client is not available.');
+            }
+
+            // 1. Sign up user with profile metadata
+            const { data: signUpData, error: signUpError } = await window.supabaseClient.auth.signUp({
+              email: email,
+              password: p1,
+              options: {
+                data: {
+                  full_name: fullName,
+                  name: fullName,
+                  company: company,
+                  phone: phone,
+                  role: 'customer'
+                }
+              }
+            });
+
+            if (signUpError) {
+              showError(signUpError.message || 'Failed to create account.');
+              if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+              }
+              return;
+            }
+
+            // 2. Automatically log in to establish session
+            let user = signUpData.user;
+            let session = signUpData.session;
+
+            if (!session) {
+              const { data: loginData, error: loginError } = await window.supabaseClient.auth.signInWithPassword({
+                email: email,
+                password: p1
+              });
+              if (!loginError && loginData.session) {
+                user = loginData.user;
+                session = loginData.session;
+              }
+            }
+
+            // Accounts are authoritative only after both Auth and public.profiles
+            // contain the new user. The database trigger normally creates this row.
+            if (!user || !session) {
+              throw new Error('Account created. Please confirm your email before signing in.');
+            }
+
+            const { data: profile, error: profileError } = await window.supabaseClient
+              .from('profiles')
+              .select('id, email, full_name, company, phone, role')
+              .eq('id', user.id)
+              .maybeSingle();
+
+            if (profileError) {
+              throw new Error(`Unable to verify your account in the database: ${profileError.message}`);
+            }
+
+            if (!profile) {
+              throw new Error('Your authentication account was created, but its database profile is not ready yet. Please try again shortly.');
+            }
+
+            if (window.BD22_DB) {
+              BD22_DB.clearUserData();
+              if (user) {
+                BD22_DB.set('currentUser', {
+                  id: user.id,
+                  email: user.email,
+                  role: 'customer',
+                  full_name: profile.full_name || fullName,
+                  name: profile.full_name || fullName,
+                  company: profile.company || company,
+                  phone: profile.phone || phone,
+                  pref_sms: true,
+                  pref_email: true,
+                  pref_warranty: true
+                });
+              }
+            }
+
+            window.location.href = 'customer-portal.html';
+          } catch (err) {
+            console.error('Registration error:', err);
+            showError(err.message || 'Unable to connect to registration server. Please check your network connection.');
+            if (submitBtn) {
+              submitBtn.disabled = false;
+              submitBtn.textContent = originalText;
+            }
+          }
+        });
+      }
+    });
+  </script>
+</body>
+</html>

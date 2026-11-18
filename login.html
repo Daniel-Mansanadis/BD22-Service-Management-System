@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - BD22 Fire System & Builders Inc.</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css">
+  <link rel="shortcut icon" href="assets/images/bd22-logo.png" type="image/png">
+</head>
+<body style="background-color: #f6f4ed; min-height: 100vh; display: flex; flex-direction: column;">
+
+  <!-- Header Navigation -->
+  <header class="site-header">
+    <div class="header-container">
+      <a href="index.html" class="logo-link">
+        <img src="assets/images/bd22-logo.png" alt="BD22 Fire System & Builders Inc." class="logo-img">
+      </a>
+
+      <nav>
+        <ul class="nav-menu" id="navMenu">
+          <li><a href="index.html" class="nav-link">Home</a></li>
+          <li><a href="about.html" class="nav-link">About Us</a></li>
+          <li><a href="services.html" class="nav-link">Services</a></li>
+          <li><a href="projects.html" class="nav-link">Projects</a></li>
+          <li><a href="faq.html" class="nav-link">FAQ</a></li>
+          <li><a href="contacts.html" class="nav-link">Contacts</a></li>
+        </ul>
+      </nav>
+
+      <div class="header-actions">
+        <a href="index.html#inquirySection" class="btn-primary-red header-booking-link">Book an Appointment</a>
+        <a href="login.html" class="btn-outline landing-login-link">Client Login</a>
+        <button class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Toggle navigation" aria-expanded="false">
+          <img src="assets/images/icons/menu.svg" alt="" style="width: 24px; height: 24px; display: block;">
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Login Card Container (Mockup 11) -->
+  <main style="flex-grow: 1; display: flex; align-items: center; justify-content: center; padding: 3rem 1.5rem;">
+    <div class="auth-card" data-aos="fade-up" style="background: #ffffff; border-radius: 20px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.08); padding: 3rem 2.5rem; width: 100%; max-width: 480px; text-align: center;">
+      
+      <div style="margin-bottom: 1.75rem;">
+        <img src="assets/images/bd22-logo.png" alt="BD22 Fire System & Builders Inc." style="height: 64px; margin: 0 auto 1.25rem;">
+        <h1 style="font-size: 1.75rem; font-weight: 800; color: #111827; margin-bottom: 0.35rem;">Sign in to BD22 Portal</h1>
+      </div>
+
+      <form id="loginForm" style="text-align: left;">
+        <div id="authAlert" style="display: none; background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; padding: 0.75rem 1rem; border-radius: 8px; font-size: 0.9rem; margin-bottom: 1.25rem; line-height: 1.4;"></div>
+
+        <div class="form-group" style="margin-bottom: 1.25rem;">
+          <label class="form-label" for="loginEmail" style="display:block; font-size:0.9rem; font-weight:600; color:#1e293b; margin-bottom:0.4rem;">Email Address</label>
+          <input type="email" id="loginEmail" class="form-control" placeholder="name@company.com" maxlength="191" autocomplete="email" required style="width:100%; padding:0.75rem 1rem; border:1px solid #cbd5e1; border-radius:8px; font-size:1rem;">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1.25rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+            <label class="form-label" for="loginPassword" style="font-size:0.9rem; font-weight:600; color:#1e293b; margin-bottom:0;">Password</label>
+            <button type="button" id="forgotPasswordButton" style="padding:0; border:0; background:none; font-size:0.85rem; color:#a61c14; font-weight:600; cursor:pointer;">Forgot password?</button>
+          </div>
+          <div style="position:relative; width:100%;">
+            <input type="password" id="loginPassword" class="form-control" placeholder="••••••••" minlength="6" maxlength="128" autocomplete="current-password" required style="width:100%; padding:0.75rem 3.75rem 0.75rem 1rem; border:1px solid #cbd5e1; border-radius:8px; font-size:1rem;">
+            <button type="button" id="toggleLoginPassword" aria-label="Show password" aria-pressed="false" style="position:absolute; top:50%; right:0.85rem; transform:translateY(-50%); padding:0.2rem; border:0; background:transparent; color:#a61c14; font-size:0.85rem; font-weight:600; cursor:pointer;">Show</button>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.75rem;">
+          <input type="checkbox" id="rememberMe" checked style="width:16px; height:16px; accent-color:#a61c14;">
+          <label for="rememberMe" style="font-size: 0.9rem; color: #475569; cursor: pointer;">Remember my credentials</label>
+        </div>
+
+        <div style="display: flex; align-items: flex-start; gap: 0.5rem; margin-bottom: 1.75rem;">
+          <input type="checkbox" id="agreeTerms" required style="width:16px; height:16px; accent-color:#a61c14; margin-top:3px;">
+          <label for="agreeTerms" style="font-size: 0.85rem; color: #475569; line-height: 1.4; cursor: pointer;">
+            I agree to the BD22 Fire System &amp; Builders Inc. <a class="legal-policy-link" data-legal-tab="terms" href="#terms-and-conditions" style="color: #a61c14; text-decoration: underline;">terms of conditions</a> and authorized equipment service records access
+          </label>
+        </div>
+
+        <button type="submit" class="btn-primary-red" style="width:100%; font-size:1.05rem; padding:0.85rem; justify-content:center;">
+          Sign In
+        </button>
+      </form>
+
+      <section id="passwordRecoveryPanel" hidden style="margin-top:1.5rem; text-align:left;">
+        <h2 style="font-size:1.2rem; font-weight:800; color:#111827; margin-bottom:0.4rem;">Recover your account</h2>
+        <p style="font-size:0.9rem; color:#64748b; margin-bottom:1.25rem;">Enter your registered Gmail address and we’ll send you a password recovery code.</p>
+        <div id="recoveryAlert" role="alert" hidden style="padding:0.75rem 1rem; border:1px solid #fecaca; border-radius:8px; background:#fef2f2; color:#991b1b; font-size:0.9rem; margin-bottom:1rem; line-height:1.4;"></div>
+
+        <form id="recoveryEmailForm">
+          <div class="form-group" style="margin-bottom:1rem;">
+            <label class="form-label" for="recoveryEmail" style="display:block; font-size:0.9rem; font-weight:600; color:#1e293b; margin-bottom:0.4rem;">Gmail Address</label>
+            <input type="email" id="recoveryEmail" class="form-control" autocomplete="email" placeholder="name@gmail.com" required style="width:100%; padding:0.75rem 1rem; border:1px solid #cbd5e1; border-radius:8px; font-size:1rem;">
+          </div>
+          <button type="submit" class="btn-primary-red" style="width:100%; font-size:1rem; padding:0.8rem; justify-content:center;">Send Recovery Code</button>
+        </form>
+
+        <form id="recoveryCodeForm" hidden>
+          <div class="form-group" style="margin-bottom:1rem;">
+            <label class="form-label" for="recoveryCode" style="display:block; font-size:0.9rem; font-weight:600; color:#1e293b; margin-bottom:0.4rem;">Recovery Code</label>
+            <input type="text" id="recoveryCode" class="form-control" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="6-digit recovery code" autocomplete="one-time-code" required style="width:100%; padding:0.75rem 1rem; border:1px solid #cbd5e1; border-radius:8px; font-size:1rem; letter-spacing:2px;">
+          </div>
+          <button type="submit" class="btn-primary-red" style="width:100%; font-size:1rem; padding:0.8rem; justify-content:center;">Verify Code</button>
+          <button type="button" id="resendRecoveryCode" style="width:100%; margin-top:0.75rem; padding:0.4rem; border:0; background:none; color:#a61c14; font-weight:600; cursor:pointer;">Send a new code</button>
+        </form>
+
+        <form id="recoveryPasswordForm" hidden>
+          <div class="form-group" style="margin-bottom:1rem;">
+            <label class="form-label" for="recoveryNewPassword" style="display:block; font-size:0.9rem; font-weight:600; color:#1e293b; margin-bottom:0.4rem;">New Password</label>
+            <input type="password" id="recoveryNewPassword" class="form-control" minlength="6" autocomplete="new-password" required style="width:100%; padding:0.75rem 1rem; border:1px solid #cbd5e1; border-radius:8px; font-size:1rem;">
+          </div>
+          <div class="form-group" style="margin-bottom:1rem;">
+            <label class="form-label" for="recoveryConfirmPassword" style="display:block; font-size:0.9rem; font-weight:600; color:#1e293b; margin-bottom:0.4rem;">Confirm New Password</label>
+            <input type="password" id="recoveryConfirmPassword" class="form-control" minlength="6" autocomplete="new-password" required style="width:100%; padding:0.75rem 1rem; border:1px solid #cbd5e1; border-radius:8px; font-size:1rem;">
+          </div>
+          <button type="submit" class="btn-primary-red" style="width:100%; font-size:1rem; padding:0.8rem; justify-content:center;">Reset Password</button>
+        </form>
+
+        <button type="button" id="cancelPasswordRecovery" style="width:100%; margin-top:1rem; padding:0.4rem; border:0; background:none; color:#64748b; font-weight:600; cursor:pointer;">Back to sign in</button>
+      </section>
+
+      <div style="margin-top:1.25rem;">
+        <div id="googleSignInButton" style="display:flex; justify-content:center;"></div>
+        <div id="googleAuthSetupNotice" style="display:none; color:#64748b; font-size:0.82rem; margin-top:0.5rem;"></div>
+      </div>
+
+      <div style="margin-top: 1.75rem; padding-top: 1.5rem; border-top: 1px solid #f1f5f9; font-size: 0.95rem; color: #64748b;">
+        Don't have an account? <a href="register.html" style="color: #a61c14; font-weight: 700;">Create an account</a>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="site-footer landing-footer">
+    <div class="footer-container landing-footer-grid">
+      <div class="footer-col">
+        <div class="footer-brand">
+          <img src="assets/images/bd22-logo.png" alt="" class="landing-footer-logo">
+          <h4 class="landing-footer-name">BD22 Fire System &amp; Builders Inc.</h4>
+        </div>
+      </div>
+
+      <div class="footer-col">
+        <div class="landing-footer-subsection">
+          <h4 class="footer-heading">Legal</h4>
+          <ul class="footer-links">
+            <li><a class="legal-policy-link" href="#privacy-policy" data-legal-tab="privacy">Privacy Policy</a></li>
+            <li><a class="legal-policy-link" href="#terms-and-conditions" data-legal-tab="terms">Terms and Conditions</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-col landing-footer-contact">
+        <h4 class="footer-heading">Contact Information</h4>
+        <ul class="footer-links">
+          <li><span>Address: #5436 Saniwares St., SNKI Agape, Camarin, Caloocan City, Philippines</span></li>
+          <li><a href="tel:+639163884309">Mobile: +63 916 388 4309</a></li>
+          <li><a href="tel:82942684">Landline: 82942684</a></li>
+          <li><a href="mailto:bd22firepro@gmail.com">Email: bd22firepro@gmail.com</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>&copy; 2026 BD22 Fire System &amp; Builders Inc. All Rights Reserved.</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-config.js?v=20261025_v14"></script>
+  <script src="js/app.js?v=20261025_v14"></script>
+  <script src="js/public.js?v=20261117_shared_legal_modal"></script>
+  <script src="js/google-auth.js?v=20261028_google"></script>
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script>
+    AOS.init({ duration: 700, easing: 'ease-out-cubic', once: true, offset: 80 });
+  </script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const emailInput = document.getElementById('loginEmail');
+      const passInput = document.getElementById('loginPassword');
+      const togglePassword = document.getElementById('toggleLoginPassword');
+      const loginForm = document.getElementById('loginForm');
+      const rememberCheckbox = document.getElementById('rememberMe');
+      const agreeTermsCheckbox = document.getElementById('agreeTerms');
+      const authAlert = document.getElementById('authAlert');
+      const recoveryPanel = document.getElementById('passwordRecoveryPanel');
+      const recoveryAlert = document.getElementById('recoveryAlert');
+      const recoveryEmailForm = document.getElementById('recoveryEmailForm');
+      const recoveryCodeForm = document.getElementById('recoveryCodeForm');
+      const recoveryPasswordForm = document.getElementById('recoveryPasswordForm');
+      const recoveryEmailInput = document.getElementById('recoveryEmail');
+      const recoveryCodeInput = document.getElementById('recoveryCode');
+      const recoveryNewPassword = document.getElementById('recoveryNewPassword');
+      const recoveryConfirmPassword = document.getElementById('recoveryConfirmPassword');
+      const googleSignInOptions = document.getElementById('googleSignInButton').parentElement;
+      const createAccountPrompt = document.querySelector('.auth-card > div[style*="border-top"]');
+      let recoveryEmail = '';
+      let hasRecoverySession = false;
+
+      if (passInput && togglePassword) {
+        togglePassword.addEventListener('click', () => {
+          const showPassword = passInput.type === 'password';
+          passInput.type = showPassword ? 'text' : 'password';
+          togglePassword.textContent = showPassword ? 'Hide' : 'Show';
+          togglePassword.setAttribute('aria-label', showPassword ? 'Hide password' : 'Show password');
+          togglePassword.setAttribute('aria-pressed', String(showPassword));
+          passInput.focus();
+        });
+      }
+
+      function showError(msg) {
+        if (authAlert) {
+          authAlert.textContent = msg;
+          authAlert.style.display = 'block';
+        }
+        if (typeof showToast === 'function') {
+          showToast(msg);
+        }
+      }
+
+      function hideError() {
+        if (authAlert) {
+          authAlert.style.display = 'none';
+          authAlert.textContent = '';
+        }
+      }
+
+      function showRecoveryMessage(message, type = 'error') {
+        recoveryAlert.textContent = message;
+        recoveryAlert.hidden = false;
+        recoveryAlert.setAttribute('role', type === 'error' ? 'alert' : 'status');
+        recoveryAlert.style.backgroundColor = type === 'error' ? '#fef2f2' : '#f0fdf4';
+        recoveryAlert.style.borderColor = type === 'error' ? '#fecaca' : '#bbf7d0';
+        recoveryAlert.style.color = type === 'error' ? '#991b1b' : '#166534';
+      }
+
+      function clearRecoveryMessage() {
+        recoveryAlert.hidden = true;
+        recoveryAlert.textContent = '';
+      }
+
+      function setRecoveryBusy(form, busy, busyText) {
+        const button = form.querySelector('button[type="submit"]');
+        if (!button) return;
+        if (busy) {
+          button.dataset.originalText = button.textContent;
+          button.disabled = true;
+          button.textContent = busyText;
+        } else {
+          button.disabled = false;
+          button.textContent = button.dataset.originalText || button.textContent;
+        }
+      }
+
+      function resetRecoveryForms() {
+        recoveryEmailForm.hidden = false;
+        recoveryCodeForm.hidden = true;
+        recoveryPasswordForm.hidden = true;
+        recoveryCodeInput.value = '';
+        recoveryNewPassword.value = '';
+        recoveryConfirmPassword.value = '';
+        hasRecoverySession = false;
+        clearRecoveryMessage();
+      }
+
+      async function sendPasswordRecoveryCode(email) {
+        if (!window.supabaseClient) {
+          throw new Error('Authentication service is unavailable. Please try again later.');
+        }
+
+        const { error } = await window.supabaseClient.auth.resetPasswordForEmail(email);
+        if (error) throw error;
+      }
+
+      document.getElementById('forgotPasswordButton').addEventListener('click', () => {
+        hideError();
+        resetRecoveryForms();
+        loginForm.hidden = true;
+        googleSignInOptions.hidden = true;
+        if (createAccountPrompt) createAccountPrompt.hidden = true;
+        recoveryPanel.hidden = false;
+        recoveryEmailInput.value = emailInput.value.trim();
+        recoveryEmailInput.focus();
+      });
+
+      document.getElementById('cancelPasswordRecovery').addEventListener('click', async () => {
+        if (hasRecoverySession && window.supabaseClient) {
+          const { error } = await window.supabaseClient.auth.signOut();
+          if (error) {
+            console.error('Unable to close password recovery session:', error);
+            showRecoveryMessage('Unable to close the recovery session. Please close this page for security.');
+            return;
+          }
+        }
+
+        recoveryPanel.hidden = true;
+        loginForm.hidden = false;
+        googleSignInOptions.hidden = false;
+        if (createAccountPrompt) createAccountPrompt.hidden = false;
+        resetRecoveryForms();
+      });
+
+      recoveryEmailForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        clearRecoveryMessage();
+        recoveryEmail = recoveryEmailInput.value.trim().toLowerCase();
+
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        if (!emailRegex.test(recoveryEmail)) {
+          showRecoveryMessage('Please enter a valid email address.');
+          return;
+        }
+
+        setRecoveryBusy(recoveryEmailForm, true, 'Sending Code...');
+
+        try {
+          await sendPasswordRecoveryCode(recoveryEmail);
+          recoveryEmailForm.hidden = true;
+          recoveryCodeForm.hidden = false;
+          recoveryCodeInput.focus();
+          showRecoveryMessage(`If ${recoveryEmail} is registered, a recovery code has been sent to that address.`, 'success');
+        } catch (error) {
+          console.error('Password recovery code request failed:', error);
+          showRecoveryMessage(error.message || 'Unable to send a recovery code. Please try again.');
+        } finally {
+          setRecoveryBusy(recoveryEmailForm, false);
+        }
+      });
+
+      document.getElementById('resendRecoveryCode').addEventListener('click', async () => {
+        clearRecoveryMessage();
+        const resendButton = document.getElementById('resendRecoveryCode');
+        resendButton.disabled = true;
+        resendButton.textContent = 'Sending...';
+
+        try {
+          await sendPasswordRecoveryCode(recoveryEmail);
+          showRecoveryMessage(`If ${recoveryEmail} is registered, a new recovery code has been sent.`, 'success');
+        } catch (error) {
+          console.error('Password recovery code resend failed:', error);
+          showRecoveryMessage(error.message || 'Unable to send a new recovery code. Please try again.');
+        } finally {
+          resendButton.disabled = false;
+          resendButton.textContent = 'Send a new code';
+        }
+      });
+
+      recoveryCodeForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        clearRecoveryMessage();
+
+        const codeVal = recoveryCodeInput.value.trim();
+        if (!/^\d{6}$/.test(codeVal)) {
+          showRecoveryMessage('Recovery code must be exactly 6 digits.');
+          return;
+        }
+
+        setRecoveryBusy(recoveryCodeForm, true, 'Verifying...');
+
+        try {
+          if (!window.supabaseClient) {
+            throw new Error('Authentication service is unavailable. Please try again later.');
+          }
+
+          const { data, error } = await window.supabaseClient.auth.verifyOtp({
+            email: recoveryEmail,
+            token: codeVal,
+            type: 'recovery'
+          });
+          if (error) throw error;
+          if (!data.user || data.user.email?.toLowerCase() !== recoveryEmail) {
+            const { error: signOutError } = await window.supabaseClient.auth.signOut();
+            if (signOutError) console.error('Unable to close mismatched recovery session:', signOutError);
+            throw new Error('The recovery code could not be matched to this email. Request a new code and try again.');
+          }
+
+          hasRecoverySession = true;
+          recoveryCodeForm.hidden = true;
+          recoveryPasswordForm.hidden = false;
+          recoveryNewPassword.focus();
+          showRecoveryMessage('Email verified. Enter a new password for your account.', 'success');
+        } catch (error) {
+          console.error('Password recovery code verification failed:', error);
+          showRecoveryMessage(error.message || 'The recovery code is invalid or expired. Request a new code and try again.');
+        } finally {
+          setRecoveryBusy(recoveryCodeForm, false);
+        }
+      });
+
+      recoveryPasswordForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        clearRecoveryMessage();
+        const newPassword = recoveryNewPassword.value;
+        if (newPassword.length < 6) {
+          showRecoveryMessage('Password must be at least 6 characters long.');
+          return;
+        }
+        if (newPassword.length > 128) {
+          showRecoveryMessage('Password cannot exceed 128 characters.');
+          return;
+        }
+        if (newPassword !== recoveryConfirmPassword.value) {
+          showRecoveryMessage('The passwords do not match.');
+          return;
+        }
+
+        setRecoveryBusy(recoveryPasswordForm, true, 'Updating Password...');
+        try {
+          if (!window.supabaseClient) {
+            throw new Error('Authentication service is unavailable. Please try again later.');
+          }
+
+          const { error } = await window.supabaseClient.auth.updateUser({ password: newPassword });
+          if (error) throw error;
+
+          const { error: signOutError } = await window.supabaseClient.auth.signOut();
+          if (signOutError) {
+            console.error('Password was updated but sign-out failed:', signOutError);
+          } else {
+            hasRecoverySession = false;
+          }
+
+          recoveryPanel.hidden = true;
+          loginForm.hidden = false;
+          googleSignInOptions.hidden = false;
+          if (createAccountPrompt) createAccountPrompt.hidden = false;
+          emailInput.value = recoveryEmail;
+          passInput.value = '';
+          resetRecoveryForms();
+          showError(signOutError
+            ? 'Your password was reset. Please close this page and sign in again for security.'
+            : 'Your password has been reset. Sign in with your new password.');
+          if (authAlert) {
+            authAlert.style.backgroundColor = '#f0fdf4';
+            authAlert.style.borderColor = '#bbf7d0';
+            authAlert.style.color = '#166534';
+          }
+        } catch (error) {
+          console.error('Password reset failed:', error);
+          showRecoveryMessage(error.message || 'Unable to reset your password. Please try again.');
+        } finally {
+          setRecoveryBusy(recoveryPasswordForm, false);
+        }
+      });
+
+      if (loginForm) {
+        loginForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          hideError();
+
+          const email = emailInput.value.trim();
+          const password = passInput.value;
+
+          if (agreeTermsCheckbox && !agreeTermsCheckbox.checked) {
+            showError('Please agree to the Terms of Service and equipment service records access to continue.');
+            agreeTermsCheckbox.focus();
+            return;
+          }
+
+          if (!email || !password) {
+            showError('Please enter both email and password.');
+            return;
+          }
+
+          const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+          if (!emailRegex.test(email)) {
+            showError('Please enter a valid email address.');
+            return;
+          }
+
+          if (password.length < 6) {
+            showError('Password must be at least 6 characters long.');
+            return;
+          }
+
+          const submitBtn = loginForm.querySelector('button[type="submit"]');
+          const originalText = submitBtn ? submitBtn.textContent : 'Sign In';
+          if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Signing In...';
+          }
+
+          try {
+            if (!window.supabaseClient) {
+              throw new Error('Supabase authentication client is not available.');
+            }
+
+            const { data, error } = await window.supabaseClient.auth.signInWithPassword({
+              email: email,
+              password: password
+            });
+
+            if (error) {
+              showError(error.message || 'Invalid email or password.');
+              if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+              }
+              return;
+            }
+
+            // Fetch the database profile. Auth metadata alone is not sufficient.
+            const { data: profile, error: profileError } = await window.supabaseClient
+              .from('profiles')
+              .select('id, email, full_name, company, phone, role, pref_sms, pref_email, pref_warranty')
+              .eq('id', data.user.id)
+              .maybeSingle();
+
+            if (profileError) {
+              throw new Error(`Unable to verify your account in the database: ${profileError.message}`);
+            }
+
+            if (!profile) {
+              throw new Error('This account has no database profile yet. Please contact support before signing in.');
+            }
+
+            const role = profile.role || 'customer';
+            localStorage.setItem('bd22_role', role);
+
+            if (window.BD22_DB) {
+              localStorage.removeItem('bd22_currentUser');
+              localStorage.removeItem('bd22_adminProfile');
+              BD22_DB.set('currentUser', {
+                id: data.user.id,
+                email: data.user.email,
+                role: role,
+                full_name: profile.full_name || data.user.email.split('@')[0],
+                name: profile.full_name || data.user.email.split('@')[0],
+                company: profile.company || 'Facility Operations',
+                phone: profile.phone || '',
+                pref_sms: profile.pref_sms ?? true,
+                pref_email: profile.pref_email ?? true,
+                pref_warranty: profile.pref_warranty ?? true
+              });
+            }
+
+            const target = (role === 'admin') ? 'admin.html' : 'customer-portal.html';
+            window.location.href = target;
+          } catch (err) {
+            console.error('Login error:', err);
+            showError(err.message || 'Unable to connect to authentication server. Please check your network connection.');
+            if (submitBtn) {
+              submitBtn.disabled = false;
+              submitBtn.textContent = originalText;
+            }
+          }
+        });
+      }
+    });
+  </script>
+</body>
+</html>
