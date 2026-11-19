@@ -866,7 +866,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const payAmountVal = Number(document.getElementById('payAmount')?.value || 0);
 
       if (isNaN(payAmountVal) || payAmountVal <= 0) {
-        showToast('Please enter a valid settlement amount greater than zero.');
+        showToast('Please enter a valid settlement amount greater than zero.', 'error');
         if (submitBtn) {
           submitBtn.disabled = false;
           submitBtn.textContent = 'Confirm Payment Settlement';
@@ -875,7 +875,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       if (!refNo || refNo.trim().length < 3) {
-        showToast('Please enter a valid transaction reference number (at least 3 characters).');
+        showToast('Please enter a valid transaction reference number (at least 3 characters).', 'error');
         if (submitBtn) {
           submitBtn.disabled = false;
           submitBtn.textContent = 'Confirm Payment Settlement';
@@ -892,12 +892,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (res && res.success) {
         paymentModal.classList.remove('active');
-        showToast(`Payment of ₱${payAmountVal.toLocaleString()} for Invoice ${invCode} recorded successfully!`);
         renderPayments();
         renderOverview();
         renderProjects();
+        showToast(`Payment of ₱${payAmountVal.toLocaleString()} for Invoice ${invCode} recorded successfully!`, 'success');
       } else {
-        showToast(`Payment settlement warning: ${res?.error || 'Please try again.'}`);
+        showToast(`Payment settlement warning: ${res?.error || 'Please try again.'}`, 'error');
       }
     });
   }

@@ -1,11 +1,6 @@
--- BD22 existing Supabase project reconciliation.
--- Safe to re-run. Does not drop tables, delete rows, seed fake users, or reset IDs.
--- Run in Supabase SQL Editor for the project configured by js/supabase-config.js.
 
 BEGIN;
 
--- Convert legacy integer user references only when each referenced legacy user
--- maps unambiguously to an existing Supabase Auth profile by email.
 DO $$
 DECLARE
     v_table TEXT;

@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Operations - BD22 Fire System & Builders Inc.</title>
-  <link rel="stylesheet" href="css/style.css?v=20261117_responsive_modals">
-  <link rel="stylesheet" href="css/portal.css?v=20261117_inquiry_account_source">
+  <link rel="stylesheet" href="css/style.css?v=20261119_modal_feedback_v1">
+  <link rel="stylesheet" href="css/portal.css?v=20261119_responsive_modals_v2">
   <link rel="shortcut icon" href="assets/images/bd22-logo.png" type="image/png">
   <script>
     (function() {
@@ -130,7 +130,7 @@
           <div class="stats-grid-4 admin-dashboard-stats">
             <div class="stat-card admin-card align-start">
               <div class="stat-value" id="adminStatInquiries">—</div>
-              <div class="stat-label">Total Inquiries</div>
+              <div class="stat-label">Total Bookings</div>
             </div>
             <div class="stat-card admin-card align-start">
               <div class="stat-value" id="adminStatProjects">—</div>
@@ -177,6 +177,10 @@
                 <option value="In Progress">In Progress</option>
                 <option value="Completed">Completed</option>
               </select>
+              <button class="btn btn-sm btn-outline" id="btnAdminDeleteAllBookings" style="color:#dc2626; border-color:#fca5a5; background:#fef2f2; font-weight:600; display:inline-flex; align-items:center; gap:0.4rem; padding:0.55rem 0.95rem; margin-left:auto;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                <span>Delete All Bookings</span>
+              </button>
             </div>
 
             <div class="admin-inquiries-table-wrap">
@@ -251,11 +255,17 @@
               <h2 style="font-size:1.5rem; font-weight:800; color:#1e293b;">Engineering Projects Portfolio</h2>
               <p style="color:#64748b; font-size:0.95rem;">Track milestone velocity, project managers, and target turn-over dates</p>
             </div>
-            <!-- New Project Button (Mockup 39 Enhanced) -->
-            <button class="btn btn-primary-red" id="btnOpenNewProject" style="display:inline-flex; align-items:center; gap:0.45rem;">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-              <span>New Project</span>
-            </button>
+            <!-- Project Portfolio Action Buttons -->
+            <div style="display:flex; align-items:center; gap:0.65rem; flex-wrap:wrap;">
+              <button class="btn btn-sm btn-outline" id="btnAdminDeleteAllProjects" style="color:#dc2626; border-color:#fca5a5; background:#fef2f2; font-weight:600; display:inline-flex; align-items:center; gap:0.4rem; padding:0.55rem 0.95rem;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                <span>Delete All Projects</span>
+              </button>
+              <button class="btn btn-primary-red" id="btnOpenNewProject" style="display:inline-flex; align-items:center; gap:0.45rem;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                <span>New Project</span>
+              </button>
+            </div>
           </div>
 
           <div class="table-toolbar" style="margin-bottom:1.5rem;">
@@ -354,10 +364,16 @@
                 <h3 style="font-size:1.35rem; font-weight:800; color:#1e293b;">Client Invoices & Settlement Monitor</h3>
                 <p style="font-size:0.9rem; color:#64748b;">Project invoices are generated automatically; track contract amounts, collections, and settlements here.</p>
               </div>
-              <button class="btn btn-primary-red" id="btnOpenNewInvoice" style="display:inline-flex; align-items:center; gap:0.45rem;">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                <span>New Invoice</span>
-              </button>
+              <div style="display:flex; align-items:center; gap:0.65rem; flex-wrap:wrap;">
+                <button class="btn btn-sm btn-outline" id="btnAdminDeleteAllPayments" style="color:#dc2626; border-color:#fca5a5; background:#fef2f2; font-weight:600; display:inline-flex; align-items:center; gap:0.4rem; padding:0.55rem 0.95rem;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                  <span>Delete All Invoices</span>
+                </button>
+                <button class="btn btn-primary-red" id="btnOpenNewInvoice" style="display:inline-flex; align-items:center; gap:0.45rem;">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                  <span>New Invoice</span>
+                </button>
+              </div>
             </div>
 
             <div class="table-toolbar admin-invoice-toolbar">
@@ -482,11 +498,11 @@
         <h3 class="modal-title">Manage Client Bookings</h3>
         <button class="modal-close-btn">&times;</button>
       </div>
-      <div class="modal-body" style="padding: 2rem;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem; background:#f8fafc; padding:1rem; border-radius:8px;">
+      <div class="modal-body">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem; margin-bottom:1.25rem; background:#f8fafc; padding:1rem; border-radius:8px;">
           <div>
             <div style="font-weight:700; color:#1e293b;" id="modalInqCustomer">Arden Manufacturing Ltd.</div>
-            <div style="font-size:0.85rem; color:#64748b;"><span id="modalInqEmail">arden.mfg@example.com</span> • <span id="modalInqPhone">+63 917 555 1048</span></div>
+            <div style="font-size:0.85rem; color:#64748b; word-break:break-word;"><span id="modalInqEmail">arden.mfg@example.com</span> • <span id="modalInqPhone">+63 917 555 1048</span></div>
           </div>
           <div style="font-weight:800; color:#a61c14; font-size:1.1rem;" id="modalInqRef">INQ-2026-1048</div>
         </div>
@@ -540,7 +556,7 @@
             <textarea id="modalInqNotes" class="form-control" rows="3" placeholder="Add technical notes, date of inspection visit, or required parts..."></textarea>
           </div>
 
-          <div style="display:flex; justify-content:flex-end; gap:1rem; border-top:1px solid #e2e8f0; padding-top:1.5rem; margin-top:1.5rem;">
+          <div class="admin-modal-footer end">
             <button type="button" class="btn btn-outline btn-modal-close">Close</button>
             <button type="button" class="btn btn-primary-red" id="btnSaveInquiry">Save Inquiry Changes</button>
           </div>
@@ -559,7 +575,7 @@
         </div>
         <button class="modal-close-btn">&times;</button>
       </div>
-      <div class="modal-body" style="padding: 2rem;">
+      <div class="modal-body">
         
         <!-- Header Summary Card -->
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; background:#f8fafc; border:1px solid #e2e8f0; padding:1.25rem; border-radius:10px; flex-wrap:wrap; gap:0.75rem;">
@@ -660,7 +676,7 @@
               <div>
                 <div style="font-size:0.85rem; font-weight:700; color:#065f46;">Complimentary Site Assessment & Appointment</div>
               </div>
-              <div style="display:flex; gap:0.5rem; align-items:center;">
+              <div style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap;">
                 <button type="button" class="btn btn-sm" id="btnAdminApproveSr" style="background:#15803d; color:#ffffff; border:1px solid #166534; font-weight:700; padding:0.4rem 0.85rem; font-size:0.82rem;">Approve Appointment</button>
                 <button type="button" class="btn btn-sm" id="btnAdminRejectSr" style="background:#dc2626; color:#ffffff; border:1px solid #b91c1c; font-weight:700; padding:0.4rem 0.85rem; font-size:0.82rem;">Reject Appointment</button>
               </div>
@@ -673,9 +689,15 @@
             </div>
           </div>
 
-          <div style="display:flex; justify-content:flex-end; gap:1rem; border-top:1px solid #e2e8f0; padding-top:1.5rem;">
-            <button type="button" class="btn btn-outline btn-modal-close">Close</button>
-            <button type="button" class="btn btn-primary-red" id="btnSaveServiceReqAssessment">Save Assessment</button>
+          <div class="admin-modal-footer between">
+            <button type="button" class="btn btn-outline" id="btnAdminDeleteBooking" style="color:#dc2626; border-color:#fca5a5; background:#fef2f2; font-weight:600; display:inline-flex; align-items:center; gap:0.4rem; padding:0.55rem 0.95rem;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              <span>Delete Booking</span>
+            </button>
+            <div style="display:flex; gap:0.75rem;">
+              <button type="button" class="btn btn-outline btn-modal-close">Close</button>
+              <button type="button" class="btn btn-primary-red" id="btnSaveServiceReqAssessment">Save Assessment</button>
+            </div>
           </div>
         </form>
       </div>
@@ -692,7 +714,7 @@
         </div>
         <button class="modal-close-btn">&times;</button>
       </div>
-      <div class="modal-body" style="padding: 2rem;">
+      <div class="modal-body">
         
         <!-- Project ID Preview & Billing Integration Callout -->
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; background:#f8fafc; border:1px solid #e2e8f0; padding:1rem 1.25rem; border-radius:10px; flex-wrap:wrap; gap:0.75rem;">
@@ -769,7 +791,7 @@
               Add structured project milestones with deadlines, deliverable descriptions, and completion checkpoints.
             </div>
 
-            <div style="display:grid; grid-template-columns: 2fr 1.2fr 2fr auto; gap:0.5rem; align-items:center; margin-bottom:0.75rem;">
+            <div class="milestone-input-grid" style="margin-bottom:0.75rem;">
               <input type="text" id="newProjTaskTitle" class="form-control" placeholder="Milestone Title (e.g. Pipe Hydro-Test)*">
               <input type="date" id="newProjTaskDeadline" class="form-control" title="Target Deadline">
               <input type="text" id="newProjTaskDesc" class="form-control" placeholder="Scope & Deliverable Details">
@@ -790,7 +812,7 @@
             <textarea id="newProjNotes" class="form-control" rows="2" placeholder="Add operational notes, dispatch remarks, or special clearance requirements..."></textarea>
           </div>
 
-          <div style="display:flex; justify-content:flex-end; gap:1rem; border-top:1px solid #e2e8f0; padding-top:1.5rem; margin-top:1.5rem;">
+          <div class="admin-modal-footer end">
             <button type="button" class="btn btn-outline btn-modal-close">Cancel</button>
             <button type="submit" class="btn btn-primary-red" id="btnSubmitNewProject">Create Project & Generate Invoice</button>
           </div>
@@ -812,7 +834,7 @@
         </div>
         <button class="modal-close-btn">&times;</button>
       </div>
-      <div class="modal-body" style="padding: 2rem;">
+      <div class="modal-body">
         
         <!-- Header Info Card with Badges -->
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; background:#f8fafc; border:1px solid #e2e8f0; padding:1.25rem; border-radius:10px; flex-wrap:wrap; gap:0.75rem;">
@@ -904,7 +926,7 @@
           </div>
 
           <!-- Add new task form inline -->
-          <div style="display:grid; grid-template-columns: 2fr 1.2fr 2fr auto; gap:0.5rem; align-items:center; background:#f1f5f9; padding:0.75rem; border-radius:8px;">
+          <div class="milestone-input-grid detail-milestone-grid">
             <input type="text" id="modalProjNewTaskTitle" class="form-control" placeholder="New milestone title*">
             <input type="date" id="modalProjNewTaskDeadline" class="form-control" title="Target Deadline">
             <input type="text" id="modalProjNewTaskDesc" class="form-control" placeholder="Deliverable details">
@@ -921,7 +943,7 @@
           <div id="modalProjNotesHistory" style="margin-bottom:1rem; font-size:0.9rem; color:#334155; line-height:1.6;">
             <!-- Rendered dynamically -->
           </div>
-          <div style="display:flex; gap:0.5rem; align-items:flex-end;">
+          <div class="project-note-input-row">
             <textarea id="modalProjNewNote" class="form-control" rows="2" placeholder="Log a new engineering update, site visit note, or inspection remark..."></textarea>
             <button type="button" class="btn btn-outline btn-sm" id="modalProjBtnAddNote" style="display:inline-flex; align-items:center; gap:0.4rem; white-space:nowrap; padding:0.6rem 0.85rem;">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
@@ -930,7 +952,11 @@
           </div>
         </div>
 
-        <div style="display:flex; justify-content:flex-end; gap:1rem; padding-top:1rem; border-top:1px solid #e2e8f0; margin-top:1.5rem;">
+        <div class="admin-modal-footer between">
+          <button type="button" class="btn btn-outline" id="btnAdminDeleteProject" style="color:#dc2626; border-color:#fca5a5; background:#fef2f2; font-weight:600; display:inline-flex; align-items:center; gap:0.4rem; padding:0.55rem 0.95rem;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            <span>Delete Project</span>
+          </button>
           <button type="button" class="btn btn-outline btn-modal-close">Close</button>
         </div>
 
@@ -948,7 +974,7 @@
         </div>
         <button class="modal-close-btn">&times;</button>
       </div>
-      <div class="modal-body" style="padding:1.75rem 2rem;">
+      <div class="modal-body">
         <form id="adminNewInvoiceForm">
           <div class="form-group" style="margin-bottom:1.25rem;">
             <label class="form-label" for="newInvCustomerSelect">Assign Registered Customer Account <span class="req-star">*</span></label>
@@ -965,7 +991,7 @@
             <input type="text" id="newInvProject" class="form-control" placeholder="e.g. Sprinkler System Installation & Retrofit" required>
           </div>
 
-          <div class="form-row-2" style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1.25rem;">
+          <div class="form-row-2">
             <div class="form-group">
               <label class="form-label" for="newInvAmount">Contract / Invoice Amount (₱ PHP) <span class="req-star">*</span></label>
               <input type="number" id="newInvAmount" class="form-control" placeholder="150000" min="1" step="100" required>
@@ -981,7 +1007,7 @@
             <textarea id="newInvNotes" class="form-control" rows="3" placeholder="Contract billing for fire protection engineering works, valve replacements, and BFP compliance."></textarea>
           </div>
 
-          <div style="display:flex; justify-content:flex-end; gap:0.75rem; padding-top:1rem; border-top:1px solid #f1f5f9;">
+          <div class="admin-modal-footer end">
             <button type="button" class="btn btn-outline btn-modal-close" id="btnCancelNewInvoice">Cancel</button>
             <button type="submit" class="btn btn-primary-red" id="btnSubmitNewInvoice">Create & Issue Invoice</button>
           </div>
@@ -1003,7 +1029,7 @@
         </div>
         <button class="modal-close-btn">&times;</button>
       </div>
-      <div class="modal-body" style="padding: 2rem;">
+      <div class="modal-body">
         
         <!-- Summary Header Card -->
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; background:#f8fafc; border:1px solid #e2e8f0; padding:1.25rem; border-radius:10px; flex-wrap:wrap; gap:0.75rem;">
@@ -1071,6 +1097,14 @@
           </form>
         </div>
 
+        <div class="admin-modal-footer between">
+          <button type="button" class="btn btn-outline" id="btnAdminDeleteInvoice" style="color:#dc2626; border-color:#fca5a5; background:#fef2f2; font-weight:600; display:inline-flex; align-items:center; gap:0.4rem; padding:0.55rem 0.95rem;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            <span>Delete Invoice</span>
+          </button>
+          <button type="button" class="btn btn-outline btn-modal-close">Close</button>
+        </div>
+
       </div>
     </div>
   </div>
@@ -1082,7 +1116,7 @@
         <h3 class="modal-title">Equipment Inventory & Stock</h3>
         <button class="modal-close-btn">&times;</button>
       </div>
-      <div class="modal-body" style="padding: 2rem;">
+      <div class="modal-body">
         <form id="equipmentForm">
           <div class="form-group">
             <label class="form-label" for="modalEqName">Equipment / Component Name</label>
@@ -1122,7 +1156,7 @@
             </div>
           </div>
 
-          <div style="display:flex; justify-content:flex-end; gap:1rem; border-top:1px solid #e2e8f0; padding-top:1.5rem; margin-top:1.5rem;">
+          <div class="admin-modal-footer end">
             <button type="button" class="btn btn-outline btn-modal-close">Cancel</button>
             <button type="button" class="btn btn-primary-red" id="btnSaveEquipment">Save Inventory</button>
           </div>
@@ -1141,7 +1175,7 @@
         </div>
         <button class="modal-close-btn">&times;</button>
       </div>
-      <div class="modal-body" style="padding: 2rem;">
+      <div class="modal-body">
         <form id="adminNewMaintenanceForm">
           <div class="form-group">
             <label class="form-label" for="adminMaintProjSelect">Select Project & Customer *</label>
@@ -1161,7 +1195,7 @@
             <input type="date" id="adminMaintDate" class="form-control" required>
           </div>
 
-          <div style="display:flex; justify-content:flex-end; gap:0.75rem; padding-top:1.25rem; border-top:1px solid #e2e8f0;">
+          <div class="admin-modal-footer end">
             <button type="button" class="btn btn-outline btn-modal-close">Cancel</button>
             <button type="submit" class="btn btn-primary-red" id="btnSubmitNewMaintenance">Save Maintenance Schedule</button>
           </div>
@@ -1171,8 +1205,8 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/supabase-config.js?v=20261025_v14"></script>
-  <script src="js/app.js?v=20261117_inquiry_uuid_column_fix"></script>
-  <script src="js/admin.js?v=20261117_inquiry_uuid_column_fix"></script>
+  <script src="js/supabase-config.js?v=20261119_total_bookings_v3"></script>
+  <script src="js/app.js?v=20261119_total_bookings_v3"></script>
+  <script src="js/admin.js?v=20261119_total_bookings_v3"></script>
 </body>
 </html>

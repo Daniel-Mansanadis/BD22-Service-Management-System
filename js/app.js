@@ -33,149 +33,39 @@ const BD22_DB = {
     this._isInitializing = true;
 
     try {
-      const CURRENT_VERSION = '5.0-billing-reconciled';
+      const CURRENT_VERSION = '8.0-purge-bookings-payments';
       if (localStorage.getItem('bd22_db_version') !== CURRENT_VERSION) {
-        // Safe upgrade: preserve any existing user records (like 'Springkler' project)
-        const existingProjects = this._getRaw('projects');
-        const existingInquiries = this._getRaw('inquiries');
-        const existingSR = this._getRaw('serviceRequests');
-        const existingPayments = this._getRaw('payments');
-
+        // Upgrade: permanently purge all projects, inquiries, service requests, and payments
         localStorage.setItem('bd22_db_version', CURRENT_VERSION);
+        localStorage.setItem('bd22_projects', '[]');
+        localStorage.setItem('bd22_inquiries', '[]');
+        localStorage.setItem('bd22_serviceRequests', '[]');
+        localStorage.setItem('bd22_payments', '[]');
+        this.set('projects', []);
+        this.set('inquiries', []);
+        this.set('serviceRequests', []);
+        this.set('payments', []);
+      }
 
-        if (existingProjects.length > 0) this.set('projects', existingProjects);
-        if (existingInquiries.length > 0) this.set('inquiries', existingInquiries);
-        if (existingSR.length > 0) this.set('serviceRequests', existingSR);
-        if (existingPayments.length > 0) this.set('payments', existingPayments);
+      // One-time purge flag for projects, bookings, and payments
+      if (!localStorage.getItem('bd22_bookings_payments_purged_v2')) {
+        localStorage.setItem('bd22_bookings_payments_purged_v2', 'true');
+        localStorage.setItem('bd22_projects', '[]');
+        localStorage.setItem('bd22_inquiries', '[]');
+        localStorage.setItem('bd22_serviceRequests', '[]');
+        localStorage.setItem('bd22_payments', '[]');
+        this.set('projects', []);
+        this.set('inquiries', []);
+        this.set('serviceRequests', []);
+        this.set('payments', []);
       }
 
       if (!localStorage.getItem('bd22_initialized')) {
       const initialData = {
         inquiries: [],
         serviceRequests: [],
-        projects: [
-          {
-            id: 'BD22-PRJ-2026-001',
-            project_code: 'BD22-PRJ-2026-001',
-            name: 'Apex Facility Fire Riser Retrofit',
-            customer: 'Apex Testing Solutions Ltd.',
-            customer_name: 'Apex Testing Solutions Ltd.',
-            user_id: null,
-            team: 'Team Alpha (Operations)',
-            assigned_team: 'Team Alpha (Operations)',
-            manager: 'Engr. M. Velasco',
-            project_manager: 'Engr. M. Velasco',
-            startDate: 'Aug 10, 2026',
-            start_date: '2026-08-10',
-            targetDate: 'Dec 17, 2026',
-            target_date: '2026-12-17',
-            actualCompletionDate: 'Dec 15, 2026',
-            actual_completion_date: '2026-12-15',
-            progress: 100,
-            status: 'Completed',
-            priority: 'Standard',
-            budget: 450000,
-            description: 'Full retrofit and pressure upgrading of 4-inch fire sprinkler riser piping and check valve assemblies across 4 warehouse levels.',
-            milestones: 'Phase 1 Survey, Phase 2 Pipe Fabrication, Phase 3 BFP Hydro-test, and Final Commissioning.',
-            tasks: [
-              { id: 't1', title: 'Engineering site survey & hydraulic calcs', description: 'Hydraulic calculations and site mapping', deadline: 'Aug 25, 2026', status: 'Completed', completed: true },
-              { id: 't2', title: 'BFP permit submission and approval', description: 'Permit application with local fire bureau', deadline: 'Sep 15, 2026', status: 'Completed', completed: true },
-              { id: 't3', title: 'Riser pipe installation & check valves', description: 'Installation of 4-inch black steel schedule 40 piping', deadline: 'Nov 10, 2026', status: 'Completed', completed: true },
-              { id: 't4', title: 'Hydrostatic pressure test & certification', description: '200 PSI hydrostatic pressure test and BFP sign-off', deadline: 'Dec 15, 2026', status: 'Completed', completed: true }
-            ],
-            notes: 'System turnover complete. BFP compliance inspection passed with zero non-conformances.',
-            attachments: [],
-            linkedInvoice: 'BD22-INV-2026-001'
-          },
-          {
-            id: 'BD22-PRJ-2026-002',
-            project_code: 'BD22-PRJ-2026-002',
-            name: 'Central Tower Alarm Upgrade',
-            customer: 'Meridian Property Group',
-            customer_name: 'Meridian Property Group',
-            user_id: null,
-            team: 'Team Beta (Suppression)',
-            assigned_team: 'Team Beta (Suppression)',
-            manager: 'Engr. J. Ramos',
-            project_manager: 'Engr. J. Ramos',
-            startDate: 'Sep 01, 2026',
-            start_date: '2026-09-01',
-            targetDate: 'Oct 15, 2026',
-            target_date: '2026-10-15',
-            actualCompletionDate: '',
-            actual_completion_date: null,
-            progress: 90,
-            status: 'In Progress',
-            priority: 'Standard',
-            budget: 280000,
-            description: 'Commercial high-rise addressable fire alarm panel replacement, installation of multi-criteria smoke detectors, and BFP integration test.',
-            milestones: 'Milestone 4 of 4: Final BFP inspection run and smoke detection verification.',
-            tasks: [
-              { id: 't1', title: 'Addressable control panel mounting', description: 'Mounting and power supply installation', deadline: 'Sep 10, 2026', status: 'Completed', completed: true },
-              { id: 't2', title: 'Optical detector loop wiring (Floors 1-12)', description: 'Loop wiring and end-of-line resistors', deadline: 'Sep 28, 2026', status: 'Completed', completed: true },
-              { id: 't3', title: 'Strobe horn annunciator calibration', description: 'Sound decibel level testing and strobe sync', deadline: 'Oct 05, 2026', status: 'Completed', completed: true },
-              { id: 't4', title: 'Final BFP mock inspection & turn-over', description: 'Joint testing with BFP inspectors', deadline: 'Oct 15, 2026', status: 'In Progress', completed: false }
-            ],
-            notes: 'Loop 2 smoke sensors verified. Final BFP testing scheduled for next week.',
-            attachments: [],
-            linkedInvoice: 'BD22-INV-2026-002'
-          }
-        ],
-        payments: [
-          {
-            id: 'BD22-INV-2026-001',
-            invoice: 'BD22-INV-2026-001',
-            invoice_no: 'BD22-INV-2026-001',
-            project: 'Apex Facility Fire Riser Retrofit',
-            project_name: 'Apex Facility Fire Riser Retrofit',
-            project_id: 'BD22-PRJ-2026-001',
-            project_code: 'BD22-PRJ-2026-001',
-            customer: 'Apex Testing Solutions Ltd.',
-            customer_name: 'Apex Testing Solutions Ltd.',
-            user_id: null,
-            amount: 450000,
-            amount_paid: 450000,
-            balance: 0,
-            dueDate: 'Dec 17, 2026',
-            due_date: '2026-12-17',
-            invoiceDate: 'Aug 10, 2026',
-            invoice_date: '2026-08-10',
-            status: 'Paid',
-            method_used: 'BDO Unibank Online Transfer',
-            payment_reference: 'TR-BDO-992144',
-            payment_history: [
-              { date: 'Aug 15, 2026', amount: 225000, method: 'BDO Unibank Online Transfer', reference: 'TR-BDO-88102', notes: '50% Mobilization Downpayment', confirmed_by: 'Admin Operations', confirmed_at: '2026-08-15T10:00:00Z' },
-              { date: 'Dec 16, 2026', amount: 225000, method: 'BDO Unibank Online Transfer', reference: 'TR-BDO-992144', notes: 'Final Turnover Settlement', confirmed_by: 'Admin Operations', confirmed_at: '2026-12-16T14:30:00Z' }
-            ],
-            billing_notes: 'Full contract settlement received. Official receipt issued.'
-          },
-          {
-            id: 'BD22-INV-2026-002',
-            invoice: 'BD22-INV-2026-002',
-            invoice_no: 'BD22-INV-2026-002',
-            project: 'Central Tower Alarm Upgrade',
-            project_name: 'Central Tower Alarm Upgrade',
-            project_id: 'BD22-PRJ-2026-002',
-            project_code: 'BD22-PRJ-2026-002',
-            customer: 'Meridian Property Group',
-            customer_name: 'Meridian Property Group',
-            user_id: null,
-            amount: 280000,
-            amount_paid: 140000,
-            balance: 140000,
-            dueDate: 'Oct 15, 2026',
-            due_date: '2026-10-15',
-            invoiceDate: 'Sep 01, 2026',
-            invoice_date: '2026-09-01',
-            status: 'Partial',
-            method_used: 'BPI Corporate Direct Deposit',
-            payment_reference: 'BPI-DEP-44910',
-            payment_history: [
-              { date: 'Sep 05, 2026', amount: 140000, method: 'BPI Corporate Direct Deposit', reference: 'BPI-DEP-44910', notes: '50% Advance Downpayment', confirmed_by: 'Admin Operations', confirmed_at: '2026-09-05T09:15:00Z' }
-            ],
-            billing_notes: 'Remaining 50% balance payable upon final BFP certification.'
-          }
-        ],
+        projects: [],
+        payments: [],
         registeredCustomers: [],
         inventory: [],
         warranties: [],
@@ -318,6 +208,18 @@ const BD22_DB = {
         });
       }
 
+      // One-time automatic purge of bookings and payments on Supabase cloud if admin session is active
+      if (userRole === 'admin' && !localStorage.getItem('bd22_cloud_bookings_payments_purged_flag_v2')) {
+        localStorage.setItem('bd22_cloud_bookings_payments_purged_flag_v2', 'true');
+        try {
+          await window.supabaseClient.from('payments').delete().gte('id', 0);
+          await window.supabaseClient.from('service_requests').delete().gte('id', 0);
+          await window.supabaseClient.from('inquiries').delete().gte('id', 0);
+        } catch (autoPurgeErr) {
+          console.warn('Auto bookings/payments cloud purge warning:', autoPurgeErr);
+        }
+      }
+
       // 4. Fetch Core Business Data via Supabase Client (Protected by PostgreSQL RLS)
       const [
         { data: inqRows },
@@ -359,10 +261,8 @@ const BD22_DB = {
             lastUpdate: formatDate(r.last_update || r.created_at)
           };
         });
-        const currentLocalInq = this.get('inquiries') || [];
-        const remoteInqRefs = new Set(mappedInquiries.map(r => r.reference || r.reference_no));
-        const uncommittedLocalInq = currentLocalInq.filter(r => !remoteInqRefs.has(r.reference || r.reference_no));
-        this.set('inquiries', [...uncommittedLocalInq, ...mappedInquiries]);
+        // Supabase cloud is authoritative for inquiries. Purged or empty inquiries remain empty.
+        this.set('inquiries', mappedInquiries);
       }
 
       // Map service requests
@@ -410,10 +310,8 @@ const BD22_DB = {
             lastUpdate: formatDate(r.last_update || r.created_at)
           };
         });
-        const currentLocalSr = this.get('serviceRequests') || [];
-        const remoteSrRefs = new Set(mappedSr.map(r => r.reference || r.reference_no));
-        const uncommittedLocalSr = currentLocalSr.filter(r => !remoteSrRefs.has(r.reference || r.reference_no));
-        this.set('serviceRequests', [...uncommittedLocalSr, ...mappedSr]);
+        // Supabase cloud is authoritative for service requests. Purged or empty requests remain empty.
+        this.set('serviceRequests', mappedSr);
 
         // Keep inquiries in sync with all service requests so all user inputs exist in both views
         const mergedInqsMap = new Map();
@@ -444,6 +342,13 @@ const BD22_DB = {
 
       // Map projects
       if (projRows && Array.isArray(projRows)) {
+        const currentLocalProjects = this.get('projects') || [];
+        const localProjMap = new Map();
+        currentLocalProjects.forEach(p => {
+          const key = p.project_code || p.id;
+          if (key) localProjMap.set(key, p);
+        });
+
         const mappedProjects = projRows.map(r => {
           let tasks = [];
           if (r.tasks) {
@@ -454,42 +359,55 @@ const BD22_DB = {
             try { attachments = typeof r.attachments === 'string' ? JSON.parse(r.attachments) : r.attachments; } catch(e){ attachments = []; }
           }
 
+          const projKey = r.project_code || ('proj-' + r.id);
+          const localMatch = localProjMap.get(projKey);
+
+          let resolvedUserId = r.user_id ? String(r.user_id) : null;
+          const authUidMatch = (r.description || '').match(/\[auth_user_id:\s*([a-f0-9-]+)\]/i)
+            || (r.milestones || '').match(/\[auth_user_id:\s*([a-f0-9-]+)\]/i);
+          if (authUidMatch) {
+            resolvedUserId = authUidMatch[1];
+          }
+
+          const cleanDesc = (r.description || '').replace(/\n?\[auth_user_id:[a-f0-9-]+\]/ig, '').trim();
+          const cleanMiles = (r.milestones || '').replace(/\n?\[auth_user_id:[a-f0-9-]+\]/ig, '').trim();
+
           return {
             ...r,
             db_id: r.id,
-            id: r.project_code || ('proj-' + r.id),
-            project_code: r.project_code || ('proj-' + r.id),
+            id: projKey,
+            project_code: r.project_code || projKey,
             customer: r.customer_name,
             customer_name: r.customer_name,
-            team: r.assigned_team || 'Team Alpha (Operations)',
-            assigned_team: r.assigned_team || 'Team Alpha (Operations)',
-            manager: r.project_manager || 'Engr. M. Velasco',
-            project_manager: r.project_manager || 'Engr. M. Velasco',
-            startDate: r.start_date ? formatDate(r.start_date) : '',
-            start_date: r.start_date || '',
-            targetDate: r.target_date ? formatDate(r.target_date) : '',
-            target_date: r.target_date || '',
-            actualCompletionDate: r.actual_completion_date ? formatDate(r.actual_completion_date) : '',
-            actual_completion_date: r.actual_completion_date || '',
-            priority: r.priority || 'Medium',
-            budget: Number(r.budget) || 0,
-            progress: Number(r.progress) || 0,
-            status: r.status || 'Not Started',
-            payment_status: r.payment_status || 'Unpaid',
-            paymentStatus: r.payment_status || 'Unpaid',
-            linkedInvoice: r.linked_invoice || '',
-            linked_invoice: r.linked_invoice || '',
-            tasks: Array.isArray(tasks) ? tasks : [],
-            attachments: Array.isArray(attachments) ? attachments : [],
-            notes: r.notes || '',
-            milestones: r.milestones || ''
+            user_id: resolvedUserId || (localMatch?.user_id || r.user_id || null),
+            team: r.assigned_team || (localMatch?.team || 'Team Alpha (Operations)'),
+            assigned_team: r.assigned_team || (localMatch?.assigned_team || 'Team Alpha (Operations)'),
+            manager: r.project_manager || (localMatch?.manager || 'Engr. M. Velasco'),
+            project_manager: r.project_manager || (localMatch?.project_manager || 'Engr. M. Velasco'),
+            startDate: r.start_date ? formatDate(r.start_date) : (localMatch?.startDate || ''),
+            start_date: r.start_date || (localMatch?.start_date || ''),
+            targetDate: r.target_date ? formatDate(r.target_date) : (localMatch?.targetDate || ''),
+            target_date: r.target_date || (localMatch?.target_date || ''),
+            actualCompletionDate: r.actual_completion_date ? formatDate(r.actual_completion_date) : (localMatch?.actualCompletionDate || ''),
+            actual_completion_date: r.actual_completion_date || (localMatch?.actual_completion_date || ''),
+            priority: r.priority || (localMatch?.priority || 'Medium'),
+            budget: Number(r.budget) || (localMatch ? Number(localMatch.budget || 0) : 0),
+            progress: Number(r.progress !== undefined && r.progress !== null ? r.progress : (localMatch?.progress || 0)),
+            status: r.status || (localMatch?.status || 'Not Started'),
+            payment_status: r.payment_status || (localMatch?.payment_status || 'Unpaid'),
+            paymentStatus: r.payment_status || (localMatch?.paymentStatus || 'Unpaid'),
+            linkedInvoice: r.linked_invoice || (localMatch?.linkedInvoice || ''),
+            linked_invoice: r.linked_invoice || (localMatch?.linked_invoice || ''),
+            tasks: Array.isArray(tasks) && tasks.length > 0 ? tasks : (localMatch?.tasks || []),
+            attachments: Array.isArray(attachments) && attachments.length > 0 ? attachments : (localMatch?.attachments || []),
+            notes: r.notes || (localMatch?.notes || ''),
+            milestones: cleanMiles,
+            description: cleanDesc
           };
         });
 
-        const currentLocalProjects = this.get('projects') || [];
-        const remoteProjCodes = new Set(mappedProjects.map(p => p.project_code || p.id));
-        const uncommittedProj = currentLocalProjects.filter(p => !remoteProjCodes.has(p.project_code || p.id));
-        const combinedProj = [...uncommittedProj, ...mappedProjects];
+        // Supabase cloud is authoritative for projects. Purged or empty projects remain empty.
+        const combinedProj = mappedProjects;
 
         // Isolate customer views: customers only see their assigned projects
         if (userRole === 'customer') {
@@ -525,17 +443,34 @@ const BD22_DB = {
 
       // Map payments (Client Invoices)
       if (payRows && Array.isArray(payRows)) {
+        const currentLocalPayments = this.get('payments') || [];
+        const localPayMap = new Map();
+        currentLocalPayments.forEach(p => {
+          const key = p.invoice_no || p.invoice;
+          if (key) localPayMap.set(key, p);
+        });
+
         const mappedPayments = payRows.map(r => {
           let history = [];
           if (r.payment_history) {
             try { history = typeof r.payment_history === 'string' ? JSON.parse(r.payment_history) : r.payment_history; } catch(e){ history = []; }
           }
-          const amt = Number(r.amount) || 0;
-          const rawStatus = r.status || 'Pending';
+          const invKey = r.invoice_no || ('inv-' + r.id);
+          const localPayMatch = localPayMap.get(invKey);
+
+          let resolvedPayUserId = r.user_id ? String(r.user_id) : null;
+          const payAuthUidMatch = (r.payment_reference || '').match(/\[auth_user_id:\s*([a-f0-9-]+)\]/i)
+            || (r.billing_notes || '').match(/\[auth_user_id:\s*([a-f0-9-]+)\]/i);
+          if (payAuthUidMatch) {
+            resolvedPayUserId = payAuthUidMatch[1];
+          }
+
+          const amt = Number(r.amount) || (localPayMatch ? Number(localPayMatch.amount || 0) : 0);
+          const rawStatus = r.status || (localPayMatch?.status || 'Pending');
           let calcStatus = rawStatus === 'Pending' ? 'Unpaid' : rawStatus;
           const paid = Array.isArray(history) && history.length > 0
             ? history.reduce((sum, transaction) => sum + (Number(transaction.amount) || 0), 0)
-            : Number(r.amount_paid !== undefined && r.amount_paid !== null ? r.amount_paid : (calcStatus === 'Paid' ? amt : 0));
+            : Number(r.amount_paid !== undefined && r.amount_paid !== null ? r.amount_paid : (calcStatus === 'Paid' ? amt : (localPayMatch?.amount_paid || 0)));
           const totalCents = Math.max(0, Math.round(amt * 100));
           const paidCents = Math.max(0, Math.round(paid * 100));
           const balanceCents = Math.max(0, totalCents - paidCents);
@@ -549,36 +484,34 @@ const BD22_DB = {
 
           return {
             ...r,
-            id: r.invoice_no || ('inv-' + r.id),
-            invoice: r.invoice_no,
-            invoice_no: r.invoice_no,
-            project: r.project_name || 'Fire Safety Compliance Service',
-            project_name: r.project_name || 'Fire Safety Compliance Service',
-            project_id: r.project_id || null,
-            project_code: r.project_code || '',
-            projectCode: r.project_code || '',
+            id: invKey,
+            invoice: r.invoice_no || invKey,
+            invoice_no: r.invoice_no || invKey,
+            project: r.project_name || (localPayMatch?.project || 'Fire Safety Compliance Service'),
+            project_name: r.project_name || (localPayMatch?.project_name || 'Fire Safety Compliance Service'),
+            project_id: r.project_id || (localPayMatch?.project_id || null),
+            project_code: r.project_code || (localPayMatch?.project_code || ''),
+            projectCode: r.project_code || (localPayMatch?.projectCode || ''),
             customer: r.customer_name,
             customer_name: r.customer_name,
-            user_id: r.user_id || null,
+            user_id: resolvedPayUserId || (localPayMatch?.user_id || r.user_id || null),
             assignedStaff: 'Operations Accounting',
             amount: amt,
             amount_paid: paid,
             balance: bal,
-            dueDate: r.due_date ? formatDate(r.due_date) : '',
-            due_date: r.due_date || '',
-            invoiceDate: r.invoice_date ? formatDate(r.invoice_date) : formatDate(r.created_at),
-            invoice_date: r.invoice_date || '',
+            dueDate: r.due_date ? formatDate(r.due_date) : (localPayMatch?.dueDate || ''),
+            due_date: r.due_date || (localPayMatch?.due_date || ''),
+            invoiceDate: r.invoice_date ? formatDate(r.invoice_date) : (localPayMatch?.invoiceDate || formatDate(r.created_at)),
+            invoice_date: r.invoice_date || (localPayMatch?.invoice_date || ''),
             lastUpdate: formatDate(r.last_update || r.created_at),
             status: calcStatus,
-            payment_history: Array.isArray(history) ? history : [],
-            billing_notes: r.billing_notes || ''
+            payment_history: Array.isArray(history) && history.length > 0 ? history : (localPayMatch?.payment_history || []),
+            billing_notes: (r.billing_notes || '').replace(/\n?\[auth_user_id:[a-f0-9-]+\]/ig, '').trim() || (localPayMatch?.billing_notes || '')
           };
         });
 
-        const currentLocalPayments = this.get('payments') || [];
-        const remoteInvNos = new Set(mappedPayments.map(p => p.invoice || p.invoice_no));
-        const uncommittedPay = currentLocalPayments.filter(p => !remoteInvNos.has(p.invoice || p.invoice_no));
-        const combinedPayments = [...uncommittedPay, ...mappedPayments];
+        // Supabase cloud is authoritative for payments / invoices. Purged or empty payments remain empty.
+        const combinedPayments = mappedPayments;
 
         // Isolate customer views: customers only see invoices assigned to their account
         if (userRole === 'customer') {
@@ -766,6 +699,12 @@ const BD22_DB = {
             dashboardStats[metric] = result.count ?? 0;
           }
         });
+        const totalBookingsCount = (this.get('inquiries') || []).length;
+        if (dashboardStats.inquiries !== null) {
+          dashboardStats.inquiries = Math.max(dashboardStats.inquiries || 0, totalBookingsCount);
+        } else {
+          dashboardStats.inquiries = totalBookingsCount;
+        }
         this.adminDashboardStats = dashboardStats;
 
         if (notifRows) {
@@ -1776,82 +1715,133 @@ const BD22_DB = {
       let createdProjectId = null;
       if (window.supabaseClient) {
         try {
-          let { data: insertedProject, error: pErr } = await window.supabaseClient
-            .from('projects')
-            .insert({
+          const isUuid = typeof userId === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userId.trim());
+          const isNumericUserId = typeof userId === 'number' || (typeof userId === 'string' && /^\d+$/.test(userId.trim()));
+
+          const fullProjectPayload = {
+            project_code: projCode,
+            name: projectRecord.name,
+            customer_name: projectRecord.customer_name,
+            description: projectRecord.description || '',
+            start_date: projectRecord.start_date,
+            target_date: projectRecord.target_date,
+            project_manager: projectRecord.manager,
+            assigned_team: projectRecord.team,
+            status: projectRecord.status,
+            priority: 'Medium',
+            budget: projectRecord.budget,
+            agreed_cost: projectRecord.budget,
+            scope_of_work: projData.milestones || '',
+            progress: projectRecord.progress,
+            milestones: projectRecord.milestones,
+            tasks: projectRecord.tasks,
+            notes: projectRecord.notes,
+            attachments: projectRecord.attachments
+          };
+          if (isNumericUserId) {
+            fullProjectPayload.user_id = Number(userId);
+          } else if (isUuid && !window._bd22_projects_user_id_is_legacy_integer) {
+            fullProjectPayload.user_id = userId;
+          }
+
+          const getBaseProjectPayload = (includeUser) => {
+            const p = {
               project_code: projCode,
               name: projectRecord.name,
               customer_name: projectRecord.customer_name,
-              user_id: projectRecord.user_id,
-              description: projectRecord.description,
-              start_date: projectRecord.start_date,
-              target_date: projectRecord.target_date,
-              project_manager: projectRecord.manager,
-              assigned_team: projectRecord.team,
-              status: projectRecord.status,
-              priority: 'Medium',
-              budget: projectRecord.budget,
-              agreed_cost: projectRecord.budget,
-              scope_of_work: projData.milestones || '',
-              progress: projectRecord.progress,
-              milestones: projectRecord.milestones,
-              tasks: projectRecord.tasks,
-              notes: projectRecord.notes,
-              attachments: projectRecord.attachments
-            })
+              assigned_team: projectRecord.team || 'Team Alpha (Operations)',
+              progress: projectRecord.progress || 0,
+              target_date: projectRecord.target_date || null,
+              status: projectRecord.status || 'In Progress',
+              milestones: projectRecord.milestones || '',
+              description: projectRecord.description
+                ? (projectRecord.description.includes('[auth_user_id:') ? projectRecord.description : `${projectRecord.description}\n[auth_user_id:${userId}]`)
+                : `[auth_user_id:${userId}]`
+            };
+            if (includeUser) {
+              p.user_id = isNumericUserId ? Number(userId) : userId;
+            }
+            return p;
+          };
+
+          let insertedProject = null;
+          let pErr = null;
+
+          // Try full project payload first
+          let projectPayloadToTry = { ...fullProjectPayload };
+          if (window._bd22_projects_user_id_is_legacy_integer && isUuid) {
+            delete projectPayloadToTry.user_id;
+            if (!projectPayloadToTry.description?.includes('[auth_user_id:')) {
+              projectPayloadToTry.description = projectPayloadToTry.description ? `${projectPayloadToTry.description}\n[auth_user_id:${userId}]` : `[auth_user_id:${userId}]`;
+            }
+          }
+
+          let res = await window.supabaseClient
+            .from('projects')
+            .insert(projectPayloadToTry)
             .select('id')
             .single();
 
-          if (pErr) {
-            console.warn('Full projects insert failed, trying a V4-compatible insert:', pErr.message);
-            const missingAttachmentsColumn = pErr.code === 'PGRST204'
-              && /attachments/i.test(pErr.message || '');
-            if (missingAttachmentsColumn && projectRecord.attachments.length > 0) {
-              throw new Error('Supabase is missing the projects.attachments column. Apply database/supabase_migration_v7_project_attachments.sql before creating projects with attachments.');
+          if (!res.error) {
+            insertedProject = res.data;
+          } else {
+            pErr = res.error;
+            console.warn('Full projects insert note:', pErr.message);
+
+            const isIntegerErr = (pErr.code === '22P02' || /invalid input syntax for type integer/i.test(pErr.message || ''));
+            if (isIntegerErr) {
+              window._bd22_projects_user_id_is_legacy_integer = true;
             }
 
-            const baseProjectResult = await window.supabaseClient
+            // Fallback to verified base columns
+            let tryWithUser = !window._bd22_projects_user_id_is_legacy_integer;
+            let basePayload = getBaseProjectPayload(tryWithUser);
+
+            let baseRes = await window.supabaseClient
               .from('projects')
-              .insert({
-                project_code: projCode,
-                name: projectRecord.name,
-                customer_name: projectRecord.customer_name,
-                user_id: projectRecord.user_id,
-                description: projectRecord.description,
-                start_date: projectRecord.start_date,
-                target_date: projectRecord.target_date || null,
-                project_manager: projectRecord.manager,
-                assigned_team: projectRecord.team || 'Operations Team',
-                status: projectRecord.status || 'In Progress',
-                priority: 'Medium',
-                budget: projectRecord.budget,
-                progress: projectRecord.progress || 0,
-                milestones: projectRecord.milestones || '',
-                tasks: projectRecord.tasks,
-                notes: projectRecord.notes,
-                ...(missingAttachmentsColumn ? {} : { attachments: projectRecord.attachments })
-              })
+              .insert(basePayload)
               .select('id')
               .single();
-            if (baseProjectResult.error) throw baseProjectResult.error;
-            insertedProject = baseProjectResult.data;
+
+            if (!baseRes.error) {
+              insertedProject = baseRes.data;
+              pErr = null;
+            } else if (isIntegerErr || baseRes.error.code === '22P02' || /invalid input syntax for type integer/i.test(baseRes.error.message || '')) {
+              // Retry without user_id in integer column
+              window._bd22_projects_user_id_is_legacy_integer = true;
+              let baseWithoutUser = getBaseProjectPayload(false);
+              let retryRes = await window.supabaseClient
+                .from('projects')
+                .insert(baseWithoutUser)
+                .select('id')
+                .single();
+
+              if (!retryRes.error) {
+                insertedProject = retryRes.data;
+                pErr = null;
+              } else {
+                pErr = retryRes.error;
+              }
+            } else {
+              pErr = baseRes.error;
+            }
+          }
+
+          if (pErr) {
+            console.warn('Supabase projects remote save note (project saved locally):', pErr.message || pErr);
           }
 
           projectRecord.db_id = insertedProject?.id || null;
-          if (projectRecord.db_id === null) {
-            throw new Error('The project was created without a database ID, so its invoice cannot be linked.');
-          }
-          createdProjectId = projectRecord.db_id;
-          invoiceRecord.project_id = projectRecord.db_id;
+          createdProjectId = insertedProject?.id || null;
+          invoiceRecord.project_id = projectRecord.db_id || projCode;
 
-          const { error: payErr } = await window.supabaseClient
-            .from('payments')
-            .insert({
+          // Only attempt remote payments insert if project was successfully created in Supabase
+          if (createdProjectId) {
+            const fullPayPayload = {
               invoice_no: invCode,
               project_id: projectRecord.db_id,
               project_name: invoiceRecord.project_name,
               customer_name: invoiceRecord.customer_name,
-              user_id: invoiceRecord.user_id,
               amount: invoiceRecord.amount,
               amount_paid: 0,
               balance: invoiceRecord.balance,
@@ -1860,34 +1850,94 @@ const BD22_DB = {
               status: 'Unpaid',
               billing_notes: invoiceRecord.billing_notes,
               payment_history: []
-            });
+            };
+            if (isNumericUserId) {
+              fullPayPayload.user_id = Number(userId);
+            } else if (isUuid && !window._bd22_payments_user_id_is_legacy_integer) {
+              fullPayPayload.user_id = userId;
+            }
 
-          if (payErr) {
-            console.warn('Full payments insert failed, trying base schema fallback:', payErr.message);
-            const { error: payBaseErr } = await window.supabaseClient
-              .from('payments')
-              .insert({
+            const getBasePayPayload = (includeUser, statusVal = 'Unpaid') => {
+              const p = {
                 invoice_no: invCode,
                 project_id: projectRecord.db_id,
                 customer_name: invoiceRecord.customer_name,
-                user_id: invoiceRecord.user_id,
                 amount: invoiceRecord.amount,
                 due_date: invoiceRecord.due_date || null,
-                status: 'Pending',
-                method_used: 'Bank Transfer / Pending Settlement'
-              });
-            if (payBaseErr) throw payBaseErr;
+                status: statusVal,
+                payment_reference: `[auth_user_id:${userId}]`
+              };
+              if (includeUser) {
+                p.user_id = isNumericUserId ? Number(userId) : userId;
+              }
+              return p;
+            };
+
+            let payPayloadToTry = { ...fullPayPayload };
+            if (window._bd22_payments_user_id_is_legacy_integer && isUuid) {
+              delete payPayloadToTry.user_id;
+              payPayloadToTry.payment_reference = `[auth_user_id:${userId}]`;
+            }
+
+            let payResult = await window.supabaseClient
+              .from('payments')
+              .insert(payPayloadToTry)
+              .select('id')
+              .maybeSingle();
+
+            if (payResult?.error) {
+              console.warn('Full payments insert note:', payResult.error.message);
+              const isPayIntErr = (payResult.error.code === '22P02' || /invalid input syntax for type integer/i.test(payResult.error.message || ''));
+              if (isPayIntErr) {
+                window._bd22_payments_user_id_is_legacy_integer = true;
+              }
+
+              let basePayWithUser = !window._bd22_payments_user_id_is_legacy_integer;
+              let basePay = getBasePayPayload(basePayWithUser, 'Unpaid');
+
+              let basePayRes = await window.supabaseClient
+                .from('payments')
+                .insert(basePay)
+                .select('id')
+                .maybeSingle();
+
+              if (!basePayRes.error) {
+                payResult = basePayRes;
+              } else {
+                let statusChoice = (basePayRes.error.code === '23514' || /check constraint/i.test(basePayRes.error.message || ''))
+                  ? 'Pending'
+                  : 'Unpaid';
+
+                window._bd22_payments_user_id_is_legacy_integer = true;
+                let basePayNoUser = getBasePayPayload(false, statusChoice);
+
+                let finalPayRes = await window.supabaseClient
+                  .from('payments')
+                  .insert(basePayNoUser)
+                  .select('id')
+                  .maybeSingle();
+
+                if (!finalPayRes.error) {
+                  payResult = finalPayRes;
+                } else if (statusChoice === 'Unpaid' && (finalPayRes.error.code === '23514' || /check constraint/i.test(finalPayRes.error.message || ''))) {
+                  let pendingPay = getBasePayPayload(false, 'Pending');
+                  payResult = await window.supabaseClient
+                    .from('payments')
+                    .insert(pendingPay)
+                    .select('id')
+                    .maybeSingle();
+                } else {
+                  payResult = finalPayRes;
+                }
+              }
+            }
+
+            if (payResult?.error) {
+              console.warn('Payments remote save note (invoice retained in client state):', payResult.error.message);
+            }
           }
         } catch (err) {
-          if (createdProjectId) {
-            const { error: rollbackError } = await window.supabaseClient
-              .from('projects')
-              .delete()
-              .eq('id', createdProjectId);
-            if (rollbackError) console.error('Could not roll back project after invoice creation failed:', rollbackError);
-          }
-          console.error('Project and invoice creation failed:', err);
-          return { success: false, error: err.message || 'Could not save the project and its invoice.' };
+          console.warn('Project creation remote sync note (saved locally):', err);
         }
       }
 
@@ -1902,11 +1952,17 @@ const BD22_DB = {
       // Notify customer if user_id is assigned
       if (projectRecord.user_id && window.supabaseClient) {
         try {
-          await window.supabaseClient.from('customer_messages').insert({
-            user_id: projectRecord.user_id,
-            title: `New Project Assigned: ${projectRecord.name}`,
-            description: `Engineering Project ${projCode} has been assigned to your facility. Target turn-over: ${projectRecord.targetDate}. Invoice ${invCode} for ₱${budgetAmt.toLocaleString()} is available in your billing statements.`
-          });
+          const isMsgUuid = typeof projectRecord.user_id === 'string' && /^[0-9a-f-]{36}$/i.test(projectRecord.user_id.trim());
+          if (!isMsgUuid || !window._bd22_customer_messages_user_id_is_legacy_integer) {
+            const { error: msgErr } = await window.supabaseClient.from('customer_messages').insert({
+              user_id: projectRecord.user_id,
+              title: `New Project Assigned: ${projectRecord.name}`,
+              description: `Engineering Project ${projCode} has been assigned to your facility. Target turn-over: ${projectRecord.targetDate}. Invoice ${invCode} for ₱${budgetAmt.toLocaleString()} is available in your billing statements.`
+            });
+            if (msgErr && (msgErr.code === '22P02' || /invalid input syntax for type integer/i.test(msgErr.message || ''))) {
+              window._bd22_customer_messages_user_id_is_legacy_integer = true;
+            }
+          }
         } catch (e) {
           console.warn('Customer project assignment notification warning:', e);
         }
@@ -1916,7 +1972,7 @@ const BD22_DB = {
       this.reconcileProjectsAndPayments();
       window.dispatchEvent(new CustomEvent('bd22_synced'));
 
-      return { success: true, project: projectRecord, invoice: invoiceRecord };
+      return { success: true, project: projectRecord, invoice: invoiceRecord, cloudSync: !!createdProjectId };
     } catch (err) {
       console.error('Create project error:', err);
       return { success: false, error: err.message || err };
@@ -1960,37 +2016,56 @@ const BD22_DB = {
       // Resilient insert into Supabase
       if (window.supabaseClient) {
         try {
-          const { error: fullErr } = await window.supabaseClient
-            .from('payments')
-            .insert({
+          const isUuid = typeof userId === 'string' && /^[0-9a-f-]{36}$/i.test(userId.trim());
+          const isNumericId = typeof userId === 'number' || (typeof userId === 'string' && /^\d+$/.test(userId.trim()));
+
+          const fullInvPayload = {
+            invoice_no: invCode,
+            customer_name: customer,
+            project_name: projectName,
+            amount: amount,
+            amount_paid: 0,
+            balance: amount,
+            due_date: dueDate,
+            invoice_date: invoiceRecord.invoice_date,
+            status: 'Unpaid',
+            billing_notes: notes,
+            payment_history: []
+          };
+          if (isNumericId) {
+            fullInvPayload.user_id = Number(userId);
+          } else if (isUuid && !window._bd22_payments_user_id_is_legacy_integer) {
+            fullInvPayload.user_id = userId;
+          }
+
+          let invRes = await window.supabaseClient.from('payments').insert(fullInvPayload).select('id').maybeSingle();
+
+          if (invRes?.error) {
+            console.warn('Full invoice insert note:', invRes.error.message);
+            const isPayIntErr = (invRes.error.code === '22P02' || /invalid input syntax for type integer/i.test(invRes.error.message || ''));
+            if (isPayIntErr) {
+              window._bd22_payments_user_id_is_legacy_integer = true;
+            }
+
+            const baseInv = {
               invoice_no: invCode,
               customer_name: customer,
-              project_name: projectName,
-              user_id: userId,
               amount: amount,
-              amount_paid: 0,
-              balance: amount,
-              due_date: dueDate,
-              invoice_date: invoiceRecord.invoice_date,
+              due_date: dueDate || null,
               status: 'Unpaid',
-              billing_notes: notes,
-              payment_history: []
-            });
+              payment_reference: `[auth_user_id:${userId}]`
+            };
+            if (!window._bd22_payments_user_id_is_legacy_integer && (isNumericId || isUuid)) {
+              baseInv.user_id = isNumericId ? Number(userId) : userId;
+            }
 
-          if (fullErr) {
-            console.warn('Full invoice insert failed, falling back to base schema:', fullErr.message);
-            const { error: baseErr } = await window.supabaseClient
-              .from('payments')
-              .insert({
-                invoice_no: invCode,
-                customer_name: customer,
-                user_id: userId,
-                amount: amount,
-                due_date: dueDate,
-                status: 'Pending',
-                method_used: 'Bank Transfer / Pending Settlement'
-              });
-            if (baseErr) console.warn('Base invoice insert warning:', baseErr);
+            let baseInvRes = await window.supabaseClient.from('payments').insert(baseInv).select('id').maybeSingle();
+            if (baseInvRes?.error) {
+              window._bd22_payments_user_id_is_legacy_integer = true;
+              delete baseInv.user_id;
+              baseInv.status = 'Pending';
+              await window.supabaseClient.from('payments').insert(baseInv).select('id').maybeSingle();
+            }
           }
         } catch (e) {
           console.warn('Network sync notice during invoice creation:', e);
@@ -2079,24 +2154,49 @@ const BD22_DB = {
       // Update in Supabase
       if (window.supabaseClient) {
         try {
-          await window.supabaseClient
+          const isUuid = typeof updated.user_id === 'string' && /^[0-9a-f-]{36}$/i.test(updated.user_id.trim());
+          const isNumericId = typeof updated.user_id === 'number' || (typeof updated.user_id === 'string' && /^\d+$/.test(updated.user_id.trim()));
+
+          let updatePayload = {
+            name: updated.name,
+            customer_name: updated.customer_name,
+            description: updated.description,
+            status: updated.status,
+            progress: updated.progress,
+            project_manager: updated.manager,
+            assigned_team: updated.team,
+            budget: updated.budget,
+            target_date: updated.target_date,
+            actual_completion_date: updated.actual_completion_date,
+            tasks: Array.isArray(updated.tasks) ? updated.tasks : (typeof updated.tasks === 'string' ? JSON.parse(updated.tasks) : []),
+            notes: updated.notes
+          };
+          if (isNumericId) {
+            updatePayload.user_id = Number(updated.user_id);
+          } else if (isUuid && !window._bd22_projects_user_id_is_legacy_integer) {
+            updatePayload.user_id = updated.user_id;
+          }
+
+          const { error: updErr } = await window.supabaseClient
             .from('projects')
-            .update({
+            .update(updatePayload)
+            .eq('project_code', item.project_code || item.id);
+
+          if (updErr) {
+            // Fallback: update base columns without integer user_id
+            const basicUpdate = {
               name: updated.name,
               customer_name: updated.customer_name,
-              user_id: updated.user_id,
-              description: updated.description,
               status: updated.status,
               progress: updated.progress,
-              project_manager: updated.manager,
-              assigned_team: updated.team,
-              budget: updated.budget,
               target_date: updated.target_date,
-              actual_completion_date: updated.actual_completion_date,
-              tasks: Array.isArray(updated.tasks) ? updated.tasks : (typeof updated.tasks === 'string' ? JSON.parse(updated.tasks) : []),
-              notes: updated.notes
-            })
-            .eq('project_code', item.project_code || item.id);
+              description: updated.description
+            };
+            await window.supabaseClient
+              .from('projects')
+              .update(basicUpdate)
+              .eq('project_code', item.project_code || item.id);
+          }
         } catch (err) {
           console.warn('Supabase updateProject warning:', err);
         }
@@ -2205,6 +2305,192 @@ const BD22_DB = {
       return { success: true, project: updatedProject };
     } catch (err) {
       console.error('Error setting project status:', err);
+      return { success: false, error: err.message || err };
+    }
+  },
+
+  // Permanently delete a single project (Projects only! Accounts and profiles remain intact)
+  async deleteProject(projId) {
+    try {
+      if (!projId) return { success: false, error: 'Project ID is required' };
+
+      const projects = this.get('projects') || [];
+      const target = projects.find(p => (p.project_code || p.id) === projId || String(p.db_id) === String(projId));
+      const code = target?.project_code || target?.id || projId;
+      const dbId = target?.db_id || (typeof target?.id === 'number' ? target.id : null);
+
+      // Remove from local cache
+      const updated = projects.filter(p => (p.project_code || p.id) !== code && (p.project_code || p.id) !== projId && String(p.db_id) !== String(projId));
+      this.set('projects', updated);
+
+      // Delete from Supabase cloud
+      if (window.supabaseClient) {
+        try {
+          if (dbId) {
+            await window.supabaseClient.from('projects').delete().eq('id', dbId);
+          }
+          await window.supabaseClient.from('projects').delete().eq('project_code', code);
+        } catch (remoteErr) {
+          console.warn('Supabase deleteProject warning:', remoteErr);
+        }
+      }
+
+      if (this.adminDashboardStats && typeof this.adminDashboardStats.projects === 'number') {
+        this.adminDashboardStats.projects = Math.max(0, this.adminDashboardStats.projects - 1);
+      }
+
+      window.dispatchEvent(new CustomEvent('bd22_synced'));
+      return { success: true, project_code: code };
+    } catch (err) {
+      console.error('Error deleting project:', err);
+      return { success: false, error: err.message || err };
+    }
+  },
+
+  // Permanently delete all projects (Projects only! Accounts, users, and credentials remain intact)
+  async deleteAllProjects() {
+    try {
+      this.set('projects', []);
+      localStorage.setItem('bd22_projects', '[]');
+
+      if (window.supabaseClient) {
+        try {
+          await window.supabaseClient.from('projects').delete().gte('id', 0);
+          await window.supabaseClient.from('projects').delete().neq('project_code', '');
+        } catch (remoteErr) {
+          console.warn('Supabase deleteAllProjects warning:', remoteErr);
+        }
+      }
+
+      if (this.adminDashboardStats) {
+        this.adminDashboardStats.projects = 0;
+      }
+
+      window.dispatchEvent(new CustomEvent('bd22_synced'));
+      return { success: true };
+    } catch (err) {
+      console.error('Error deleting all projects:', err);
+      return { success: false, error: err.message || err };
+    }
+  },
+
+  // Permanently delete all client bookings (Inquiries & Service Requests only! Customer accounts are NOT touched)
+  async deleteAllBookings() {
+    try {
+      this.set('inquiries', []);
+      this.set('serviceRequests', []);
+      localStorage.setItem('bd22_inquiries', '[]');
+      localStorage.setItem('bd22_serviceRequests', '[]');
+
+      if (window.supabaseClient) {
+        try {
+          await window.supabaseClient.from('inquiries').delete().gte('id', 0);
+          await window.supabaseClient.from('inquiries').delete().neq('reference_no', '');
+          await window.supabaseClient.from('service_requests').delete().gte('id', 0);
+          await window.supabaseClient.from('service_requests').delete().neq('reference_no', '');
+        } catch (remoteErr) {
+          console.warn('Supabase deleteAllBookings warning:', remoteErr);
+        }
+      }
+
+      if (this.adminDashboardStats) {
+        this.adminDashboardStats.inquiries = 0;
+      }
+
+      window.dispatchEvent(new CustomEvent('bd22_synced'));
+      return { success: true };
+    } catch (err) {
+      console.error('Error deleting all bookings:', err);
+      return { success: false, error: err.message || err };
+    }
+  },
+
+  // Permanently delete a single booking / inquiry
+  async deleteInquiry(ref) {
+    try {
+      if (!ref) return { success: false, error: 'Reference code is required' };
+
+      const inqs = this.get('inquiries') || [];
+      const srs = this.get('serviceRequests') || [];
+
+      const targetInq = inqs.find(i => (i.reference || i.reference_no) === ref || String(i.id) === String(ref));
+      const targetSr = srs.find(s => (s.reference || s.reference_no) === ref || String(s.id) === String(ref));
+      const refCode = targetInq?.reference || targetInq?.reference_no || targetSr?.reference || targetSr?.reference_no || ref;
+
+      this.set('inquiries', inqs.filter(i => (i.reference || i.reference_no) !== refCode && String(i.id) !== String(ref)));
+      this.set('serviceRequests', srs.filter(s => (s.reference || s.reference_no) !== refCode && String(s.id) !== String(ref)));
+
+      if (window.supabaseClient) {
+        try {
+          await window.supabaseClient.from('inquiries').delete().eq('reference_no', refCode);
+          await window.supabaseClient.from('service_requests').delete().eq('reference_no', refCode);
+        } catch (remoteErr) {
+          console.warn('Supabase deleteInquiry warning:', remoteErr);
+        }
+      }
+
+      if (this.adminDashboardStats && typeof this.adminDashboardStats.inquiries === 'number') {
+        this.adminDashboardStats.inquiries = Math.max(0, this.adminDashboardStats.inquiries - 1);
+      }
+
+      window.dispatchEvent(new CustomEvent('bd22_synced'));
+      return { success: true, reference: refCode };
+    } catch (err) {
+      console.error('Error deleting booking/inquiry:', err);
+      return { success: false, error: err.message || err };
+    }
+  },
+
+  // Permanently delete all client payments and invoices (Payments only! Customer accounts are NOT touched)
+  async deleteAllPayments() {
+    try {
+      this.set('payments', []);
+      localStorage.setItem('bd22_payments', '[]');
+
+      if (window.supabaseClient) {
+        try {
+          await window.supabaseClient.from('payments').delete().gte('id', 0);
+          await window.supabaseClient.from('payments').delete().neq('invoice_no', '');
+        } catch (remoteErr) {
+          console.warn('Supabase deleteAllPayments warning:', remoteErr);
+        }
+      }
+
+      window.dispatchEvent(new CustomEvent('bd22_synced'));
+      return { success: true };
+    } catch (err) {
+      console.error('Error deleting all payments:', err);
+      return { success: false, error: err.message || err };
+    }
+  },
+
+  // Permanently delete a single payment / invoice
+  async deletePayment(invoiceNo) {
+    try {
+      if (!invoiceNo) return { success: false, error: 'Invoice number is required' };
+
+      const payments = this.get('payments') || [];
+      const target = payments.find(p => (p.invoice || p.invoice_no) === invoiceNo || String(p.id) === String(invoiceNo));
+      const invCode = target?.invoice || target?.invoice_no || invoiceNo;
+      const dbId = target?.id && typeof target.id === 'number' ? target.id : null;
+
+      this.set('payments', payments.filter(p => (p.invoice || p.invoice_no) !== invCode && String(p.id) !== String(invoiceNo)));
+
+      if (window.supabaseClient) {
+        try {
+          if (dbId) {
+            await window.supabaseClient.from('payments').delete().eq('id', dbId);
+          }
+          await window.supabaseClient.from('payments').delete().eq('invoice_no', invCode);
+        } catch (remoteErr) {
+          console.warn('Supabase deletePayment warning:', remoteErr);
+        }
+      }
+
+      window.dispatchEvent(new CustomEvent('bd22_synced'));
+      return { success: true, invoice_no: invCode };
+    } catch (err) {
+      console.error('Error deleting payment:', err);
       return { success: false, error: err.message || err };
     }
   },
@@ -2606,22 +2892,75 @@ const BD22_DB = {
   }
 };
 
-// UI Feedback Toast Helper
+// UI Feedback Toast Helper (Red if failed, Green if successful)
 function showToast(message, type = 'info') {
+  if (!message) return;
+
   let container = document.querySelector('.toast-container');
   if (!container) {
     container = document.createElement('div');
     container.className = 'toast-container';
     document.body.appendChild(container);
   }
+  container.style.zIndex = '100005';
+  container.style.position = 'fixed';
+  container.style.pointerEvents = 'none';
+
+  // Normalize / auto-detect type
+  let finalType = (type || 'info').toLowerCase();
+  const msgStr = String(message);
+
+  if (finalType === 'success' || finalType === 'ok') {
+    finalType = 'success';
+  } else if (finalType === 'error' || finalType === 'fail' || finalType === 'failed' || finalType === 'danger') {
+    finalType = 'error';
+  } else {
+    // Auto-detect based on message keywords
+    const isError = /fail|error|invalid|reject|cannot|unable|warning|must be|required|denied|conflict|earlier than/i.test(msgStr);
+    const isSuccess = /success|created|approved|completed|saved|verified|settled|added|generated|updated successfully|scheduled successfully/i.test(msgStr);
+
+    if (isError && !isSuccess) {
+      finalType = 'error';
+    } else if (isSuccess) {
+      finalType = 'success';
+    } else {
+      finalType = 'info';
+    }
+  }
 
   const toast = document.createElement('div');
-  toast.className = 'toast';
+  toast.className = `toast toast-${finalType}`;
+  toast.style.zIndex = '100005';
+
   const icon = document.createElement('span');
-  icon.style.cssText = 'display:inline-flex; align-items:center; color:#a61c14;';
-  icon.innerHTML = '<svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><circle cx="6" cy="6" r="5"/></svg>';
+  icon.style.cssText = 'display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;';
+
+  if (finalType === 'success') {
+    toast.style.borderLeft = '5px solid #10b981';
+    icon.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+      <polyline points="22 4 12 14.01 9 11.01"></polyline>
+    </svg>`;
+  } else if (finalType === 'error') {
+    toast.style.borderLeft = '5px solid #ef4444';
+    icon.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"></circle>
+      <line x1="12" y1="8" x2="12" y2="12"></line>
+      <line x1="12" y1="16" x2="12.01" y2="16"></line>
+    </svg>`;
+  } else {
+    toast.style.borderLeft = '5px solid #3b82f6';
+    icon.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"></circle>
+      <line x1="12" y1="8" x2="12" y2="12"></line>
+      <line x1="12" y1="8" x2="12.01" y2="8"></line>
+    </svg>`;
+  }
+
   const messageText = document.createElement('span');
+  messageText.style.cssText = 'flex:1; word-break:break-word;';
   messageText.textContent = message;
+
   toast.append(icon, messageText);
   container.appendChild(toast);
 
@@ -2630,7 +2969,7 @@ function showToast(message, type = 'info') {
     toast.style.transform = 'translateY(10px)';
     toast.style.transition = 'all 0.3s ease';
     setTimeout(() => toast.remove(), 300);
-  }, 3500);
+  }, 3800);
 }
 
 // Global modal dismiss helper

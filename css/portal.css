@@ -2857,3 +2857,308 @@ select::placeholder {
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* ==========================================================================
+   ADMIN MODALS COMPREHENSIVE RESPONSIVE SUITE
+   ========================================================================== */
+
+/* Enhanced Overlay & Card Foundation */
+.modal-overlay {
+  padding: clamp(0.5rem, 2.5vw, 1.5rem);
+  box-sizing: border-box;
+}
+
+.modal-overlay.active {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-card {
+  max-width: 620px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.modal-card.modal-card-lg {
+  max-width: 860px;
+  width: 100%;
+}
+
+.modal-header {
+  padding: 1.25rem 1.75rem;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-shrink: 0;
+  background: #ffffff;
+  box-sizing: border-box;
+}
+
+.modal-header .modal-title {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #1e293b;
+  margin: 0;
+  line-height: 1.35;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.modal-body {
+  padding: 1.5rem 1.75rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  box-sizing: border-box;
+}
+
+/* Milestone Builder Grid */
+.milestone-input-grid {
+  display: grid;
+  grid-template-columns: 2fr 1.2fr 2fr auto;
+  gap: 0.5rem;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.detail-milestone-grid {
+  background: #f1f5f9;
+  padding: 0.75rem;
+  border-radius: 8px;
+}
+
+/* Project Note Input Row */
+.project-note-input-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-end;
+  box-sizing: border-box;
+}
+
+/* Admin Modal Footer Actions */
+.admin-modal-footer {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 1.25rem;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+  box-sizing: border-box;
+}
+
+.admin-modal-footer.between {
+  justify-content: space-between;
+}
+
+.admin-modal-footer.end {
+  justify-content: flex-end;
+}
+
+/* Tablet & Moderate Mobile Viewports (<= 768px) */
+@media (max-width: 768px) {
+  .modal-overlay {
+    padding: 0.75rem;
+  }
+
+  .modal-card {
+    max-height: calc(100vh - 1.5rem);
+    max-height: calc(100dvh - 1.5rem);
+    border-radius: 14px;
+  }
+
+  .modal-header {
+    padding: 1rem 1.25rem;
+  }
+
+  .modal-header .modal-title {
+    font-size: 1.15rem;
+  }
+
+  .modal-body {
+    padding: 1.25rem 1.25rem;
+  }
+
+  .modal-overlay .form-row-2 {
+    grid-template-columns: 1fr !important;
+    gap: 0.85rem !important;
+  }
+
+  .modal-overlay input.form-control,
+  .modal-overlay select.form-control,
+  .modal-overlay textarea.form-control {
+    font-size: 16px; /* Prevents auto-zoom in iOS Safari */
+    min-height: 44px; /* Touch target minimum */
+  }
+
+  .milestone-input-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.65rem;
+  }
+
+  .milestone-input-grid > button {
+    grid-column: 1 / -1;
+    width: 100%;
+    justify-content: center;
+    padding: 0.65rem 1rem;
+  }
+
+  .detail-grid-2 {
+    grid-template-columns: 1fr !important;
+    gap: 0.85rem;
+  }
+}
+
+/* Smartphone & Compact Mobile Viewports (<= 580px) */
+@media (max-width: 580px) {
+  .modal-overlay {
+    padding: 0.4rem;
+    align-items: flex-end; /* Mobile sheet position for natural thumb reach */
+  }
+
+  .modal-card {
+    max-height: calc(100vh - 0.8rem);
+    max-height: calc(100dvh - 0.8rem);
+    border-radius: 16px 16px 8px 8px;
+    margin: 0;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .modal-header {
+    padding: 0.85rem 1rem;
+    gap: 0.5rem;
+  }
+
+  .modal-header .modal-title {
+    font-size: 1.05rem;
+  }
+
+  .modal-header .modal-close-btn {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    min-height: 38px;
+  }
+
+  .modal-body {
+    padding: 1rem 0.85rem;
+  }
+
+  .milestone-input-grid {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .milestone-input-grid > * {
+    width: 100%;
+  }
+
+  .project-note-input-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .project-note-input-row button {
+    width: 100%;
+    justify-content: center;
+    padding: 0.65rem 1rem;
+  }
+
+  .admin-modal-footer {
+    flex-direction: column-reverse;
+    align-items: stretch;
+    gap: 0.65rem;
+    padding-top: 1rem;
+    margin-top: 1.25rem;
+  }
+
+  .admin-modal-footer > button,
+  .admin-modal-footer > .btn,
+  .admin-modal-footer > div,
+  .admin-modal-footer > div > button,
+  .admin-modal-footer > div > .btn {
+    width: 100% !important;
+    justify-content: center !important;
+    text-align: center;
+    padding: 0.65rem 1rem;
+    min-height: 44px;
+    font-size: 0.9rem;
+  }
+
+  .admin-modal-footer > div {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 0.65rem;
+    width: 100%;
+  }
+
+  .task-item-row {
+    flex-direction: column !important;
+    gap: 0.65rem !important;
+    align-items: stretch !important;
+    padding: 0.75rem !important;
+  }
+
+  .task-item-row > div:last-child {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+
+  #adminProjStatusActionGroup {
+    width: 100%;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.45rem;
+  }
+
+  #adminProjStatusActionGroup .btn {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+    min-height: 38px;
+  }
+
+  .invoice-summary-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 0.5rem !important;
+  }
+
+  .invoice-summary-card {
+    padding: 0.65rem 0.45rem !important;
+  }
+
+  .invoice-summary-value {
+    font-size: 1.05rem !important;
+  }
+
+  .invoice-summary-label {
+    font-size: 0.72rem !important;
+  }
+
+  .quantity-stepper {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .quantity-stepper .stepper-btn {
+    flex: 1;
+    min-height: 44px;
+    font-size: 1.35rem;
+  }
+
+  .quantity-stepper .stepper-value {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}

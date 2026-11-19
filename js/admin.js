@@ -341,10 +341,10 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       inquiryModal.classList.remove('active');
-      showToast(`Inquiry ${ref} updated successfully!`);
       renderAdminInquiries();
       renderAdminServiceRequests();
       renderAdminDashboard();
+      showToast(`Inquiry ${ref} updated successfully!`, 'success');
     });
   }
 
@@ -665,7 +665,7 @@ document.addEventListener('DOMContentLoaded', () => {
           confirmedDateInput.reportValidity();
           confirmedDateInput.focus();
         }
-        showToast('Enter the confirmed schedule date before saving this appointment action.');
+        showToast('Enter the confirmed schedule date before saving this appointment action.', 'error');
         return;
       }
 
@@ -683,7 +683,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const result = await BD22_DB.updateServiceRequest(ref, updatedFields);
         if (!result?.success) {
-          showToast(`Unable to save assessment: ${result?.error || 'Please try again.'}`);
+          showToast(`Unable to save assessment: ${result?.error || 'Please try again.'}`, 'error');
           return;
         }
 
@@ -691,19 +691,20 @@ document.addEventListener('DOMContentLoaded', () => {
         pendingSrAction = null;
         adminSrModal.classList.remove('active');
 
-        if (savedAction === 'Approved') {
-          showToast(`Appointment ${ref} approved successfully!`);
-        } else if (savedAction === 'Rejected') {
-          showToast(`Appointment request ${ref} has been marked as Rejected.`);
-        } else {
-          showToast(`Confirmed schedule for ${ref} saved successfully!`);
-        }
         renderAdminInquiries();
         renderAdminServiceRequests();
         renderAdminDashboard();
+
+        if (savedAction === 'Approved') {
+          showToast(`Appointment ${ref} approved successfully!`, 'success');
+        } else if (savedAction === 'Rejected') {
+          showToast(`Appointment request ${ref} has been marked as Rejected.`, 'error');
+        } else {
+          showToast(`Confirmed schedule for ${ref} saved successfully!`, 'success');
+        }
       } catch (err) {
         console.error('Service request assessment save error:', err);
-        showToast('Unable to save assessment. Please try again.');
+        showToast('Unable to save assessment. Please try again.', 'error');
       } finally {
         saveSrBtn.disabled = false;
         saveSrBtn.textContent = 'Save Assessment';
@@ -719,6 +720,75 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   if (btnRejectSr) {
     btnRejectSr.addEventListener('click', () => setPendingSrAction('Rejected'));
+  }
+
+  // Delete All Bookings Action (Inquiries and Service Requests)
+  const btnAdminDeleteAllBookings = document.getElementById('btnAdminDeleteAllBookings');
+  if (btnAdminDeleteAllBookings) {
+    btnAdminDeleteAllBookings.addEventListener('click', async () => {
+      const inqs = BD22_DB.get('inquiries') || [];
+      const srs = BD22_DB.get('serviceRequests') || [];
+      const totalCount = inqs.length + srs.length;
+      if (totalCount === 0) {
+        showToast('There are no client bookings to delete.', 'info');
+        return;
+      }
+
+      const confirmPurge = window.confirm(
+        `Are you sure you want to permanently delete ALL client bookings and inquiries?\n\nThis will remove all inquiries and service requests from Admin Management, Dashboard stats, and the Customer Portal.\nUser accounts, customer profiles, and login credentials will NOT be affected.`
+      );
+      if (!confirmPurge) return;
+
+      const originalText = btnAdminDeleteAllBookings.innerHTML;
+      btnAdminDeleteAllBookings.disabled = true;
+      btnAdminDeleteAllBookings.innerHTML = '<span>Deleting all bookings...</span>';
+
+      const res = await BD22_DB.deleteAllBookings();
+      btnAdminDeleteAllBookings.disabled = false;
+      btnAdminDeleteAllBookings.innerHTML = originalText;
+
+      if (res && res.success) {
+        renderAdminInquiries();
+        renderAdminServiceRequests();
+        renderAdminDashboard();
+        showToast('All client bookings have been permanently deleted.', 'success');
+      } else {
+        showToast(`Failed to delete all bookings: ${res?.error || 'Please try again.'}`, 'error');
+      }
+    });
+  }
+
+  // Delete Single Booking Action
+  const btnAdminDeleteBooking = document.getElementById('btnAdminDeleteBooking');
+  if (btnAdminDeleteBooking) {
+    btnAdminDeleteBooking.addEventListener('click', async () => {
+      const ref = adminSrModal?.getAttribute('data-active-sr-ref');
+      if (!ref) return;
+
+      const confirmDelete = window.confirm(
+        `Are you sure you want to permanently delete booking ${ref}?\n\nThis booking will be removed from Admin Management, Dashboard metrics, and the Customer Portal.\nCustomer accounts will NOT be affected.`
+      );
+      if (!confirmDelete) return;
+
+      const originalHtml = btnAdminDeleteBooking.innerHTML;
+      btnAdminDeleteBooking.disabled = true;
+      btnAdminDeleteBooking.innerHTML = '<span>Deleting...</span>';
+
+      const res = await BD22_DB.deleteInquiry(ref);
+      btnAdminDeleteBooking.disabled = false;
+      btnAdminDeleteBooking.innerHTML = originalHtml;
+
+      if (res && res.success) {
+        if (adminSrModal) adminSrModal.classList.remove('active');
+        if (inquiryModal) inquiryModal.classList.remove('active');
+        renderAdminInquiries();
+        renderAdminServiceRequests();
+        renderAdminDashboard();
+        showToast(`Booking ${ref} deleted permanently!`, 'success');
+      } else {
+        showToast(`Failed to delete booking: ${res?.error || 'Please try again.'}`, 'error');
+      }
+    });
   }
 
   // =========================================================================
@@ -829,6 +899,40 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
+  // Delete All Projects Action
+  const btnAdminDeleteAllProjects = document.getElementById('btnAdminDeleteAllProjects');
+  if (btnAdminDeleteAllProjects) {
+    btnAdminDeleteAllProjects.addEventListener('click', async () => {
+      const projects = BD22_DB.get('projects') || [];
+      if (projects.length === 0) {
+        showToast('There are no projects to delete.', 'info');
+        return;
+      }
+
+      const confirmPurge = window.confirm(
+        `Are you sure you want to permanently delete ALL ${projects.length} project(s)?\n\nThis will remove projects from Admin Management, Dashboard stats, and the Customer Portal.\nUser accounts, profiles, and login credentials will NOT be affected.`
+      );
+      if (!confirmPurge) return;
+
+      const originalText = btnAdminDeleteAllProjects.innerHTML;
+      btnAdminDeleteAllProjects.disabled = true;
+      btnAdminDeleteAllProjects.innerHTML = '<span>Deleting all projects...</span>';
+
+      const res = await BD22_DB.deleteAllProjects();
+      btnAdminDeleteAllProjects.disabled = false;
+      btnAdminDeleteAllProjects.innerHTML = originalText;
+
+      if (res && res.success) {
+        renderAdminProjects();
+        renderAdminDashboard();
+        renderAdminPayments();
+        showToast('All projects have been permanently deleted.', 'success');
+      } else {
+        showToast(`Failed to delete all projects: ${res?.error || 'Please try again.'}`, 'error');
+      }
+    });
+  }
+
   // Open New Project Modal
   const openNewProjBtn = document.getElementById('btnOpenNewProject');
   if (openNewProjBtn && newProjectModal) {
@@ -903,7 +1007,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const select = document.getElementById('newProjCustomerSelect');
       const userId = document.getElementById('newProjUserId')?.value || null;
       if (!userId) {
-        showToast('Please select a valid registered customer account. Projects must be assigned to an existing registered customer.');
+        showToast('Please select a valid registered customer account. Projects must be assigned to an existing registered customer.', 'error');
         if (select) {
           select.focus();
           select.style.borderColor = '#ef4444';
@@ -961,14 +1065,25 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       if (res && res.success) {
+        // 1. Immediately close modal and reset state
         newProjectModal.classList.remove('active');
         newProjectForm.reset();
-        showToast(`Project ${res.project.project_code} created and linked Invoice ${res.invoice.invoice_no} generated!`);
+        resetNewProjectTasks();
+
+        // 2. Refresh UI views
         renderAdminProjects();
         renderAdminPayments();
         renderAdminDashboard();
+
+        // 3. Pop successful feedback in green
+        if (res.cloudSync === false) {
+          showToast(`Project ${res.project.project_code} created successfully! (Saved locally; cloud sync pending)`, 'success');
+        } else {
+          showToast(`Project ${res.project.project_code} created successfully and Invoice ${res.invoice.invoice_no} generated!`, 'success');
+        }
       } else {
-        showToast(`Project creation failed: ${res?.error || 'Please try again.'}`);
+        // Keep modal open so user can adjust inputs, show failed feedback in red
+        showToast(`Project creation failed: ${res?.error || 'Please try again.'}`, 'error');
       }
     });
   }
@@ -1457,7 +1572,37 @@ document.addEventListener('DOMContentLoaded', () => {
 
       noteInput.value = '';
       renderAdminProjNotes(proj);
-      showToast('Project note logged.');
+      showToast('Project note logged.', 'info');
+    });
+  }
+
+  // Delete single project permanently
+  const btnAdminDeleteProject = document.getElementById('btnAdminDeleteProject');
+  if (btnAdminDeleteProject) {
+    btnAdminDeleteProject.addEventListener('click', async () => {
+      if (!activeAdminProjectId) return;
+      const confirmDelete = window.confirm(
+        `Are you sure you want to permanently delete project ${activeAdminProjectId}?\n\nThis project will be removed from Admin Management, Dashboard metrics, and the Customer Portal.\nAssociated customer accounts will NOT be affected.`
+      );
+      if (!confirmDelete) return;
+
+      const originalHtml = btnAdminDeleteProject.innerHTML;
+      btnAdminDeleteProject.disabled = true;
+      btnAdminDeleteProject.innerHTML = '<span>Deleting...</span>';
+
+      const res = await BD22_DB.deleteProject(activeAdminProjectId);
+      btnAdminDeleteProject.disabled = false;
+      btnAdminDeleteProject.innerHTML = originalHtml;
+
+      if (res && res.success) {
+        projectDetailModal.classList.remove('active');
+        renderAdminProjects();
+        renderAdminDashboard();
+        renderAdminPayments();
+        showToast(`Project ${activeAdminProjectId} deleted successfully!`, 'success');
+      } else {
+        showToast(`Failed to delete project: ${res?.error || 'Please try again.'}`, 'error');
+      }
     });
   }
 
@@ -1611,9 +1756,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         equipmentModal.classList.remove('active');
-        showToast(isNewEquipment ? 'Equipment added to inventory!' : 'Inventory record updated!');
         renderAdminInventory();
         renderAdminDashboard();
+        showToast(isNewEquipment ? 'Equipment added to inventory successfully!' : 'Inventory record updated successfully!', 'success');
       } catch (error) {
         console.error('Unable to save equipment:', error);
         showToast(`Unable to save equipment: ${error.message || 'Please try again.'}`, 'error');
@@ -1713,14 +1858,14 @@ document.addEventListener('DOMContentLoaded', () => {
       const notes = document.getElementById('newInvNotes')?.value.trim() || '';
 
       if (!userId) {
-        showToast('Please select a valid registered customer account.');
+        showToast('Please select a valid registered customer account.', 'error');
         const select = document.getElementById('newInvCustomerSelect');
         if (select) select.focus();
         return;
       }
 
       if (amount <= 0) {
-        showToast('Please enter a valid invoice amount.');
+        showToast('Please enter a valid invoice amount.', 'error');
         return;
       }
 
@@ -1747,12 +1892,12 @@ document.addEventListener('DOMContentLoaded', () => {
       if (res && res.success) {
         adminNewInvoiceModal.classList.remove('active');
         adminNewInvoiceForm.reset();
-        showToast(`Invoice ${res.invoice.invoice_no} issued successfully for ${customer}!`);
         renderAdminPayments();
         renderAdminProjects();
         renderAdminDashboard();
+        showToast(`Invoice ${res.invoice.invoice_no} issued successfully for ${customer}!`, 'success');
       } else {
-        showToast(`Invoice notice: ${res?.error || 'Saved'}`);
+        showToast(`Invoice creation failed: ${res?.error || 'Unable to save invoice'}`, 'error');
       }
     });
   }
@@ -1952,7 +2097,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const date = document.getElementById('adminRecordPayDate')?.value || '';
 
       if (amount <= 0) {
-        showToast('Please enter a valid payment amount.');
+        showToast('Please enter a valid payment amount.', 'error');
         if (submitBtn) {
           submitBtn.disabled = false;
           submitBtn.textContent = 'Post Payment Settlement & Update Balance';
@@ -1972,13 +2117,76 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       if (res && res.success) {
-        showToast(`Payment of ₱${amount.toLocaleString()} recorded for Invoice ${activeAdminInvoiceNo}! Status: ${res.invoice.status}.`);
+        adminInvoiceModal.classList.remove('active');
         renderAdminPayments();
         renderAdminDashboard();
         renderAdminProjects();
-        openAdminInvoiceModal(activeAdminInvoiceNo);
+        showToast(`Payment of ₱${amount.toLocaleString()} recorded successfully for Invoice ${activeAdminInvoiceNo}! Status: ${res.invoice.status}.`, 'success');
       } else {
-        showToast(`Payment warning: ${res?.error || 'Could not record'}`);
+        showToast(`Payment recording failed: ${res?.error || 'Could not record'}`, 'error');
+      }
+    });
+  }
+
+  // Delete All Payments & Invoices Action
+  const btnAdminDeleteAllPayments = document.getElementById('btnAdminDeleteAllPayments');
+  if (btnAdminDeleteAllPayments) {
+    btnAdminDeleteAllPayments.addEventListener('click', async () => {
+      const payments = BD22_DB.get('payments') || [];
+      if (payments.length === 0) {
+        showToast('There are no invoices or billing records to delete.', 'info');
+        return;
+      }
+
+      const confirmPurge = window.confirm(
+        `Are you sure you want to permanently delete ALL ${payments.length} invoice(s) and billing records?\n\nThis will remove invoices from Payment & Billing, Dashboard metrics, and the Customer Portal.\nCustomer accounts and profiles will NOT be affected.`
+      );
+      if (!confirmPurge) return;
+
+      const originalText = btnAdminDeleteAllPayments.innerHTML;
+      btnAdminDeleteAllPayments.disabled = true;
+      btnAdminDeleteAllPayments.innerHTML = '<span>Deleting all invoices...</span>';
+
+      const res = await BD22_DB.deleteAllPayments();
+      btnAdminDeleteAllPayments.disabled = false;
+      btnAdminDeleteAllPayments.innerHTML = originalText;
+
+      if (res && res.success) {
+        renderAdminPayments();
+        renderAdminDashboard();
+        showToast('All invoices and billing records have been permanently deleted.', 'success');
+      } else {
+        showToast(`Failed to delete all invoices: ${res?.error || 'Please try again.'}`, 'error');
+      }
+    });
+  }
+
+  // Delete Single Invoice Action
+  const btnAdminDeleteInvoice = document.getElementById('btnAdminDeleteInvoice');
+  if (btnAdminDeleteInvoice) {
+    btnAdminDeleteInvoice.addEventListener('click', async () => {
+      if (!activeAdminInvoiceNo) return;
+
+      const confirmDelete = window.confirm(
+        `Are you sure you want to permanently delete invoice ${activeAdminInvoiceNo}?\n\nThis invoice will be removed from Payment & Billing, Dashboard metrics, and the Customer Portal.\nCustomer accounts will NOT be affected.`
+      );
+      if (!confirmDelete) return;
+
+      const originalHtml = btnAdminDeleteInvoice.innerHTML;
+      btnAdminDeleteInvoice.disabled = true;
+      btnAdminDeleteInvoice.innerHTML = '<span>Deleting...</span>';
+
+      const res = await BD22_DB.deletePayment(activeAdminInvoiceNo);
+      btnAdminDeleteInvoice.disabled = false;
+      btnAdminDeleteInvoice.innerHTML = originalHtml;
+
+      if (res && res.success) {
+        if (adminInvoiceModal) adminInvoiceModal.classList.remove('active');
+        renderAdminPayments();
+        renderAdminDashboard();
+        showToast(`Invoice ${activeAdminInvoiceNo} deleted successfully!`, 'success');
+      } else {
+        showToast(`Failed to delete invoice: ${res?.error || 'Please try again.'}`, 'error');
       }
     });
   }
@@ -2141,11 +2349,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const schedDate = document.getElementById('adminMaintDate')?.value;
 
       if (!projCode) {
-        showToast('Please select a project for this maintenance schedule.');
+        showToast('Please select a project for this maintenance schedule.', 'error');
         return;
       }
       if (!title || !schedDate) {
-        showToast('Please provide a title and scheduled maintenance date.');
+        showToast('Please provide a title and scheduled maintenance date.', 'error');
         return;
       }
 
@@ -2169,11 +2377,11 @@ document.addEventListener('DOMContentLoaded', () => {
       if (res && res.success) {
         newMaintModal.classList.remove('active');
         newMaintForm.reset();
-        showToast(`Maintenance schedule created successfully for project ${projCode}!`);
         renderAdminMaintenance();
         renderAdminDashboard();
+        showToast(`Maintenance schedule created successfully for project ${projCode}!`, 'success');
       } else {
-        showToast(`Error creating schedule: ${res?.error || 'Database operation failed'}`);
+        showToast(`Error creating schedule: ${res?.error || 'Database operation failed'}`, 'error');
       }
     });
   }
