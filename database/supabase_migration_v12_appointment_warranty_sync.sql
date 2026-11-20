@@ -50,7 +50,7 @@ DROP POLICY IF EXISTS "Admins delete service requests" ON public.service_request
 CREATE POLICY "Users submit service requests" ON public.service_requests
 FOR INSERT TO authenticated
 WITH CHECK (
-    auth.uid() = user_id 
+    (user_id IS NOT NULL AND auth.uid()::text = user_id::text)
     OR user_id IS NULL 
     OR public.is_admin()
     OR lower(COALESCE(auth.jwt()->>'email', '')) = 'admin@bd22fire.com'
@@ -59,7 +59,7 @@ WITH CHECK (
 CREATE POLICY "Users view own service requests" ON public.service_requests
 FOR SELECT TO authenticated
 USING (
-    auth.uid() = user_id 
+    (user_id IS NOT NULL AND auth.uid()::text = user_id::text)
     OR public.is_admin()
     OR lower(COALESCE(auth.jwt()->>'email', '')) = 'admin@bd22fire.com'
 );
@@ -92,8 +92,8 @@ WITH CHECK (true);
 CREATE POLICY "Users view own inquiries" ON public.inquiries
 FOR SELECT TO authenticated
 USING (
-    auth.uid() = auth_user_id
-    OR auth.uid() = user_id
+    (auth_user_id IS NOT NULL AND auth.uid() = auth_user_id)
+    OR (user_id IS NOT NULL AND auth.uid()::text = user_id::text)
     OR public.is_admin()
     OR lower(COALESCE(auth.jwt()->>'email', '')) = 'admin@bd22fire.com'
 );
@@ -121,7 +121,7 @@ DROP POLICY IF EXISTS "Admins manage warranties" ON public.warranties;
 CREATE POLICY "Users view own warranties" ON public.warranties
 FOR SELECT TO authenticated
 USING (
-    auth.uid() = user_id
+    (user_id IS NOT NULL AND auth.uid()::text = user_id::text)
     OR public.is_admin()
     OR lower(COALESCE(auth.jwt()->>'email', '')) = 'admin@bd22fire.com'
 );
@@ -149,7 +149,7 @@ DROP POLICY IF EXISTS "Admins manage service history" ON public.service_history;
 CREATE POLICY "Users view own service history" ON public.service_history
 FOR SELECT TO authenticated
 USING (
-    auth.uid() = user_id
+    (user_id IS NOT NULL AND auth.uid()::text = user_id::text)
     OR public.is_admin()
     OR lower(COALESCE(auth.jwt()->>'email', '')) = 'admin@bd22fire.com'
 );
@@ -189,7 +189,7 @@ SET
     status = 'Paid',
     amount_paid = COALESCE(amount, 0),
     balance = 0.00
-WHERE project_id IN (SELECT id FROM public.projects WHERE status = 'Completed');
+WHERE project_id::text IN (SELECT id::text FROM public.projects WHERE status = 'Completed');
 
 -- Update service_history records for completed projects
 -- service_history only has: id, user_id, project_id, activity_type, title, description, service_date, badge, logged_by, created_at
@@ -230,7 +230,7 @@ FROM public.projects p
 WHERE p.status = 'Completed'
   AND NOT EXISTS (
       SELECT 1 FROM public.warranties w 
-      WHERE w.project_id = p.id
+      WHERE w.project_id::text = p.id::text
   );
 
 -- Refresh PostgREST schema cache
