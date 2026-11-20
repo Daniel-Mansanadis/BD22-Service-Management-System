@@ -286,6 +286,15 @@ const BD22_DB = {
           };
         });
 
+        // Preserve any newly submitted local items not yet returned by Supabase
+        const currentLocal = this.get('inquiries') || [];
+        const syncedRefs = new Set(mappedInquiries.map(i => i.reference || i.reference_no));
+        currentLocal.forEach(localItem => {
+          const ref = localItem.reference || localItem.reference_no;
+          if (ref && !syncedRefs.has(ref) && localItem.lastUpdate === 'Just now') {
+            mappedInquiries.unshift(localItem);
+          }
+        });
         this.set('inquiries', mappedInquiries);
       }
 
@@ -348,6 +357,15 @@ const BD22_DB = {
           };
         });
 
+        // Preserve any newly submitted local items not yet returned by Supabase
+        const currentSrLocal = this.get('serviceRequests') || [];
+        const syncedSrRefs = new Set(mappedSr.map(s => s.reference || s.reference_no));
+        currentSrLocal.forEach(localItem => {
+          const ref = localItem.reference || localItem.reference_no;
+          if (ref && !syncedSrRefs.has(ref) && localItem.lastUpdate === 'Just now') {
+            mappedSr.unshift(localItem);
+          }
+        });
         this.set('serviceRequests', mappedSr);
 
         // Keep inquiries in sync with all service requests so all user inputs exist in both views
@@ -1085,8 +1103,6 @@ const BD22_DB = {
         try {
           const inqPayload = {
             reference_no: finalRef,
-            user_id: authUid,
-            auth_user_id: authUid,
             submission_source: authUid ? 'customer_account_verified' : 'public_visitor',
             customer_name: customerDisplayName,
             email: reqData.contact_email || user.email || 'customer@bd22fire.com',
@@ -1096,7 +1112,20 @@ const BD22_DB = {
             status: 'Pending Review',
             tracking_note: JSON.stringify(metaPayload)
           };
-          const { data: inqRes, error: inqErr } = await window.supabaseClient.from('inquiries').insert(inqPayload).select().single();
+          if (authUid) {
+            inqPayload.auth_user_id = authUid;
+            if (!window._bd22_inq_user_id_is_legacy_integer) {
+              inqPayload.user_id = authUid;
+            }
+          }
+          let { data: inqRes, error: inqErr } = await window.supabaseClient.from('inquiries').insert(inqPayload).select().single();
+          if (inqErr && (inqErr.code === '22P02' || /invalid input syntax for type integer/i.test(inqErr.message || ''))) {
+            window._bd22_inq_user_id_is_legacy_integer = true;
+            delete inqPayload.user_id;
+            const retry = await window.supabaseClient.from('inquiries').insert(inqPayload).select().single();
+            inqRes = retry.data;
+            inqErr = retry.error;
+          }
           if (inqErr) {
             console.warn('Supabase inquiries insert notice:', inqErr.message || inqErr);
           } else if (inqRes?.reference_no) {
@@ -1116,10 +1145,15 @@ const BD22_DB = {
             status: 'Pending Review',
             notes: JSON.stringify(metaPayload)
           };
-          if (authUid) {
+          if (authUid && !window._bd22_sr_user_id_is_legacy_integer) {
             srPayload.user_id = authUid;
           }
-          await window.supabaseClient.from('service_requests').insert(srPayload);
+          let { error: srErr } = await window.supabaseClient.from('service_requests').insert(srPayload);
+          if (srErr && (srErr.code === '22P02' || /invalid input syntax for type integer/i.test(srErr.message || ''))) {
+            window._bd22_sr_user_id_is_legacy_integer = true;
+            delete srPayload.user_id;
+            await window.supabaseClient.from('service_requests').insert(srPayload);
+          }
         } catch (srErr) {
           console.warn('Supabase service_requests mirror note:', srErr);
         }
@@ -1251,15 +1285,15 @@ const BD22_DB = {
         }
 
         try {
+          const inqUpdate = {
+            status: newStatus,
+            assigned_staff: assignedStaff,
+            last_update: new Date().toISOString(),
+            tracking_note: JSON.stringify(meta)
+          };
           await window.supabaseClient
             .from('inquiries')
-            .update({
-              status: newStatus,
-              assigned_staff: assignedStaff,
-              response_notes: assessmentNotes,
-              last_update: new Date().toISOString(),
-              tracking_note: JSON.stringify(meta)
-            })
+            .update(inqUpdate)
             .eq('reference_no', reference);
         } catch (inqErr) {
           console.warn('Supabase inquiries update notice:', inqErr);
