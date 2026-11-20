@@ -27,14 +27,34 @@ ALTER TABLE public.service_requests
     ADD COLUMN IF NOT EXISTS assessment_notes TEXT,
     ADD COLUMN IF NOT EXISTS payment_status VARCHAR(50) DEFAULT 'Unpaid';
 
+ALTER TABLE public.service_requests DROP CONSTRAINT IF EXISTS service_requests_status_check;
+ALTER TABLE public.service_requests ALTER COLUMN user_id DROP NOT NULL;
+
 -- 2. Ensure inquiries table has payment_status and phone allows empty strings
 ALTER TABLE public.inquiries
     ADD COLUMN IF NOT EXISTS payment_status VARCHAR(50) DEFAULT 'Unpaid';
 
--- 3. Ensure projects table has payment_status and linked_invoice columns
+ALTER TABLE public.inquiries DROP CONSTRAINT IF EXISTS inquiries_status_check;
+ALTER TABLE public.inquiries ALTER COLUMN phone DROP NOT NULL;
+
+-- 3. Ensure projects table has payment_status, linked_invoice, actual_completion_date
 ALTER TABLE public.projects
     ADD COLUMN IF NOT EXISTS payment_status VARCHAR(50) DEFAULT 'Unpaid',
-    ADD COLUMN IF NOT EXISTS linked_invoice VARCHAR(50);
+    ADD COLUMN IF NOT EXISTS linked_invoice VARCHAR(50),
+    ADD COLUMN IF NOT EXISTS actual_completion_date DATE;
+
+ALTER TABLE public.projects DROP CONSTRAINT IF EXISTS projects_status_check;
+
+-- 3b. Ensure payments table has amount_paid and balance columns
+ALTER TABLE public.payments
+    ADD COLUMN IF NOT EXISTS amount_paid NUMERIC(12,2) DEFAULT 0.00,
+    ADD COLUMN IF NOT EXISTS balance NUMERIC(12,2) DEFAULT 0.00;
+
+ALTER TABLE public.payments DROP CONSTRAINT IF EXISTS payments_status_check;
+
+-- 3c. Ensure warranties and service_history allow nullable user_id
+ALTER TABLE public.warranties ALTER COLUMN user_id DROP NOT NULL;
+ALTER TABLE public.service_history ALTER COLUMN user_id DROP NOT NULL;
 
 -- 4. Fix RLS policies on service_requests
 ALTER TABLE public.service_requests ENABLE ROW LEVEL SECURITY;
