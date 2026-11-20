@@ -129,6 +129,23 @@ const BD22_DB = {
     localStorage.setItem(`bd22_${key}`, JSON.stringify(val));
   },
 
+  // Persistent appointment overrides (status, schedule, staff, payment) to guarantee UI responsiveness
+  getAppointmentOverrides() {
+    try {
+      const data = localStorage.getItem('bd22_appointment_overrides');
+      return data ? JSON.parse(data) : {};
+    } catch (e) {
+      return {};
+    }
+  },
+
+  setAppointmentOverride(ref, fields) {
+    if (!ref) return;
+    const overrides = this.getAppointmentOverrides();
+    overrides[ref] = { ...(overrides[ref] || {}), ...fields, lastUpdated: new Date().toISOString() };
+    localStorage.setItem('bd22_appointment_overrides', JSON.stringify(overrides));
+  },
+
   // Authoritative Synchronization with Supabase PostgreSQL
   async sync() {
     if (!window.supabaseClient) {
@@ -208,18 +225,6 @@ const BD22_DB = {
         });
       }
 
-      // One-time automatic purge of bookings and payments on Supabase cloud if admin session is active
-      if (userRole === 'admin' && !localStorage.getItem('bd22_cloud_bookings_payments_purged_flag_v2')) {
-        localStorage.setItem('bd22_cloud_bookings_payments_purged_flag_v2', 'true');
-        try {
-          await window.supabaseClient.from('payments').delete().gte('id', 0);
-          await window.supabaseClient.from('service_requests').delete().gte('id', 0);
-          await window.supabaseClient.from('inquiries').delete().gte('id', 0);
-        } catch (autoPurgeErr) {
-          console.warn('Auto bookings/payments cloud purge warning:', autoPurgeErr);
-        }
-      }
-
       // 4. Fetch Core Business Data via Supabase Client (Protected by PostgreSQL RLS)
       const [
         { data: inqRows },
@@ -240,6 +245,7 @@ const BD22_DB = {
       ]);
 
       // Map inquiries
+      const appointmentOverrides = this.getAppointmentOverrides();
       if (inqRows && Array.isArray(inqRows)) {
         const mappedInquiries = inqRows.map(r => {
           let meta = {};
@@ -248,20 +254,38 @@ const BD22_DB = {
               meta = JSON.parse(r.tracking_note);
             } catch (e) {}
           }
+          const ref = r.reference_no;
+          const ovr = appointmentOverrides[ref] || {};
+          const status = ovr.status || r.status || meta.extended_status || 'Pending Review';
+          const payStatus = ovr.payment_status || meta.payment_status || r.payment_status || 'Unpaid';
+          const confirmedDate = ovr.confirmed_schedule || meta.confirmed_schedule || '';
+          const assignedStaff = ovr.assigned_staff || r.assigned_staff || 'Awaiting Staff Assignment';
+
           return {
             ...meta,
             ...r,
+            ...ovr,
             user_id: r.auth_user_id || r.user_id || null,
-            reference: r.reference_no,
+            auth_user_id: r.auth_user_id || r.user_id || null,
+            reference: ref,
+            reference_no: ref,
             customer: r.customer_name,
-            service: r.service_name,
-            assignedStaff: r.assigned_staff || 'Awaiting Staff Assignment',
+            customer_name: r.customer_name,
+            service: r.service_name || meta.service_type || 'Fire Protection Service',
+            service_name: r.service_name || meta.service_type || 'Fire Protection Service',
+            service_type: r.service_name || meta.service_type || 'Fire Protection Service',
+            status: status,
+            payment_status: payStatus,
+            paymentStatus: payStatus,
+            confirmed_schedule: confirmedDate,
+            assignedStaff: assignedStaff,
+            assigned_staff: assignedStaff,
             trackingNote: r.tracking_note || '',
             dateSubmitted: formatDate(r.created_at),
             lastUpdate: formatDate(r.last_update || r.created_at)
           };
         });
-        // Supabase cloud is authoritative for inquiries. Purged or empty inquiries remain empty.
+
         this.set('inquiries', mappedInquiries);
       }
 
@@ -279,14 +303,26 @@ const BD22_DB = {
             meta = { description: r.notes || '' };
           }
 
-          const status = r.status || meta.extended_status || 'Pending Review';
+          const ref = r.reference_no;
+          const ovr = appointmentOverrides[ref] || {};
+          const status = ovr.status || r.status || meta.extended_status || 'Pending Review';
+          const payStatus = ovr.payment_status || meta.payment_status || r.payment_status || 'Unpaid';
+          const confirmedDate = ovr.confirmed_schedule || meta.confirmed_schedule || (r.scheduled_date ? formatDate(r.scheduled_date) : '');
+          const assignedStaff = ovr.assigned_staff || r.assigned_staff || 'Awaiting Staff Assignment';
 
           return {
             ...r,
-            reference: r.reference_no,
+            ...meta,
+            ...ovr,
+            reference: ref,
+            reference_no: ref,
             customer: r.customer_name,
+            customer_name: r.customer_name,
             service: r.service_type,
+            service_type: r.service_type,
             status: status,
+            payment_status: payStatus,
+            paymentStatus: payStatus,
             urgency: meta.urgency || r.urgency || 'Standard',
             establishment_name: r.establishment_name || meta.establishment_name || 'Site Facility',
             building_type: r.building_type || meta.building_type || 'Commercial Office',
@@ -299,18 +335,19 @@ const BD22_DB = {
             contact_position: r.contact_position || meta.contact_position || 'Site Coordinator',
             description: r.description || meta.description || r.notes || '',
             preferred_timeline: r.preferred_timeline || meta.preferred_timeline || '',
-            preferred_date: r.preferred_date ? formatDate(r.preferred_date) : (meta.preferred_date || ''),
+            preferred_date: meta.preferred_date || (r.preferred_date ? formatDate(r.preferred_date) : ''),
             additional_concerns: r.additional_concerns || meta.additional_concerns || '',
             attachments: r.attachments || meta.attachments || [],
-            confirmed_schedule: r.scheduled_date ? formatDate(r.scheduled_date) : (meta.confirmed_schedule || ''),
+            confirmed_schedule: confirmedDate,
             quotation_amount: Number(r.quotation_amount || meta.quotation_amount || 0),
             assessment_notes: r.assessment_notes || meta.assessment_notes || '',
-            assignedStaff: r.assigned_staff || 'Awaiting Staff Assignment',
+            assignedStaff: assignedStaff,
+            assigned_staff: assignedStaff,
             dateSubmitted: formatDate(r.created_at),
             lastUpdate: formatDate(r.last_update || r.created_at)
           };
         });
-        // Supabase cloud is authoritative for service requests. Purged or empty requests remain empty.
+
         this.set('serviceRequests', mappedSr);
 
         // Keep inquiries in sync with all service requests so all user inputs exist in both views
@@ -328,6 +365,9 @@ const BD22_DB = {
                 ...inquiry,
                 ...sr,
                 user_id: sr.user_id || inquiry.user_id || null,
+                auth_user_id: sr.user_id || inquiry.auth_user_id || null,
+                payment_status: sr.payment_status || inquiry.payment_status || 'Unpaid',
+                paymentStatus: sr.payment_status || inquiry.payment_status || 'Unpaid',
                 submission_source: inquiry.submission_source && inquiry.submission_source !== 'legacy_unknown'
                   ? inquiry.submission_source
                   : (sr.submission_source || inquiry.submission_source || 'legacy_unknown')
@@ -337,7 +377,30 @@ const BD22_DB = {
             }
           }
         });
-        this.set('inquiries', Array.from(mergedInqsMap.values()));
+        const combinedInquiries = Array.from(mergedInqsMap.values());
+
+        // Apply strict customer privacy isolation
+        if (userRole === 'customer') {
+          const cId = (currentUser.id || '').toLowerCase().trim();
+          const cEmail = (currentUser.email || '').toLowerCase().trim();
+          const cName = (currentUser.full_name || currentUser.name || '').toLowerCase().trim();
+
+          const filterForCust = (items) => items.filter(item => {
+            const uId = (item.user_id || item.auth_user_id || '').toLowerCase().trim();
+            if (uId && cId && uId === cId) return true;
+            const email = (item.email || item.contact_email || '').toLowerCase().trim();
+            if (email && cEmail && (email === cEmail || email.includes(cEmail))) return true;
+            const name = (item.customer || item.customer_name || '').toLowerCase().trim();
+            if (name && cName && (name === cName || name.includes(cName))) return true;
+            return false;
+          });
+
+          this.set('inquiries', filterForCust(combinedInquiries));
+          this.set('serviceRequests', filterForCust(mappedSr));
+        } else {
+          this.set('inquiries', combinedInquiries);
+          this.set('serviceRequests', mappedSr);
+        }
       }
 
       // Map projects
@@ -372,6 +435,22 @@ const BD22_DB = {
           const cleanDesc = (r.description || '').replace(/\n?\[auth_user_id:[a-f0-9-]+\]/ig, '').trim();
           const cleanMiles = (r.milestones || '').replace(/\n?\[auth_user_id:[a-f0-9-]+\]/ig, '').trim();
 
+          const pStatus = r.status || (localMatch?.status || 'Not Started');
+          const isCompleted = pStatus === 'Completed';
+
+          // Find linked invoice in payRows
+          const matchingPay = (payRows || []).find(p => 
+            (p.project_id && (p.project_id === r.id || String(p.project_id) === String(r.id) || p.project_id === projKey)) ||
+            (p.project_code && (p.project_code === projKey || p.project_code === r.project_code)) ||
+            (r.linked_invoice && (p.invoice_no === r.linked_invoice || p.invoice === r.linked_invoice))
+          );
+
+          // Authoritative Rule: If project is Completed OR invoice is Paid, payment status is always Paid!
+          let payStatus = isCompleted ? 'Paid' : (matchingPay?.status || r.payment_status || (localMatch?.payment_status || 'Unpaid'));
+          if (matchingPay?.status === 'Paid') {
+            payStatus = 'Paid';
+          }
+
           return {
             ...r,
             db_id: r.id,
@@ -392,10 +471,10 @@ const BD22_DB = {
             actual_completion_date: r.actual_completion_date || (localMatch?.actual_completion_date || ''),
             priority: r.priority || (localMatch?.priority || 'Medium'),
             budget: Number(r.budget) || (localMatch ? Number(localMatch.budget || 0) : 0),
-            progress: Number(r.progress !== undefined && r.progress !== null ? r.progress : (localMatch?.progress || 0)),
-            status: r.status || (localMatch?.status || 'Not Started'),
-            payment_status: r.payment_status || (localMatch?.payment_status || 'Unpaid'),
-            paymentStatus: r.payment_status || (localMatch?.paymentStatus || 'Unpaid'),
+            progress: Number(r.progress !== undefined && r.progress !== null ? r.progress : (localMatch?.progress || (isCompleted ? 100 : 0))),
+            status: pStatus,
+            payment_status: payStatus,
+            paymentStatus: payStatus,
             linkedInvoice: r.linked_invoice || (localMatch?.linkedInvoice || ''),
             linked_invoice: r.linked_invoice || (localMatch?.linked_invoice || ''),
             tasks: Array.isArray(tasks) && tasks.length > 0 ? tasks : (localMatch?.tasks || []),
@@ -743,6 +822,113 @@ const BD22_DB = {
         }
       }
 
+      // Reconcile completed projects into warranties and service history
+      const allProjects = this.get('projects') || [];
+      const completedProjs = allProjects.filter(p => p.status === 'Completed');
+      const currentWarranties = this.get('warranties') || [];
+      const currentHistory = this.get('serviceHistory') || [];
+      const todayDate = new Date();
+
+      completedProjs.forEach(p => {
+        const projCode = p.project_code || p.id;
+        const projName = p.name || 'Fire Protection Project';
+        const completionDate = p.actual_completion_date || p.actualCompletionDate || p.start_date || new Date().toISOString().split('T')[0];
+
+        // 1. Warranty Reconcile: ensure 1-year warranty is generated
+        const startObj = new Date(completionDate);
+        const expObj = new Date(startObj);
+        expObj.setFullYear(startObj.getFullYear() + 1);
+        const expiryDate = expObj.toISOString().split('T')[0];
+        const isExpired = todayDate > expObj;
+        const warrStatus = isExpired ? 'Expired' : 'Active';
+
+        const existingWarrIndex = currentWarranties.findIndex(w => 
+          (w.project_code && w.project_code === projCode) ||
+          (w.project_id && (w.project_id === projCode || w.project_id === p.id || String(w.project_id) === String(p.db_id))) ||
+          (w.system_covered && w.system_covered.trim().toLowerCase() === projName.trim().toLowerCase())
+        );
+
+        if (existingWarrIndex >= 0) {
+          // Update warranty if completion date was corrected
+          const w = currentWarranties[existingWarrIndex];
+          if (w.install_date !== completionDate) {
+            w.install_date = completionDate;
+            w.installDate = formatDate(completionDate);
+            w.expiry_date = expiryDate;
+            w.expiryDate = formatDate(expiryDate);
+            w.status = warrStatus;
+          }
+        } else {
+          const warCode = `BD22-WAR-${startObj.getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+          currentWarranties.unshift({
+            id: warCode,
+            warranty_code: warCode,
+            ref: warCode,
+            user_id: p.user_id || null,
+            project_id: typeof p.db_id === 'number' ? p.db_id : null,
+            project_code: projCode,
+            customer: p.customer || p.customer_name,
+            customer_name: p.customer || p.customer_name,
+            title: projName,
+            system_covered: projName,
+            systemCovered: projName,
+            installDate: formatDate(completionDate),
+            install_date: completionDate,
+            expiryDate: formatDate(expiryDate),
+            expiry_date: expiryDate,
+            coverage: `1-Year Comprehensive Fire Protection System Warranty & BFP Compliance Coverage for ${projName}`,
+            coverage_summary: `1-Year Comprehensive Fire Protection System Warranty & BFP Compliance Coverage for ${projName}`,
+            status: warrStatus,
+            created_at: new Date().toISOString()
+          });
+        }
+
+        // 2. Service History Reconcile: ensure project appears in Service History
+        const budget = Number(p.budget || p.amount || 0);
+        const payStatus = 'Paid'; // Authoritative: Completed projects are always Paid!
+        const existingHistIndex = currentHistory.findIndex(h => 
+          (h.project_code && h.project_code === projCode) ||
+          (h.title && h.title.includes(projCode)) ||
+          (h.title && h.title.includes(projName) && (h.activity_type === 'Project Turnover' || h.eventType === 'Project Turnover'))
+        );
+
+        if (existingHistIndex >= 0) {
+          const h = currentHistory[existingHistIndex];
+          h.payment_status = 'Paid';
+          h.total_cost = budget;
+          h.service_date = completionDate;
+          h.date = formatDate(completionDate);
+          h.warranty_note = '1-Year Warranty Given';
+          h.badge = 'Completed';
+          h.description = `${p.description || 'System installation and turnover.'} • Total Cost: ₱${budget.toLocaleString()} • Payment Status: Paid. 1-Year Comprehensive Warranty given.`;
+        } else {
+          currentHistory.unshift({
+            id: 'hist-' + (p.db_id || projCode),
+            project_code: projCode,
+            project_id: projCode,
+            project_name: projName,
+            user_id: p.user_id || null,
+            activity_type: 'Project Turnover',
+            activityType: 'Project Turnover',
+            eventType: 'Project Turnover',
+            title: `Project Commissioning & Turnover: ${projName} (${projCode})`,
+            description: `${p.description || 'System installation and turnover.'} • Total Cost: ₱${budget.toLocaleString()} • Payment Status: Paid. 1-Year Comprehensive Warranty given.`,
+            date: formatDate(completionDate),
+            service_date: completionDate,
+            total_cost: budget,
+            payment_status: 'Paid',
+            warranty_note: '1-Year Warranty Given',
+            badge: 'Completed',
+            logged_by: p.project_manager || p.manager || 'Admin Operations',
+            performedBy: p.project_manager || p.manager || 'Admin Operations',
+            created_at: new Date().toISOString()
+          });
+        }
+      });
+
+      this.set('warranties', currentWarranties);
+      this.set('serviceHistory', currentHistory);
+
       // Reconcile projects and invoices on every sync
       this.reconcileProjectsAndPayments();
 
@@ -856,6 +1042,15 @@ const BD22_DB = {
     const user = this.get('currentUser') || {};
     const customerDisplayName = user.full_name || user.name || reqData.customer_name || reqData.customer || reqData.contact_name || (user.email ? user.email.split('@')[0] : 'Valued Customer');
     
+    // Clean urgency and status for Supabase table check constraints
+    let cleanUrgency = 'Standard';
+    if (reqData.urgency === 'Urgent' || reqData.urgency === 'Priority') cleanUrgency = 'Urgent';
+    else if (reqData.urgency === 'Emergency') cleanUrgency = 'Emergency / Urgent';
+    else if (reqData.urgency === 'Routine Maintenance') cleanUrgency = 'Scheduled';
+    else if (reqData.urgency) cleanUrgency = reqData.urgency;
+
+    const cleanPhone = (reqData.contact_phone || reqData.contactPhone || user.phone || '+63 916 388 4309').trim() || '+63 916 388 4309';
+
     // Structured JSON metadata packing all 5 sections
     const metaPayload = {
       establishment_name: reqData.establishment_name || reqData.establishmentName || 'Site Facility',
@@ -863,12 +1058,12 @@ const BD22_DB = {
       floors: reqData.floors || 'Standard',
       site_address: reqData.site_address || reqData.siteAddress || '',
       google_maps_link: reqData.google_maps_link || reqData.mapsLink || '',
-      contact_name: reqData.contact_name || reqData.contactName || (user.full_name || 'Site Contact'),
-      contact_phone: reqData.contact_phone || reqData.contactPhone || '',
-      contact_email: reqData.contact_email || reqData.contactEmail || '',
+      contact_name: reqData.contact_name || reqData.contactName || customerDisplayName,
+      contact_phone: cleanPhone,
+      contact_email: reqData.contact_email || reqData.contactEmail || (user.email || ''),
       contact_position: reqData.contact_position || reqData.contactPosition || 'Property Coordinator',
       description: reqData.description || reqData.notes || '',
-      urgency: reqData.urgency || 'Standard',
+      urgency: cleanUrgency,
       preferred_timeline: reqData.preferred_timeline || reqData.preferredTimeframe || '',
       preferred_date: reqData.preferred_date || reqData.preferredDate || '',
       additional_concerns: reqData.additional_concerns || reqData.otherConcerns || '',
@@ -876,6 +1071,7 @@ const BD22_DB = {
       extended_status: 'Pending Review',
       confirmed_schedule: '',
       quotation_amount: 0,
+      payment_status: 'Unpaid',
       assessment_notes: 'Service request queued for engineering review.'
     };
 
@@ -883,68 +1079,49 @@ const BD22_DB = {
     if (window.supabaseClient) {
       try {
         const { data: { session } } = await window.supabaseClient.auth.getSession();
-        
-        // Clean urgency and status for Supabase table check constraints
-        let cleanUrgency = 'Standard';
-        if (reqData.urgency === 'Urgent' || reqData.urgency === 'Priority') cleanUrgency = 'Urgent';
-        else if (reqData.urgency === 'Emergency') cleanUrgency = 'Emergency / Urgent';
-        else if (reqData.urgency === 'Routine Maintenance') cleanUrgency = 'Scheduled';
-        else if (reqData.urgency) cleanUrgency = reqData.urgency;
+        const authUid = session?.user?.id || user.id || null;
 
-        const payload = {
-          reference_no: refCode,
-          customer_name: customerDisplayName,
-          service_type: reqData.service_type || reqData.serviceType || 'Fire Protection Service',
-          urgency: cleanUrgency,
-          status: 'Pending Review',
-          description: metaPayload.description || '',
-          preferred_timeline: metaPayload.preferred_timeline || '',
-          preferred_date: metaPayload.preferred_date || null,
-          establishment_name: metaPayload.establishment_name || '',
-          building_type: metaPayload.building_type || '',
-          floors: metaPayload.floors || '',
-          site_address: metaPayload.site_address || '',
-          google_maps_link: metaPayload.google_maps_link || '',
-          contact_name: metaPayload.contact_name || customerDisplayName,
-          contact_phone: metaPayload.contact_phone || '',
-          contact_email: metaPayload.contact_email || (user.email || ''),
-          contact_position: metaPayload.contact_position || 'Property Coordinator',
-          attachments: metaPayload.attachments || [],
-          additional_concerns: metaPayload.additional_concerns || '',
-          notes: JSON.stringify(metaPayload)
-        };
-
-        if (session?.user?.id) {
-          payload.user_id = session.user.id;
-        }
-
-        const { data, error } = await window.supabaseClient
-          .from('service_requests')
-          .insert(payload)
-          .select()
-          .single();
-
-        if (error) {
-          console.warn('Supabase service_requests insert note (local fallback active):', error.message || error);
-        } else if (data?.reference_no) {
-          finalRef = data.reference_no;
-        }
-
-        // Mirror insert to inquiries table in Supabase so both tables hold the record
+        // Authoritative insert into inquiries table in Supabase
         try {
-          await window.supabaseClient.from('inquiries').insert({
+          const inqPayload = {
             reference_no: finalRef,
-            user_id: session?.user?.id || null,
+            user_id: authUid,
+            auth_user_id: authUid,
+            submission_source: authUid ? 'customer_account_verified' : 'public_visitor',
             customer_name: customerDisplayName,
-            email: reqData.contact_email || user.email || '',
-            phone: reqData.contact_phone || user.phone || '',
+            email: reqData.contact_email || user.email || 'customer@bd22fire.com',
+            phone: cleanPhone,
             service_name: reqData.service_type || reqData.serviceType || 'Fire Protection Service',
             message: metaPayload.description || 'Service request submitted from Customer Portal.',
             status: 'Pending Review',
             tracking_note: JSON.stringify(metaPayload)
-          });
+          };
+          const { data: inqRes, error: inqErr } = await window.supabaseClient.from('inquiries').insert(inqPayload).select().single();
+          if (inqErr) {
+            console.warn('Supabase inquiries insert notice:', inqErr.message || inqErr);
+          } else if (inqRes?.reference_no) {
+            finalRef = inqRes.reference_no;
+          }
         } catch (inqDbErr) {
-          console.warn('Supabase inquiries mirror insert note:', inqDbErr);
+          console.warn('Supabase inquiries insert error:', inqDbErr);
+        }
+
+        // Mirror insert to service_requests table in Supabase (packing metadata into notes)
+        try {
+          const srPayload = {
+            reference_no: finalRef,
+            customer_name: customerDisplayName,
+            service_type: reqData.service_type || reqData.serviceType || 'Fire Protection Service',
+            urgency: cleanUrgency,
+            status: 'Pending Review',
+            notes: JSON.stringify(metaPayload)
+          };
+          if (authUid) {
+            srPayload.user_id = authUid;
+          }
+          await window.supabaseClient.from('service_requests').insert(srPayload);
+        } catch (srErr) {
+          console.warn('Supabase service_requests mirror note:', srErr);
         }
       } catch (err) {
         console.warn('Supabase service_requests network warning (persisted locally):', err);
@@ -961,8 +1138,11 @@ const BD22_DB = {
       service: reqData.service_type || reqData.serviceType || 'Fire Protection Service',
       service_type: reqData.service_type || reqData.serviceType || 'Fire Protection Service',
       status: 'Pending Review',
+      payment_status: 'Unpaid',
+      paymentStatus: 'Unpaid',
       ...metaPayload,
       assignedStaff: 'Awaiting Staff Assignment',
+      assigned_staff: 'Awaiting Staff Assignment',
       dateSubmitted: formatDate(new Date()),
       lastUpdate: 'Just now'
     };
@@ -979,6 +1159,8 @@ const BD22_DB = {
       service: localRecord.service,
       service_name: localRecord.service_type,
       status: 'Pending Review',
+      payment_status: 'Unpaid',
+      paymentStatus: 'Unpaid',
       email: localRecord.contact_email || user.email || '',
       phone: localRecord.contact_phone || user.phone || '',
       trackingNote: `Site: ${localRecord.establishment_name || 'Project Site'} • Preferred: ${localRecord.preferred_date || 'Target Date'}`,
@@ -999,7 +1181,7 @@ const BD22_DB = {
     return finalRef;
   },
 
-  // 2b. Update Service Request (Admin Technical Assessment, Schedule Confirmation, Quotation, Status)
+  // 2b. Update Service Request (Admin Technical Assessment, Schedule Confirmation, Quotation, Status, Payment)
   async updateServiceRequest(reference, updatedFields) {
     try {
       const currentList = this.get('serviceRequests') || [];
@@ -1008,7 +1190,8 @@ const BD22_DB = {
                    currentInqs.find(i => i.reference === reference || i.reference_no === reference);
       
       const newStatus = updatedFields.status || item?.status || 'Pending Review';
-      const assignedStaff = updatedFields.assignedStaff || item?.assignedStaff || 'M. Velasco';
+      const assignedStaff = updatedFields.assignedStaff || updatedFields.assigned_staff || item?.assignedStaff || item?.assigned_staff || 'M. Velasco';
+      const paymentStatus = updatedFields.payment_status || updatedFields.paymentStatus || item?.payment_status || item?.paymentStatus || 'Unpaid';
       const hasConfirmedDate = Object.prototype.hasOwnProperty.call(updatedFields, 'confirmedSchedule') ||
         Object.prototype.hasOwnProperty.call(updatedFields, 'confirmed_schedule');
       const confirmedDate = hasConfirmedDate
@@ -1045,6 +1228,7 @@ const BD22_DB = {
       meta.confirmed_schedule = confirmedDate;
       meta.quotation_amount = quotationAmt;
       meta.assessment_notes = assessmentNotes;
+      meta.payment_status = paymentStatus;
 
       const updates = {
         last_update: new Date().toISOString(),
@@ -1085,7 +1269,9 @@ const BD22_DB = {
       // If user_id exists on item, send customer notification message
       if (item?.user_id && window.supabaseClient) {
         let notifMsg = `Your service request ${reference} at ${item.establishment_name || 'site'} status has been updated to "${newStatus}".`;
-        if (newStatus === 'Approved') {
+        if (updatedFields.payment_status === 'Paid') {
+          notifMsg = `Payment confirmed: Your appointment (${reference}) has been marked as PAID by BD22 operations.`;
+        } else if (newStatus === 'Approved') {
           notifMsg = `Your appointment (${reference}) has been APPROVED! Confirmed schedule: ${confirmedDate || 'Pending schedule'}. Assigned Lead: ${assignedStaff}.`;
         } else if (newStatus === 'Rejected') {
           notifMsg = `Your appointment request (${reference}) could not be approved at this time. Please contact BD22 operations for alternative scheduling.`;
@@ -1100,7 +1286,7 @@ const BD22_DB = {
         try {
           await window.supabaseClient.from('customer_messages').insert({
             user_id: item.user_id,
-            title: `Service Request Update: ${newStatus}`,
+            title: updatedFields.payment_status === 'Paid' ? 'Appointment Payment Confirmed' : `Service Request Update: ${newStatus}`,
             description: notifMsg
           });
         } catch (mErr) {
@@ -1117,7 +1303,10 @@ const BD22_DB = {
             ...r,
             ...meta,
             status: newStatus,
+            payment_status: paymentStatus,
+            paymentStatus: paymentStatus,
             assignedStaff: assignedStaff,
+            assigned_staff: assignedStaff,
             confirmed_schedule: confirmedDate,
             quotation_amount: quotationAmt,
             assessment_notes: assessmentNotes,
@@ -1131,7 +1320,10 @@ const BD22_DB = {
           ...item,
           ...meta,
           status: newStatus,
+          payment_status: paymentStatus,
+          paymentStatus: paymentStatus,
           assignedStaff: assignedStaff,
+          assigned_staff: assignedStaff,
           confirmed_schedule: confirmedDate,
           quotation_amount: quotationAmt,
           assessment_notes: assessmentNotes,
@@ -1149,7 +1341,10 @@ const BD22_DB = {
             ...i,
             ...meta,
             status: newStatus,
+            payment_status: paymentStatus,
+            paymentStatus: paymentStatus,
             assignedStaff: assignedStaff,
+            assigned_staff: assignedStaff,
             confirmed_schedule: confirmedDate,
             quotation_amount: quotationAmt,
             assessment_notes: assessmentNotes,
@@ -1163,7 +1358,10 @@ const BD22_DB = {
           ...item,
           ...meta,
           status: newStatus,
+          payment_status: paymentStatus,
+          paymentStatus: paymentStatus,
           assignedStaff: assignedStaff,
+          assigned_staff: assignedStaff,
           confirmed_schedule: confirmedDate,
           quotation_amount: quotationAmt,
           assessment_notes: assessmentNotes,
@@ -1171,6 +1369,16 @@ const BD22_DB = {
         });
       }
       this.set('inquiries', updatedInqList);
+
+      // Record persistent override so sync() never reverts this update
+      this.setAppointmentOverride(reference, {
+        status: newStatus,
+        payment_status: paymentStatus,
+        assigned_staff: assignedStaff,
+        confirmed_schedule: confirmedDate,
+        quotation_amount: quotationAmt,
+        assessment_notes: assessmentNotes
+      });
 
       await this.sync();
       window.dispatchEvent(new CustomEvent('bd22_synced'));
@@ -1318,13 +1526,32 @@ const BD22_DB = {
           projectsUpdated = true;
         }
         // Authoritative reconciliation: synchronize project's payment status with invoice
-        if (proj.payment_status !== existingInv.status || proj.paymentStatus !== existingInv.status) {
-          proj.payment_status = existingInv.status;
-          proj.paymentStatus = existingInv.status;
+        let authoritativeStatus = existingInv.status || proj.payment_status || proj.paymentStatus || 'Unpaid';
+        if (proj.status === 'Completed') {
+          authoritativeStatus = 'Paid';
+        }
+        if (proj.payment_status !== authoritativeStatus || proj.paymentStatus !== authoritativeStatus) {
+          proj.payment_status = authoritativeStatus;
+          proj.paymentStatus = authoritativeStatus;
           projectsUpdated = true;
+        }
+        if (existingInv.status !== authoritativeStatus) {
+          existingInv.status = authoritativeStatus;
+          if (authoritativeStatus === 'Paid') {
+            existingInv.amount = budget;
+            existingInv.amount_paid = budget;
+            existingInv.balance = 0;
+          }
+          paymentsUpdated = true;
         }
 
         // Warranty terms are entered by an administrator for the specific project.
+      } else if (proj.status === 'Completed') {
+        if (proj.payment_status !== 'Paid' || proj.paymentStatus !== 'Paid') {
+          proj.payment_status = 'Paid';
+          proj.paymentStatus = 'Paid';
+          projectsUpdated = true;
+        }
       }
     });
 
@@ -1334,12 +1561,12 @@ const BD22_DB = {
       const history = Array.isArray(inv.payment_history) ? inv.payment_history : [];
 
       let confirmedPaidCents = 0;
-      if (history.length > 0) {
+      if (inv.status === 'Paid') {
+        confirmedPaidCents = Math.round(totalAmt * 100);
+      } else if (history.length > 0) {
         confirmedPaidCents = history.reduce((sum, t) => sum + Math.round((Number(t.amount) || 0) * 100), 0);
       } else if (Number(inv.amount_paid) > 0) {
         confirmedPaidCents = Math.round(Number(inv.amount_paid) * 100);
-      } else if (inv.status === 'Paid') {
-        confirmedPaidCents = Math.round(totalAmt * 100);
       }
 
       const totalCents = Math.max(0, Math.round(totalAmt * 100));
@@ -1350,11 +1577,17 @@ const BD22_DB = {
       inv.amount_paid = confirmedPaid;
       inv.balance = balanceCents / 100;
 
-      if (totalCents > 0 && balanceCents === 0) {
+      if (inv.status === 'Paid') {
+        inv.amount_paid = totalAmt;
+        inv.balance = 0;
+      } else if (inv.status === 'Unpaid') {
+        inv.amount_paid = 0;
+        inv.balance = totalAmt;
+      } else if (totalCents > 0 && balanceCents === 0) {
         inv.status = 'Paid';
       } else if (confirmedPaidCents > 0) {
         inv.status = 'Partial';
-      } else {
+      } else if (inv.status !== 'Overdue') {
         inv.status = 'Unpaid';
         inv.balance = totalCents / 100;
       }
@@ -1362,6 +1595,156 @@ const BD22_DB = {
 
     if (projectsUpdated) this.set('projects', projects);
     if (paymentsUpdated) this.set('payments', payments);
+  },
+
+  // 3d. Authoritative Project & Payment Status Update
+  async setProjectPaymentStatus(projId, paymentStatus, customAmount = null) {
+    try {
+      const projects = this.get('projects') || [];
+      const payments = this.get('payments') || [];
+      const proj = projects.find(p => (p.project_code || p.id) === projId || p.id === projId || String(p.db_id) === String(projId));
+      if (!proj) return { success: false, error: 'Project not found' };
+
+      const projCode = proj.project_code || proj.id;
+      const budget = Number(proj.budget || proj.amount || 0);
+
+      // Find or create linked invoice
+      let inv = payments.find(p => 
+        (p.project_id && (p.project_id === projCode || p.project_id === proj.id || String(p.project_id) === String(proj.db_id))) ||
+        (p.project_code && (p.project_code === projCode || p.project_code === proj.id)) ||
+        (p.invoice && p.invoice === (proj.linked_invoice || proj.linkedInvoice)) ||
+        (p.invoice_no && p.invoice_no === (proj.linked_invoice || proj.linkedInvoice)) ||
+        (p.project && p.project.trim().toLowerCase() === proj.name.trim().toLowerCase()) ||
+        (p.project_name && p.project_name.trim().toLowerCase() === proj.name.trim().toLowerCase())
+      );
+
+      let invCode = inv?.invoice_no || inv?.invoice || proj.linked_invoice || proj.linkedInvoice;
+      if (!invCode) {
+        invCode = this.generateInvoiceCode();
+      }
+
+      let amountPaid = 0;
+      let balance = budget;
+
+      if (paymentStatus === 'Paid') {
+        amountPaid = budget;
+        balance = 0;
+      } else if (paymentStatus === 'Partial') {
+        amountPaid = customAmount !== null ? Number(customAmount) : Math.round(budget / 2);
+        balance = Math.max(0, budget - amountPaid);
+      } else if (paymentStatus === 'Unpaid') {
+        amountPaid = 0;
+        balance = budget;
+      } else if (paymentStatus === 'Overdue') {
+        amountPaid = customAmount !== null ? Number(customAmount) : (inv?.amount_paid || 0);
+        balance = Math.max(0, budget - amountPaid);
+      }
+
+      // Update project local and Supabase
+      proj.payment_status = paymentStatus;
+      proj.paymentStatus = paymentStatus;
+      proj.linked_invoice = invCode;
+      proj.linkedInvoice = invCode;
+
+      if (window.supabaseClient) {
+        try {
+          await window.supabaseClient
+            .from('projects')
+            .update({
+              payment_status: paymentStatus,
+              linked_invoice: invCode,
+              updated_at: new Date().toISOString()
+            })
+            .eq('project_code', projCode);
+        } catch (projDbErr) {
+          console.warn('Supabase project payment_status update note:', projDbErr);
+        }
+      }
+
+      // Update or insert invoice in Supabase
+      if (!inv) {
+        inv = {
+          id: invCode,
+          invoice: invCode,
+          invoice_no: invCode,
+          project: proj.name,
+          project_name: proj.name,
+          project_id: proj.db_id || projCode,
+          project_code: projCode,
+          customer: proj.customer || proj.customer_name,
+          customer_name: proj.customer || proj.customer_name,
+          user_id: proj.user_id || null,
+          amount: budget,
+          amount_paid: amountPaid,
+          balance: balance,
+          status: paymentStatus,
+          due_date: proj.target_date || null,
+          dueDate: proj.targetDate || '',
+          invoiceDate: formatDate(new Date()),
+          invoice_date: new Date().toISOString().split('T')[0],
+          payment_history: paymentStatus === 'Paid' ? [{ date: formatDate(new Date()), amount: budget, method: 'Direct Bank Settlement' }] : [],
+          billing_notes: `Authoritative payment status set to ${paymentStatus}.`,
+          created_at: new Date().toISOString()
+        };
+        payments.unshift(inv);
+
+        if (window.supabaseClient) {
+          try {
+            await window.supabaseClient.from('payments').insert({
+              invoice_no: invCode,
+              user_id: proj.user_id || null,
+              customer_name: proj.customer || proj.customer_name,
+              project_name: proj.name,
+              project_id: typeof proj.db_id === 'number' ? proj.db_id : null,
+              project_code: projCode,
+              amount: budget,
+              amount_paid: amountPaid,
+              balance: balance,
+              status: paymentStatus,
+              billing_notes: inv.billing_notes
+            });
+          } catch (payInsErr) {
+            console.warn('Supabase payment insert note:', payInsErr);
+          }
+        }
+      } else {
+        inv.status = paymentStatus;
+        inv.amount = budget;
+        inv.amount_paid = amountPaid;
+        inv.balance = balance;
+        if (paymentStatus === 'Paid') {
+          inv.payment_history = [{ date: formatDate(new Date()), amount: budget, method: 'Direct Bank Settlement' }];
+        }
+        inv.lastUpdate = 'Just now';
+
+        if (window.supabaseClient) {
+          try {
+            await window.supabaseClient
+              .from('payments')
+              .update({
+                status: paymentStatus,
+                amount: budget,
+                amount_paid: amountPaid,
+                balance: balance,
+                payment_history: inv.payment_history,
+                last_update: new Date().toISOString()
+              })
+              .eq('invoice_no', inv.invoice_no || inv.invoice);
+          } catch (payUpdErr) {
+            console.warn('Supabase payment update note:', payUpdErr);
+          }
+        }
+      }
+
+      this.set('projects', projects);
+      this.set('payments', payments);
+      this.reconcileProjectsAndPayments();
+      window.dispatchEvent(new CustomEvent('bd22_synced'));
+      return { success: true, project: proj, invoice: inv };
+    } catch (err) {
+      console.error('Error updating project payment status:', err);
+      return { success: false, error: err.message || err };
+    }
   },
 
   // Get Registered Customers directly from Database/Profiles
@@ -2204,6 +2587,13 @@ const BD22_DB = {
 
       const updatedList = list.map(p => (p.id === projId || p.project_code === projId) ? updated : p);
       this.set('projects', updatedList);
+
+      // If project is completed, synchronize warranty and service history
+      if (updated.status === 'Completed') {
+        await this.createProjectWarranty(updated);
+        await this.logProjectCompletionHistory(updated);
+      }
+
       this.reconcileProjectsAndPayments();
       window.dispatchEvent(new CustomEvent('bd22_synced'));
 
@@ -2231,7 +2621,7 @@ const BD22_DB = {
 
       if (newStatus === 'Completed') {
         computedProgress = 100;
-        actualDate = todayIso;
+        if (!actualDate) actualDate = todayIso;
         // Mark all milestones as completed
         updatedTasks = updatedTasks.map(t => ({
           ...t,
@@ -2242,6 +2632,7 @@ const BD22_DB = {
         updatedNotes = updatedNotes ? `${updatedNotes}\n${completionRemark}` : completionRemark;
       } else if (newStatus === 'Not Started') {
         if (computedProgress === 100) computedProgress = 0;
+        actualDate = '';
       }
 
       const updatedProject = {
@@ -2278,26 +2669,13 @@ const BD22_DB = {
       const updatedList = list.map(p => (p.project_code || p.id) === projId ? updatedProject : p);
       this.set('projects', updatedList);
 
-      // Requirement 4: When the project is marked as Completed AND its invoice is Paid,
-      // automatically add the project to Warranty Tracking with a 1-year warranty.
+      // When a project is officially marked as "Completed", automatically generate 1-year warranty, mark as Paid, and update service history
       if (newStatus === 'Completed') {
-        const payments = this.get('payments') || [];
-        const inv = payments.find(p => 
-          (p.project_id && (p.project_id === updatedProject.project_code || p.project_id === updatedProject.id)) ||
-          (p.project_code && (p.project_code === updatedProject.project_code || p.project_code === updatedProject.id)) ||
-          (p.invoice && p.invoice === (updatedProject.linked_invoice || updatedProject.linkedInvoice)) ||
-          (p.invoice_no && p.invoice_no === (updatedProject.linked_invoice || updatedProject.linkedInvoice)) ||
-          (p.project && p.project.trim().toLowerCase() === updatedProject.name.trim().toLowerCase()) ||
-          (p.project_name && p.project_name.trim().toLowerCase() === updatedProject.name.trim().toLowerCase())
-        );
-
-        const isPaid = (inv && inv.status === 'Paid') || updatedProject.payment_status === 'Paid';
-        if (isPaid) {
-          await this.createProjectWarranty(updatedProject);
-        }
-
-        // Add service history entry for completion
-        await this.logProjectCompletionHistory(updatedProject, isPaid);
+        updatedProject.payment_status = 'Paid';
+        updatedProject.paymentStatus = 'Paid';
+        await this.setProjectPaymentStatus(projId, 'Paid');
+        await this.createProjectWarranty(updatedProject);
+        await this.logProjectCompletionHistory(updatedProject);
       }
 
       this.reconcileProjectsAndPayments();
@@ -2495,23 +2873,53 @@ const BD22_DB = {
     }
   },
 
-  // 5c. Automatic 1-Year Warranty Generation (When Project is Completed AND Paid)
+  // 5c. Automatic 1-Year Warranty Generation (When Project is Completed)
   async createProjectWarranty(proj) {
     try {
       const today = new Date().toISOString().split('T')[0];
-      const expiryDate = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+      const installDate = proj.actual_completion_date || proj.actualCompletionDate || today;
+
+      // Calculate exactly 1 year later (365 days / 1 full calendar year)
+      const startDateObj = new Date(installDate);
+      const expiryDateObj = new Date(startDateObj);
+      expiryDateObj.setFullYear(startDateObj.getFullYear() + 1);
+      const expiryDate = expiryDateObj.toISOString().split('T')[0];
+
+      const now = new Date();
+      const status = (now > expiryDateObj) ? 'Expired' : 'Active';
+
       const customerName = proj.customer_name || proj.customer || 'Commercial Client';
       const projCode = proj.project_code || proj.id || 'BD22-PRJ';
       const projName = proj.name || 'Fire Protection Project';
 
       const existingWarr = this.get('warranties') || [];
-      const hasWarr = existingWarr.some(w => (
+      const existingMatch = existingWarr.find(w => (
+        (w.project_code && w.project_code === projCode) ||
+        (w.project_id && (w.project_id === projCode || w.project_id === proj.id || String(w.project_id) === String(proj.db_id))) ||
         (w.system_covered && w.system_covered.trim().toLowerCase() === projName.trim().toLowerCase()) ||
         (w.systemCovered && w.systemCovered.trim().toLowerCase() === projName.trim().toLowerCase()) ||
         (w.title && w.title.trim().toLowerCase() === projName.trim().toLowerCase())
       ));
 
-      if (hasWarr) return { success: true, message: 'Warranty already registered.' };
+      if (existingMatch) {
+        // If completion date was updated/corrected, update warranty start & expiration dates accordingly
+        existingMatch.install_date = installDate;
+        existingMatch.installDate = formatDate(installDate);
+        existingMatch.expiry_date = expiryDate;
+        existingMatch.expiryDate = formatDate(expiryDate);
+        existingMatch.status = status;
+        if (window.supabaseClient) {
+          try {
+            await window.supabaseClient.from('warranties').update({
+              install_date: installDate,
+              expiry_date: expiryDate,
+              status: status
+            }).eq('warranty_code', existingMatch.warranty_code || existingMatch.ref);
+          } catch (e) {}
+        }
+        this.set('warranties', existingWarr);
+        return { success: true, warranty: existingMatch };
+      }
 
       const year = new Date().getFullYear();
       let maxNum = 0;
@@ -2526,7 +2934,8 @@ const BD22_DB = {
 
       // Resolve integer project_id if available
       let intProjId = null;
-      if (typeof proj.id === 'number') intProjId = proj.id;
+      if (typeof proj.db_id === 'number') intProjId = proj.db_id;
+      else if (typeof proj.id === 'number') intProjId = proj.id;
 
       const warrRecord = {
         id: warCode,
@@ -2534,18 +2943,19 @@ const BD22_DB = {
         ref: warCode,
         user_id: proj.user_id || null,
         project_id: intProjId,
+        project_code: projCode,
         customer: customerName,
         customer_name: customerName,
         title: projName,
         system_covered: projName,
         systemCovered: projName,
-        installDate: formatDate(today),
-        install_date: today,
+        installDate: formatDate(installDate),
+        install_date: installDate,
         expiryDate: formatDate(expiryDate),
         expiry_date: expiryDate,
         coverage: `1-Year Comprehensive Fire Protection System Warranty & BFP Compliance Coverage for ${projName}`,
         coverage_summary: `1-Year Comprehensive Fire Protection System Warranty & BFP Compliance Coverage for ${projName}`,
-        status: 'Active',
+        status: status,
         created_at: new Date().toISOString()
       };
 
@@ -2556,9 +2966,9 @@ const BD22_DB = {
             user_id: proj.user_id || null,
             customer_name: customerName,
             system_covered: projName,
-            install_date: today,
+            install_date: installDate,
             expiry_date: expiryDate,
-            status: 'Active',
+            status: status,
             coverage_summary: warrRecord.coverage_summary
           });
 
@@ -2566,7 +2976,7 @@ const BD22_DB = {
             await window.supabaseClient.from('customer_messages').insert({
               user_id: proj.user_id,
               title: `1-Year Warranty Activated: ${projName}`,
-              description: `Congratulations! Official 1-Year System Warranty certificate (${warCode}) has been issued for "${projName}". Coverage is active and valid until ${expiryDate}.`
+              description: `Congratulations! Official 1-Year System Warranty certificate (${warCode}) has been issued for "${projName}". Coverage is active from ${installDate} until ${expiryDate}.`
             });
           }
         } catch (e) {
@@ -2585,31 +2995,50 @@ const BD22_DB = {
   },
 
   // Log Project Completion in Service History
-  async logProjectCompletionHistory(proj, isPaid) {
+  async logProjectCompletionHistory(proj) {
     try {
-      const today = new Date().toISOString().split('T')[0];
+      const completionDate = proj.actual_completion_date || proj.actualCompletionDate || new Date().toISOString().split('T')[0];
       const customerName = proj.customer_name || proj.customer || 'Commercial Client';
       const projCode = proj.project_code || proj.id || 'BD22-PRJ';
       const projName = proj.name || 'Fire Protection Project';
       const manager = proj.project_manager || proj.manager || 'Engr. M. Velasco';
+      const budget = Number(proj.budget || proj.amount || 0);
+      const payStatus = 'Paid'; // Authoritative: Completed projects are always Paid!
+      const desc = proj.description || 'System installation, pressure testing, and operational turnover completed.';
 
       const existingHist = this.get('serviceHistory') || [];
-      const hasHist = existingHist.some(h => (
-        h.title && h.title.includes(projName) && (h.activity_type === 'Project Turnover' || h.eventType === 'Project Turnover')
+      const existingMatch = existingHist.find(h => (
+        (h.project_code && h.project_code === projCode) ||
+        (h.title && h.title.includes(projCode)) ||
+        (h.title && h.title.includes(projName) && (h.activity_type === 'Project Turnover' || h.eventType === 'Project Turnover'))
       ));
 
-      if (hasHist) return;
+      if (existingMatch) {
+        existingMatch.total_cost = budget;
+        existingMatch.payment_status = 'Paid';
+        existingMatch.service_date = completionDate;
+        existingMatch.date = formatDate(completionDate);
+        existingMatch.description = `${desc} • Total Cost: ₱${budget.toLocaleString()} • Payment Status: Paid. 1-Year Comprehensive Warranty given.`;
+        this.set('serviceHistory', existingHist);
+        return;
+      }
 
       const histRecord = {
-        id: 'hist-' + Date.now(),
+        id: 'hist-' + (proj.db_id || projCode || Date.now()),
+        project_code: projCode,
+        project_id: projCode,
+        project_name: projName,
         user_id: proj.user_id || null,
         activity_type: 'Project Turnover',
         activityType: 'Project Turnover',
         eventType: 'Project Turnover',
-        title: `Project Commissioning & Turnover: ${projName}`,
-        description: `Fire protection system installation, pressure testing, and operational turnover completed for ${customerName} (${projCode}).${isPaid ? ' 1-Year Comprehensive Warranty activated.' : ' Final invoice settlement pending for warranty certificate activation.'}`,
-        date: formatDate(today),
-        service_date: today,
+        title: `Project Commissioning & Turnover: ${projName} (${projCode})`,
+        description: `${desc} • Total Cost: ₱${budget.toLocaleString()} • Payment Status: Paid. 1-Year Comprehensive Warranty given.`,
+        date: formatDate(completionDate),
+        service_date: completionDate,
+        total_cost: budget,
+        payment_status: 'Paid',
+        warranty_note: '1-Year Warranty Given',
         badge: 'Completed',
         logged_by: manager,
         performedBy: manager,
@@ -2623,7 +3052,7 @@ const BD22_DB = {
             activity_type: 'Project Turnover',
             title: histRecord.title,
             description: histRecord.description,
-            service_date: today,
+            service_date: completionDate,
             badge: 'Completed',
             logged_by: manager
           });

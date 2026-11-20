@@ -190,8 +190,9 @@
                     <th>Customer</th>
                     <th>Submission Source</th>
                     <th>Service</th>
-                    <th>Date Submitted</th>
+                    <th>Schedule</th>
                     <th>Status</th>
+                    <th>Payment</th>
                     <th>Last Update</th>
                     <th></th>
                   </tr>
@@ -237,6 +238,7 @@
                     <th>Service & Scope</th>
                     <th>Preferred Date</th>
                     <th>Status</th>
+                    <th>Payment</th>
                     <th>Assigned Staff</th>
                     <th></th>
                   </tr>
@@ -583,7 +585,10 @@
             <div style="font-size:1.35rem; font-weight:800; color:#a61c14;" id="adminSrRef">BD22-REQ-2026-001</div>
             <div style="font-size:0.85rem; color:#64748b; margin-top:0.25rem;">Customer: <strong id="adminSrCustomer" style="color:#1e293b;">Arden Manufacturing</strong> • <span id="adminSrDate">Oct 23, 2026</span></div>
           </div>
-          <span class="badge-status badge-pending" id="adminSrStatusBadge" style="font-size:0.95rem; padding:0.4rem 0.85rem;">Pending Review</span>
+          <div style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap;">
+            <span class="badge-status badge-pending" id="adminSrStatusBadge" style="font-size:0.95rem; padding:0.4rem 0.85rem;">Pending Review</span>
+            <span class="badge-status badge-unpaid" id="adminSrPaymentBadge" style="font-size:0.95rem; padding:0.4rem 0.85rem;">Unpaid</span>
+          </div>
         </div>
 
         <form id="adminServiceRequestForm">
@@ -671,15 +676,33 @@
               BD22 Technical Assessment & Schedule Management
             </div>
 
-            <!-- Free Appointment & Quick Action Notice -->
-            <div style="margin-bottom:1.25rem; background:#ecfdf5; border:1px solid #a7f3d0; border-radius:8px; padding:0.85rem 1rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.6rem;">
+            <!-- Appointment & Payment Action Bar -->
+            <div style="margin-bottom:1.25rem; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:0.85rem 1rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.6rem;">
               <div>
-                <div style="font-size:0.85rem; font-weight:700; color:#065f46;">Complimentary Site Assessment & Appointment</div>
+                <div style="font-size:0.85rem; font-weight:700; color:#1e293b;">Appointment & Payment Actions</div>
+                <div style="font-size:0.8rem; color:#64748b;">Authoritative status update synchronized with customer portal</div>
               </div>
               <div style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap;">
                 <button type="button" class="btn btn-sm" id="btnAdminApproveSr" style="background:#15803d; color:#ffffff; border:1px solid #166534; font-weight:700; padding:0.4rem 0.85rem; font-size:0.82rem;">Approve Appointment</button>
                 <button type="button" class="btn btn-sm" id="btnAdminRejectSr" style="background:#dc2626; color:#ffffff; border:1px solid #b91c1c; font-weight:700; padding:0.4rem 0.85rem; font-size:0.82rem;">Reject Appointment</button>
+                <button type="button" class="btn btn-sm btn-outline" id="btnAdminMarkSrPaid" style="background:#f0fdf4; color:#166534; border:1px solid #bbf7d0; font-weight:700; padding:0.4rem 0.85rem; font-size:0.82rem;">Mark as Paid</button>
+                <button type="button" class="btn btn-sm btn-outline" id="btnAdminMarkSrUnpaid" style="background:#fffbeb; color:#b45309; border:1px solid #fde68a; font-weight:700; padding:0.4rem 0.85rem; font-size:0.82rem;">Mark as Unpaid</button>
               </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom:1rem;">
+              <label class="form-label" for="adminSrStatusSelect">Appointment Workflow Status *</label>
+              <select id="adminSrStatusSelect" class="form-control">
+                <option value="Pending Review">Pending Review</option>
+                <option value="Under Assessment">Under Assessment</option>
+                <option value="Quotation Prepared">Quotation Prepared</option>
+                <option value="Approved">Approved</option>
+                <option value="Scheduled">Scheduled</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Completed">Completed</option>
+                <option value="Rejected">Rejected</option>
+                <option value="Cancelled">Cancelled</option>
+              </select>
             </div>
 
             <div class="form-group">
@@ -889,12 +912,21 @@
           <div>
             <div style="font-size:0.8rem; color:#64748b; font-weight:600; text-transform:uppercase;">Billing & Contract Integration</div>
             <div style="display:flex; align-items:center; gap:0.85rem; margin-top:0.25rem; flex-wrap:wrap;">
-              <span>Contract Budget: <strong id="modalProjBudget" style="color:#1e293b; font-size:1.05rem;">₱450,000</strong></span>
+              <span>Total Budget: <strong id="modalProjBudget" style="color:#1e293b; font-size:1.05rem;">₱450,000</strong></span>
+              <span>Paid: <strong id="modalProjAmountPaid" style="color:#15803d; font-size:1.05rem;">₱0</strong></span>
+              <span>Balance: <strong id="modalProjBalance" style="color:#dc2626; font-size:1.05rem;">₱450,000</strong></span>
               <span>Invoice: <strong id="modalProjInvoiceCode" class="ref-code">BD22-INV-2026-001</strong></span>
-              <span id="modalProjInvoiceStatus" class="badge-status badge-paid">Paid</span>
+              <span id="modalProjInvoiceStatus" class="badge-status badge-unpaid">Unpaid</span>
             </div>
           </div>
           <div id="adminModalProjPayActionWrap" style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+            <button type="button" class="btn btn-sm" id="btnAdminMarkProjectPaid" style="background:#15803d; color:#ffffff; border:1px solid #166534; font-weight:700; padding:0.4rem 0.85rem; font-size:0.82rem; cursor:pointer;">Mark as Paid</button>
+            <select id="adminModalProjPayStatusSelect" class="form-control" style="width:auto; padding:0.35rem 0.65rem; font-size:0.82rem; font-weight:600; height:auto; cursor:pointer;">
+              <option value="Unpaid">Set: Unpaid</option>
+              <option value="Partial">Set: Partially Paid</option>
+              <option value="Paid">Set: Paid</option>
+              <option value="Overdue">Set: Outstanding Balance</option>
+            </select>
             <button type="button" class="btn btn-sm btn-outline" id="btnAdminScheduleProjectMaintenance" style="display:inline-flex; align-items:center; gap:0.4rem; padding:0.4rem 0.85rem; font-size:0.82rem; color:#0369a1; border-color:#bae6fd; background:#f0f9ff; font-weight:700;">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
               <span>Schedule Maintenance</span>

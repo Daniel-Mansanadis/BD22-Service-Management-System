@@ -265,15 +265,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (items.length === 0) {
-      tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 2.5rem; color:#64748b;">No matching inquiries found.</td></tr>`;
+      tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 2.5rem; color:#64748b;">No matching inquiries found.</td></tr>`;
       return;
     }
 
     tableBody.innerHTML = items.map(item => {
       const ref = item.reference || item.reference_no || '';
       const badgeClass = getAdminStatusBadgeClass(item.status);
+      const payStatus = item.payment_status || item.paymentStatus || 'Unpaid';
+      const payBadgeClass = payStatus === 'Paid' ? 'badge-paid' : (payStatus === 'Partial' ? 'badge-partial' : 'badge-unpaid');
       const estLabel = item.establishment_name ? `<div style="font-size:0.8rem; color:#64748b; font-weight:normal; margin-top:0.15rem;">Site: ${item.establishment_name}</div>` : '';
-      const displayDate = item.preferred_date || item.dateSubmitted || 'Recent';
+      const displayDate = item.preferred_date || item.confirmed_schedule || item.dateSubmitted || 'Recent';
       const sourceDetails = {
         customer_account_verified: ['Verified customer account', 'inquiry-source-verified'],
         customer_account_unverified: ['Account - email unverified', 'inquiry-source-unverified'],
@@ -299,6 +301,7 @@ document.addEventListener('DOMContentLoaded', () => {
           </td>
           <td><span class="client-booking-date">${displayDate}</span></td>
           <td><span class="badge-status client-booking-status ${badgeClass}">${item.status || 'Pending Review'}</span></td>
+          <td><span class="badge-status ${payBadgeClass}">${payStatus}</span></td>
           <td style="color: #64748b;">${item.lastUpdate || 'Recent'}</td>
           <td><span class="row-action-arrow">›</span></td>
         </tr>
@@ -426,16 +429,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (list.length === 0) {
-      tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 3rem 1.5rem; color:#64748b;">No matching service requests found.</td></tr>`;
+      tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 3rem 1.5rem; color:#64748b;">No matching service requests found.</td></tr>`;
       return;
     }
 
     tableBody.innerHTML = list.map(item => {
       const ref = item.reference || item.reference_no || '';
       const badgeClass = getAdminStatusBadgeClass(item.status);
+      const payStatus = item.payment_status || item.paymentStatus || 'Unpaid';
+      const payBadgeClass = payStatus === 'Paid' ? 'badge-paid' : (payStatus === 'Partial' ? 'badge-partial' : 'badge-unpaid');
       const siteDisplay = item.establishment_name || 'Project Site';
       const addressShort = item.site_address ? `<div style="font-size:0.78rem; color:#64748b; margin-top:0.15rem;">${item.site_address}</div>` : '';
-      const displayDate = item.preferred_date || item.dateSubmitted || 'Recent';
+      const displayDate = item.preferred_date || item.confirmed_schedule || item.dateSubmitted || 'Recent';
       const scopeSummary = item.description || item.notes || '';
 
       return `
@@ -452,6 +457,7 @@ document.addEventListener('DOMContentLoaded', () => {
           </td>
           <td><span class="date-pill">${displayDate}</span></td>
           <td><span class="badge-status ${badgeClass}">${item.status || 'Pending Review'}</span></td>
+          <td><span class="badge-status ${payBadgeClass}">${payStatus}</span></td>
           <td style="font-size:0.9rem; color:#334155;">${item.assignedStaff || 'Unassigned'}</td>
           <td>
             <button class="btn btn-outline btn-sm btn-open-sr" data-sr-ref="${ref}" style="padding:0.3rem 0.75rem; font-size:0.8rem;">
@@ -538,6 +544,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const curStatus = merged.status || 'Pending Review';
       badge.textContent = curStatus;
       badge.className = 'badge-status ' + getAdminStatusBadgeClass(curStatus);
+    }
+
+    const payStatus = merged.payment_status || merged.paymentStatus || 'Unpaid';
+    const payBadge = document.getElementById('adminSrPaymentBadge');
+    if (payBadge) {
+      payBadge.textContent = payStatus;
+      payBadge.className = 'badge-status ' + (payStatus === 'Paid' ? 'badge-paid' : (payStatus === 'Partial' ? 'badge-partial' : 'badge-unpaid'));
     }
 
     // Block 1: Service Scope & Customer Urgency
@@ -638,15 +651,25 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // Block 5: Schedule Controls
+    // Block 5: Schedule Controls & Workflow Status
+    const statusSelect = document.getElementById('adminSrStatusSelect');
+    if (statusSelect) {
+      statusSelect.value = merged.status || 'Pending Review';
+    }
     if (confirmedDateInput) {
       confirmedDateInput.value = merged.confirmed_schedule || merged.scheduled_date || '';
     }
     pendingSrAction = null;
-    if (btnApproveSr) btnApproveSr.setAttribute('aria-pressed', 'false');
-    if (btnRejectSr) btnRejectSr.setAttribute('aria-pressed', 'false');
-    if (btnApproveSr) btnApproveSr.textContent = 'Approve Appointment';
-    if (btnRejectSr) btnRejectSr.textContent = 'Reject Appointment';
+    if (btnApproveSr) {
+      btnApproveSr.setAttribute('aria-pressed', 'false');
+      btnApproveSr.disabled = false;
+      btnApproveSr.textContent = 'Approve Appointment';
+    }
+    if (btnRejectSr) {
+      btnRejectSr.setAttribute('aria-pressed', 'false');
+      btnRejectSr.disabled = false;
+      btnRejectSr.textContent = 'Reject Appointment';
+    }
 
     adminSrModal.setAttribute('data-active-sr-ref', reference);
     adminSrModal.classList.add('active');
@@ -658,15 +681,17 @@ document.addEventListener('DOMContentLoaded', () => {
       const ref = adminSrModal.getAttribute('data-active-sr-ref');
       if (!ref) return;
 
-      const confirmedDate = confirmedDateInput?.value || '';
-      if (pendingSrAction && !confirmedDate) {
-        if (confirmedDateInput) {
-          confirmedDateInput.setCustomValidity('Enter a confirmed schedule date before saving this appointment action.');
-          confirmedDateInput.reportValidity();
-          confirmedDateInput.focus();
-        }
-        showToast('Enter the confirmed schedule date before saving this appointment action.', 'error');
-        return;
+      const statusSelect = document.getElementById('adminSrStatusSelect');
+      const selectedStatus = statusSelect?.value || 'Pending Review';
+      let confirmedDate = confirmedDateInput?.value || '';
+
+      if (selectedStatus === 'Approved' && !confirmedDate) {
+        const inqs = BD22_DB.get('inquiries') || [];
+        const srs = BD22_DB.get('serviceRequests') || [];
+        const item = inqs.find(i => i.reference === ref || i.reference_no === ref) ||
+                     srs.find(s => s.reference === ref || s.reference_no === ref);
+        confirmedDate = item?.preferred_date || new Date().toISOString().split('T')[0];
+        if (confirmedDateInput) confirmedDateInput.value = confirmedDate;
       }
 
       saveSrBtn.disabled = true;
@@ -675,11 +700,10 @@ document.addEventListener('DOMContentLoaded', () => {
       if (btnRejectSr) btnRejectSr.disabled = true;
 
       try {
-        const updatedFields = { confirmedSchedule: confirmedDate };
-        if (pendingSrAction) {
-          updatedFields.status = pendingSrAction;
-          if (pendingSrAction === 'Rejected') updatedFields.confirmedSchedule = '';
-        }
+        const updatedFields = {
+          status: selectedStatus,
+          confirmedSchedule: confirmedDate
+        };
 
         const result = await BD22_DB.updateServiceRequest(ref, updatedFields);
         if (!result?.success) {
@@ -687,21 +711,11 @@ document.addEventListener('DOMContentLoaded', () => {
           return;
         }
 
-        const savedAction = pendingSrAction;
-        pendingSrAction = null;
         adminSrModal.classList.remove('active');
-
         renderAdminInquiries();
         renderAdminServiceRequests();
         renderAdminDashboard();
-
-        if (savedAction === 'Approved') {
-          showToast(`Appointment ${ref} approved successfully!`, 'success');
-        } else if (savedAction === 'Rejected') {
-          showToast(`Appointment request ${ref} has been marked as Rejected.`, 'error');
-        } else {
-          showToast(`Confirmed schedule for ${ref} saved successfully!`, 'success');
-        }
+        showToast(`Appointment ${ref} updated to "${selectedStatus}" successfully!`, 'success');
       } catch (err) {
         console.error('Service request assessment save error:', err);
         showToast('Unable to save assessment. Please try again.', 'error');
@@ -714,12 +728,112 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Choosing an action only stages it; the assessment is saved explicitly below.
+  // Direct, immediate action: Approve Appointment button
   if (btnApproveSr) {
-    btnApproveSr.addEventListener('click', () => setPendingSrAction('Approved'));
+    btnApproveSr.addEventListener('click', async () => {
+      const ref = adminSrModal.getAttribute('data-active-sr-ref');
+      if (!ref) return;
+
+      btnApproveSr.disabled = true;
+      btnApproveSr.textContent = 'Approving...';
+
+      let confirmedDate = confirmedDateInput?.value || '';
+      if (!confirmedDate) {
+        const inqs = BD22_DB.get('inquiries') || [];
+        const srs = BD22_DB.get('serviceRequests') || [];
+        const item = inqs.find(i => i.reference === ref || i.reference_no === ref) ||
+                     srs.find(s => s.reference === ref || s.reference_no === ref);
+        confirmedDate = item?.preferred_date || new Date().toISOString().split('T')[0];
+        if (confirmedDateInput) confirmedDateInput.value = confirmedDate;
+      }
+
+      const res = await BD22_DB.updateServiceRequest(ref, {
+        status: 'Approved',
+        confirmedSchedule: confirmedDate
+      });
+
+      btnApproveSr.disabled = false;
+      btnApproveSr.textContent = 'Approve Appointment';
+
+      if (res?.success) {
+        showToast(`Appointment ${ref} has been APPROVED! Confirmed for ${confirmedDate}.`, 'success');
+        adminSrModal.classList.remove('active');
+        renderAdminInquiries();
+        renderAdminServiceRequests();
+        renderAdminDashboard();
+      } else {
+        showToast(`Unable to approve appointment: ${res?.error || 'Please try again.'}`, 'error');
+      }
+    });
   }
+
+  // Direct, immediate action: Reject Appointment button
   if (btnRejectSr) {
-    btnRejectSr.addEventListener('click', () => setPendingSrAction('Rejected'));
+    btnRejectSr.addEventListener('click', async () => {
+      const ref = adminSrModal.getAttribute('data-active-sr-ref');
+      if (!ref) return;
+
+      if (!confirm(`Are you sure you want to mark appointment ${ref} as Rejected?`)) return;
+
+      btnRejectSr.disabled = true;
+      btnRejectSr.textContent = 'Rejecting...';
+
+      const res = await BD22_DB.updateServiceRequest(ref, {
+        status: 'Rejected',
+        confirmedSchedule: ''
+      });
+
+      btnRejectSr.disabled = false;
+      btnRejectSr.textContent = 'Reject Appointment';
+
+      if (res?.success) {
+        showToast(`Appointment ${ref} marked as Rejected.`, 'info');
+        adminSrModal.classList.remove('active');
+        renderAdminInquiries();
+        renderAdminServiceRequests();
+        renderAdminDashboard();
+      } else {
+        showToast(`Unable to reject appointment: ${res?.error || 'Please try again.'}`, 'error');
+      }
+    });
+  }
+
+  const btnMarkSrPaid = document.getElementById('btnAdminMarkSrPaid');
+  if (btnMarkSrPaid) {
+    btnMarkSrPaid.onclick = async () => {
+      const ref = adminSrModal.getAttribute('data-active-sr-ref');
+      if (!ref) return;
+      btnMarkSrPaid.disabled = true;
+      btnMarkSrPaid.textContent = 'Updating...';
+      const res = await BD22_DB.updateServiceRequest(ref, { payment_status: 'Paid' });
+      btnMarkSrPaid.disabled = false;
+      btnMarkSrPaid.textContent = 'Mark as Paid';
+      if (res?.success) {
+        showToast(`Appointment ${ref} marked as Paid!`, 'success');
+        openAdminServiceRequestModal(ref);
+        renderAdminInquiries();
+        renderAdminServiceRequests();
+      }
+    };
+  }
+
+  const btnMarkSrUnpaid = document.getElementById('btnAdminMarkSrUnpaid');
+  if (btnMarkSrUnpaid) {
+    btnMarkSrUnpaid.onclick = async () => {
+      const ref = adminSrModal.getAttribute('data-active-sr-ref');
+      if (!ref) return;
+      btnMarkSrUnpaid.disabled = true;
+      btnMarkSrUnpaid.textContent = 'Updating...';
+      const res = await BD22_DB.updateServiceRequest(ref, { payment_status: 'Unpaid' });
+      btnMarkSrUnpaid.disabled = false;
+      btnMarkSrUnpaid.textContent = 'Mark as Unpaid';
+      if (res?.success) {
+        showToast(`Appointment ${ref} marked as Unpaid.`, 'info');
+        openAdminServiceRequestModal(ref);
+        renderAdminInquiries();
+        renderAdminServiceRequests();
+      }
+    };
   }
 
   // Delete All Bookings Action (Inquiries and Service Requests)
@@ -1140,7 +1254,8 @@ document.addEventListener('DOMContentLoaded', () => {
         (p.project && p.project.toLowerCase() === proj.name.toLowerCase()) ||
         (p.project_name && p.project_name.toLowerCase() === proj.name.toLowerCase())
       );
-      const payStatus = (inv && inv.status) || proj.payment_status || proj.paymentStatus || 'Unpaid';
+      const isCompleted = proj.status === 'Completed';
+      const payStatus = isCompleted ? 'Paid' : ((inv && inv.status) || proj.payment_status || proj.paymentStatus || 'Unpaid');
       let payBadgeClass = 'badge-unpaid';
       if (payStatus === 'Paid') payBadgeClass = 'badge-paid';
       else if (payStatus === 'Partial') payBadgeClass = 'badge-partial';
@@ -1268,7 +1383,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const invCodeEl = document.getElementById('modalProjInvoiceCode');
     const invStatusEl = document.getElementById('modalProjInvoiceStatus');
 
-    const invStatus = (inv && inv.status) || proj.payment_status || proj.paymentStatus || 'Unpaid';
+    const isCompleted = proj.status === 'Completed';
+    const invStatus = isCompleted ? 'Paid' : ((inv && inv.status) || proj.payment_status || proj.paymentStatus || 'Unpaid');
     const invCodeText = (inv && (inv.invoice || inv.invoice_no)) || proj.linked_invoice || proj.linkedInvoice || 'Pending Bill';
 
     if (invCodeEl) invCodeEl.textContent = invCodeText;
@@ -1291,6 +1407,51 @@ document.addEventListener('DOMContentLoaded', () => {
         invBoxEl.style.background = '#fef2f2';
         invBoxEl.style.border = '1.5px solid #fee2e2';
       }
+    }
+
+    const budgetAmt = Number(proj.budget || (inv ? inv.amount : 0) || 0);
+    const paidAmt = Number(isCompleted ? budgetAmt : (inv?.amount_paid !== undefined ? inv.amount_paid : (invStatus === 'Paid' ? budgetAmt : 0)));
+    const balAmt = Number(isCompleted ? 0 : (inv?.balance !== undefined ? inv.balance : Math.max(0, budgetAmt - paidAmt)));
+
+    const paidEl = document.getElementById('modalProjAmountPaid');
+    if (paidEl) paidEl.textContent = `₱${paidAmt.toLocaleString()}`;
+
+    const balEl = document.getElementById('modalProjBalance');
+    if (balEl) {
+      balEl.textContent = `₱${balAmt.toLocaleString()}`;
+      balEl.style.color = balAmt > 0 ? '#dc2626' : '#15803d';
+    }
+
+    const paySelect = document.getElementById('adminModalProjPayStatusSelect');
+    if (paySelect) {
+      paySelect.value = invStatus;
+      paySelect.onchange = async () => {
+        const newPayStatus = paySelect.value;
+        const res = await BD22_DB.setProjectPaymentStatus(activeAdminProjectId, newPayStatus);
+        if (res?.success) {
+          showToast(`Project payment status updated to "${newPayStatus}".`, 'success');
+          openAdminProjectDetail(activeAdminProjectId);
+          renderAdminProjects();
+          renderAdminPayments();
+        }
+      };
+    }
+
+    const btnMarkProjPaid = document.getElementById('btnAdminMarkProjectPaid');
+    if (btnMarkProjPaid) {
+      btnMarkProjPaid.onclick = async () => {
+        btnMarkProjPaid.disabled = true;
+        btnMarkProjPaid.textContent = 'Updating...';
+        const res = await BD22_DB.setProjectPaymentStatus(activeAdminProjectId, 'Paid');
+        btnMarkProjPaid.disabled = false;
+        btnMarkProjPaid.textContent = 'Mark as Paid';
+        if (res?.success) {
+          showToast(`Project marked as PAID!`, 'success');
+          openAdminProjectDetail(activeAdminProjectId);
+          renderAdminProjects();
+          renderAdminPayments();
+        }
+      };
     }
 
     // Project Maintenance Scheduling Action
@@ -2394,7 +2555,40 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!container) return;
 
     const history = BD22_DB.get('serviceHistory') || [];
-    if (history.length === 0) {
+    const allProjects = BD22_DB.get('projects') || [];
+    const warranties = BD22_DB.get('warranties') || [];
+    const completedProjects = allProjects.filter(p => p.status === 'Completed');
+
+    const combinedHistory = [...history];
+    completedProjects.forEach(p => {
+      const pCode = p.project_code || p.id;
+      const alreadyPresent = combinedHistory.some(h => 
+        (h.project_code && h.project_code === pCode) ||
+        (h.title && h.title.includes(pCode)) ||
+        (h.project_id && (h.project_id === pCode || h.project_id === p.id))
+      );
+      if (!alreadyPresent) {
+        const completionDate = p.actual_completion_date || p.actualCompletionDate || p.start_date || 'Completed';
+        const budget = Number(p.budget || p.amount || 0);
+        combinedHistory.unshift({
+          id: 'hist-' + (p.db_id || pCode),
+          project_code: pCode,
+          project_id: pCode,
+          title: `Project Commissioning & Turnover: ${p.name} (${pCode})`,
+          description: p.description || 'Fire protection system installation, testing, and operational turnover completed.',
+          date: formatDate(completionDate),
+          service_date: completionDate,
+          total_cost: budget,
+          payment_status: 'Paid',
+          equipment_installed: p.name || 'Fire Protection Equipment',
+          badge: 'Completed',
+          logged_by: p.project_manager || p.manager || 'Operations Lead',
+          warranty_note: '1-Year Warranty Given'
+        });
+      }
+    });
+
+    if (combinedHistory.length === 0) {
       container.innerHTML = `
         <div style="text-align: center; padding: 2rem; color: #64748b;">
           No company service history records logged yet.
@@ -2403,19 +2597,47 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    container.innerHTML = history.map(item => `
-      <div class="timeline-item">
-        <div class="timeline-check-icon">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
-        </div>
-        <div>
-          <div class="timeline-text"><strong>${item.title || item.eventType}</strong> — ${item.description || ''}</div>
-          <div style="font-size: 0.85rem; color: #64748b; margin-top: 0.25rem;">
-            ${item.date} • <span class="badge-status service-history-status">${item.badge || 'Verified'}</span>
+    container.innerHTML = combinedHistory.map(item => {
+      const projCode = item.project_code || item.project_id || '';
+      const matchingWarr = warranties.find(w => 
+        (projCode && (w.project_code === projCode || w.project_id === projCode)) ||
+        (item.title && w.system_covered && item.title.includes(w.system_covered))
+      );
+      const isCompleted = item.status === 'Completed' || item.badge === 'Completed' || item.activity_type === 'Project Turnover' || item.activityType === 'Project Turnover' || (item.title && (item.title.includes('Turnover') || item.title.includes('Commissioning')));
+      const payStatus = isCompleted ? 'Paid' : (item.payment_status || 'Paid');
+      const payBadgeClass = payStatus === 'Paid' ? 'badge-paid' : (payStatus === 'Partial' ? 'badge-partial' : 'badge-unpaid');
+      const cleanDesc = (item.description || '').replace(/Payment Status:\s*Unpaid/gi, 'Payment Status: Paid');
+      const costText = item.total_cost ? ` • Cost: ₱${Number(item.total_cost).toLocaleString()}` : '';
+      const warrInfo = matchingWarr
+        ? `<div style="margin-top:0.35rem; display:inline-flex; align-items:center; gap:0.4rem; background:#ecfdf5; border:1px solid #a7f3d0; border-radius:6px; padding:0.25rem 0.6rem; font-size:0.8rem; font-weight:700; color:#065f46;">
+             <span>✓ 1-Year Comprehensive Warranty (Expires: ${matchingWarr.expiryDate || matchingWarr.expiry_date} • ${matchingWarr.status})</span>
+           </div>`
+        : `<div style="margin-top:0.35rem; display:inline-flex; align-items:center; gap:0.4rem; background:#ecfdf5; border:1px solid #a7f3d0; border-radius:6px; padding:0.25rem 0.6rem; font-size:0.8rem; font-weight:700; color:#065f46;">
+             <span>✓ 1-Year Comprehensive Warranty given</span>
+           </div>`;
+
+      return `
+        <div class="timeline-item" style="background:#ffffff; border:1px solid #e2e8f0; border-radius:10px; padding:1.25rem; margin-bottom:1rem;">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:0.5rem;">
+            <div>
+              ${projCode ? `<span class="ref-code" style="font-size:0.75rem;">${projCode}</span>` : ''}
+              <div class="timeline-text" style="font-size:1rem; font-weight:700; color:#1e293b; margin-top:0.2rem;">
+                ${item.title || item.eventType}
+              </div>
+            </div>
+            <div style="display:flex; gap:0.4rem; align-items:center;">
+              <span class="badge-status badge-completed">${item.badge || 'Completed'}</span>
+              <span class="badge-status ${payBadgeClass}">${payStatus}</span>
+            </div>
           </div>
+          <p style="font-size:0.9rem; color:#475569; margin:0.5rem 0; line-height:1.5;">${cleanDesc}</p>
+          <div style="font-size: 0.82rem; color: #64748b; margin-top: 0.25rem;">
+            Completed: <strong>${item.date}</strong>${costText} • Performed by: ${item.logged_by || item.performedBy || 'Admin Operations'}
+          </div>
+          ${warrInfo}
         </div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
   }
 
   // =========================================================================

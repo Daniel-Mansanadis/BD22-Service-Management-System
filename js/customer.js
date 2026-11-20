@@ -328,7 +328,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (filtered.length === 0) {
       tbody.innerHTML = `
         <tr>
-          <td colspan="6" style="text-align:center; padding: 3.5rem 1.5rem; color: #64748b;">
+          <td colspan="7" style="text-align:center; padding: 3.5rem 1.5rem; color: #64748b;">
             <img src="assets/images/empty/empty-inquiries.svg" class="empty-state-img" alt="No Inquiries">
             <strong>No service requests or inquiries found</strong>
             <p style="margin-top:0.25rem; font-size:0.85rem;">Click "+ Request Service" to submit your facility specifications.</p>
@@ -342,16 +342,20 @@ document.addEventListener('DOMContentLoaded', () => {
       const badgeClass = getCustomerStatusBadgeClass(item.status);
       const siteName = item.establishment_name || item.customer || 'Facility Site';
       const buildingInfo = item.building_type ? ` • ${item.building_type}` : '';
-      const displayDate = item.preferred_date || item.dateSubmitted;
+      const displayCustomer = item.customer || item.customer_name || 'Valued Customer';
+      const displaySchedule = (item.preferred_date && item.preferred_timeline)
+        ? `${item.preferred_date} (${item.preferred_timeline})`
+        : (item.preferred_date || item.confirmed_schedule || item.dateSubmitted || 'Pending Schedule');
 
       return `
         <tr data-ref="${item.reference}">
           <td class="ref-code">${item.reference}</td>
+          <td><div style="font-weight: 600; color:#1e293b;">${displayCustomer}</div></td>
           <td>
-            <div style="font-weight: 700; color:#1e293b;">${item.service}</div>
+            <div style="font-weight: 700; color:#1e293b;">${item.service || item.service_name || 'Fire Protection Service'}</div>
             <div style="font-size: 0.8rem; color: #64748b; margin-top: 0.15rem;">${siteName}${buildingInfo}</div>
           </td>
-          <td><span class="date-pill">${displayDate}</span></td>
+          <td><span class="date-pill">${displaySchedule}</span></td>
           <td><span class="badge-status ${badgeClass}">${item.status}</span></td>
           <td style="color: #64748b;">${item.lastUpdate || 'Just now'}</td>
           <td><span class="row-action-arrow">›</span></td>
@@ -381,6 +385,9 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const dateSubEl = document.getElementById('custInqDateSubmitted');
     if (dateSubEl) dateSubEl.textContent = `Submitted: ${item.dateSubmitted || 'Recent'}`;
+
+    const custEl = document.getElementById('custInqCustomerName');
+    if (custEl) custEl.textContent = item.customer || item.customer_name || 'Valued Customer';
     
     const badge = document.getElementById('custInqStatus');
     if (badge) {
@@ -473,14 +480,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const grid = document.getElementById('customerProjectsGrid');
     if (!grid) return;
 
-    const projects = BD22_DB.get('projects') || [];
+    const allProjects = BD22_DB.get('projects') || [];
+    // Only display active or ongoing projects (Completed projects transition into Service History)
+    const projects = allProjects.filter(p => p.status !== 'Completed');
 
     if (projects.length === 0) {
       grid.innerHTML = `
         <div class="empty-state-card" style="grid-column: 1 / -1; text-align: center; padding: 3.5rem 1.5rem; background: #ffffff; border-radius: 12px; border: 1px dashed #cbd5e1;">
           <img src="assets/images/empty/empty-projects.svg" class="empty-state-img" alt="No Active Projects">
           <h4 style="font-weight: 700; color: #1e293b; margin-bottom: 0.35rem;">No Active Projects</h4>
-          <p style="color: #64748b; font-size: 0.9rem;">You do not have any ongoing installations or retrofits yet. Submit a service request to initiate a project.</p>
+          <p style="color: #64748b; font-size: 0.9rem;">You do not have any ongoing installations or retrofits. Completed projects are archived under Service History.</p>
         </div>
       `;
       return;
@@ -505,10 +514,15 @@ document.addEventListener('DOMContentLoaded', () => {
         (pay.project && pay.project.toLowerCase() === p.name.toLowerCase()) ||
         (pay.project_name && pay.project_name.toLowerCase() === p.name.toLowerCase())
       );
-      const payStatus = (inv && inv.status) || p.payment_status || p.paymentStatus || 'Unpaid';
+      const isCompleted = p.status === 'Completed';
+      const payStatus = isCompleted ? 'Paid' : ((inv && inv.status) || p.payment_status || p.paymentStatus || 'Unpaid');
       let payBadgeClass = 'badge-unpaid';
       if (payStatus === 'Paid') payBadgeClass = 'badge-paid';
       else if (payStatus === 'Partial') payBadgeClass = 'badge-partial';
+
+      const budget = Number(p.budget || inv?.amount || 0);
+      const paid = Number(isCompleted ? budget : (inv?.amount_paid !== undefined ? inv.amount_paid : (payStatus === 'Paid' ? budget : 0)));
+      const balance = Number(isCompleted ? 0 : (inv?.balance !== undefined ? inv.balance : Math.max(0, budget - paid)));
 
       // Milestone counts & latest updates
       let tasksList = p.tasks;
@@ -553,6 +567,11 @@ document.addEventListener('DOMContentLoaded', () => {
             <span>Target completion: ${p.targetDate || p.target_date || 'TBD'}</span>
             <span>${p.progress || 0}%</span>
           </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.5rem; font-size:0.82rem; background:#f8fafc; padding:0.4rem 0.65rem; border-radius:6px;">
+            <span>Budget: <strong style="color:#1e293b;">₱${budget.toLocaleString()}</strong></span>
+            <span>Paid: <strong style="color:#15803d;">₱${paid.toLocaleString()}</strong></span>
+            <span>Balance: <strong style="color:${balance > 0 ? '#dc2626' : '#15803d'};">₱${balance.toLocaleString()}</strong></span>
+          </div>
           ${tasksCountText}
           ${latestRemarkHtml}
           <div style="display:flex; justify-content:space-between; align-items:center; margin-top:1.25rem; padding-top:0.75rem; border-top:1px solid #f1f5f9;">
@@ -565,7 +584,7 @@ document.addEventListener('DOMContentLoaded', () => {
     grid.querySelectorAll('.project-details-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const pid = btn.getAttribute('data-proj-id');
-        const proj = projects.find(p => (p.project_code || p.id) === pid);
+        const proj = allProjects.find(p => (p.project_code || p.id) === pid);
         if (proj && custProjModal) {
           openCustProjectDetailModal(proj);
         }
@@ -619,10 +638,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const invBalEl = document.getElementById('custProjInvoiceBalance');
     const invBtn = document.getElementById('custProjBtnGoToPayments');
 
-    const curStatus = inv ? inv.status : (proj.payment_status || proj.paymentStatus || '');
+    const isCompleted = proj.status === 'Completed';
+    const curStatus = isCompleted ? 'Paid' : (inv ? inv.status : (proj.payment_status || proj.paymentStatus || ''));
     const totalAmt = inv ? Number(inv.amount || 0) : Number(proj.budget || 0);
-    const paidAmt = inv ? (Number(inv.amount_paid) || (curStatus === 'Paid' ? totalAmt : 0)) : (curStatus === 'Paid' ? totalAmt : 0);
-    const balAmt = inv ? (inv.balance !== undefined ? Number(inv.balance) : (curStatus === 'Paid' ? 0 : Math.max(0, totalAmt - paidAmt))) : (curStatus === 'Paid' ? 0 : totalAmt);
+    const paidAmt = isCompleted ? totalAmt : (inv ? (Number(inv.amount_paid) || (curStatus === 'Paid' ? totalAmt : 0)) : (curStatus === 'Paid' ? totalAmt : 0));
+    const balAmt = isCompleted ? 0 : (inv ? (inv.balance !== undefined ? Number(inv.balance) : (curStatus === 'Paid' ? 0 : Math.max(0, totalAmt - paidAmt))) : (curStatus === 'Paid' ? 0 : totalAmt));
     const invCodeText = (inv && (inv.invoice || inv.invoice_no)) || proj.linked_invoice || proj.linkedInvoice || 'BD22-INV-PENDING';
 
     if (invCodeEl) invCodeEl.textContent = invCodeText;
@@ -1035,7 +1055,41 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!container) return;
 
     const history = BD22_DB.get('serviceHistory') || [];
-    if (history.length === 0) {
+    const allProjects = BD22_DB.get('projects') || [];
+    const warranties = BD22_DB.get('warranties') || [];
+    const completedProjects = allProjects.filter(p => p.status === 'Completed');
+
+    // Combine history items and completed projects, preventing duplicates
+    const combinedHistory = [...history];
+    completedProjects.forEach(p => {
+      const pCode = p.project_code || p.id;
+      const alreadyPresent = combinedHistory.some(h => 
+        (h.project_code && h.project_code === pCode) ||
+        (h.title && h.title.includes(pCode)) ||
+        (h.project_id && (h.project_id === pCode || h.project_id === p.id))
+      );
+      if (!alreadyPresent) {
+        const completionDate = p.actual_completion_date || p.actualCompletionDate || p.start_date || 'Completed';
+        const budget = Number(p.budget || p.amount || 0);
+        combinedHistory.unshift({
+          id: 'hist-' + (p.db_id || pCode),
+          project_code: pCode,
+          project_id: pCode,
+          title: `Project Commissioning & Turnover: ${p.name} (${pCode})`,
+          description: p.description || 'Fire protection system installation, testing, and operational turnover completed.',
+          date: formatDate(completionDate),
+          service_date: completionDate,
+          total_cost: budget,
+          payment_status: 'Paid',
+          equipment_installed: p.name || 'Fire Protection Equipment',
+          badge: 'Completed',
+          logged_by: p.project_manager || p.manager || 'Operations Lead',
+          warranty_note: '1-Year Warranty Given'
+        });
+      }
+    });
+
+    if (combinedHistory.length === 0) {
       container.innerHTML = `
         <div style="text-align: center; padding: 3.5rem 1.5rem; color: #64748b; background: #ffffff; border-radius: 12px; border: 1px dashed #cbd5e1;">
           <img src="assets/images/empty/empty-history.svg" class="empty-state-img" alt="No Service History">
@@ -1046,19 +1100,48 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    container.innerHTML = history.map(item => `
-      <div class="timeline-item">
-        <div class="timeline-check-icon">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
-        </div>
-        <div>
-          <div class="timeline-text"><strong>${item.title || item.eventType}</strong> — ${item.description || ''}</div>
-          <div style="font-size: 0.85rem; color: #64748b; margin-top: 0.25rem;">
-            ${item.date} • <span class="badge-status badge-completed" style="font-size: 0.75rem; padding: 0.15rem 0.5rem;">${item.badge || 'Verified'}</span>
+    container.innerHTML = combinedHistory.map(item => {
+      const projCode = item.project_code || item.project_id || '';
+      const matchingWarr = warranties.find(w => 
+        (projCode && (w.project_code === projCode || w.project_id === projCode)) ||
+        (item.title && w.system_covered && item.title.includes(w.system_covered))
+      );
+
+      const isCompleted = item.status === 'Completed' || item.badge === 'Completed' || item.activity_type === 'Project Turnover' || item.activityType === 'Project Turnover' || (item.title && item.title.includes('Project Commissioning & Turnover'));
+      const payStatus = isCompleted ? 'Paid' : (item.payment_status || 'Paid');
+      const payBadgeClass = payStatus === 'Paid' ? 'badge-paid' : (payStatus === 'Partial' ? 'badge-partial' : 'badge-unpaid');
+      const cleanDesc = (item.description || '').replace(/Payment Status:\s*Unpaid/gi, 'Payment Status: Paid');
+      const totalCostText = item.total_cost ? ` • Cost: ₱${Number(item.total_cost).toLocaleString()}` : '';
+      const warrInfo = matchingWarr 
+        ? `<div style="margin-top:0.45rem; display:inline-flex; align-items:center; gap:0.4rem; background:#ecfdf5; border:1px solid #a7f3d0; border-radius:6px; padding:0.3rem 0.65rem; font-size:0.8rem; font-weight:700; color:#065f46;">
+             <span>✓ 1-Year Comprehensive Warranty given (Valid until ${matchingWarr.expiryDate || matchingWarr.expiry_date} • ${matchingWarr.status})</span>
+           </div>`
+        : `<div style="margin-top:0.45rem; display:inline-flex; align-items:center; gap:0.4rem; background:#ecfdf5; border:1px solid #a7f3d0; border-radius:6px; padding:0.3rem 0.65rem; font-size:0.8rem; font-weight:700; color:#065f46;">
+             <span>✓ 1-Year Comprehensive Warranty given</span>
+           </div>`;
+
+      return `
+        <div class="timeline-item" style="background:#ffffff; border:1px solid #e2e8f0; border-radius:10px; padding:1.25rem; margin-bottom:1rem;">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:0.5rem;">
+            <div>
+              ${projCode ? `<span class="ref-code" style="font-size:0.75rem;">${projCode}</span>` : ''}
+              <div class="timeline-text" style="font-size:1rem; font-weight:700; color:#1e293b; margin-top:0.2rem;">
+                ${item.title || item.eventType}
+              </div>
+            </div>
+            <div style="display:flex; gap:0.4rem; align-items:center;">
+              <span class="badge-status badge-completed">${item.badge || 'Completed'}</span>
+              <span class="badge-status ${payBadgeClass}">${payStatus}</span>
+            </div>
           </div>
+          <p style="font-size:0.9rem; color:#475569; margin:0.5rem 0; line-height:1.5;">${cleanDesc}</p>
+          <div style="font-size: 0.82rem; color: #64748b; margin-top: 0.25rem;">
+            Completed: <strong>${item.date}</strong>${totalCostText} • Verified by: ${item.logged_by || item.performedBy || 'Admin Operations'}
+          </div>
+          ${warrInfo}
         </div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
   }
 
   // =========================================================================
@@ -1531,12 +1614,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Bind to BOTH form submit AND button click
+  // Bind form submit listener (guarded against duplicate submissions)
   if (newServiceForm) {
     newServiceForm.addEventListener('submit', validateAndSubmitServiceForm);
-  }
-  if (submitBtn) {
-    submitBtn.addEventListener('click', validateAndSubmitServiceForm);
   }
 
   const btnGoToInq = document.getElementById('btnGoToInquiries');
