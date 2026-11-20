@@ -32,6 +32,24 @@ document.addEventListener('DOMContentLoaded', () => {
     'settings': 'Account Settings'
   };
 
+  function getUniqueBookingRecords(inquiries, serviceRequests) {
+    const recordsByKey = new Map();
+    const addRecords = (records, source) => {
+      records.forEach((record, index) => {
+        const reference = record.reference || record.reference_no;
+        const key = reference
+          ? `ref:${reference}`
+          : (record.id !== undefined && record.id !== null ? `${source}:${record.id}` : `${source}:local-${index}`);
+        const existing = recordsByKey.get(key);
+        recordsByKey.set(key, existing ? { ...record, ...existing } : record);
+      });
+    };
+
+    addRecords(serviceRequests, 'service-request');
+    addRecords(inquiries, 'inquiry');
+    return Array.from(recordsByKey.values());
+  }
+
   function switchView(viewName) {
     if (!views.length) return;
     views.forEach(v => {
@@ -140,8 +158,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const warranties = BD22_DB.get('warranties') || [];
     const maintenance = BD22_DB.get('maintenance') || [];
 
-    // Combine requests & inquiries for customer view
-    const allRequests = [...serviceRequests, ...inquiries];
+    const allRequests = getUniqueBookingRecords(inquiries, serviceRequests);
 
     // Stats
     const activeProjectsCount = projects.filter(p => p.status === 'In Progress').length;
@@ -302,16 +319,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const inquiries = BD22_DB.get('inquiries') || [];
     const serviceRequests = BD22_DB.get('serviceRequests') || [];
 
-    // Combine both collections, deduplicating by reference code
-    const combinedMap = new Map();
-    serviceRequests.forEach(sr => combinedMap.set(sr.reference, sr));
-    inquiries.forEach(inq => {
-      if (!combinedMap.has(inq.reference)) {
-        combinedMap.set(inq.reference, inq);
-      }
-    });
-
-    const allRecords = Array.from(combinedMap.values());
+    const allRecords = getUniqueBookingRecords(inquiries, serviceRequests);
     const searchVal = (inqSearchInput?.value || '').toLowerCase().trim();
     const statusVal = inqStatusFilter?.value || 'All';
 
@@ -1386,6 +1394,31 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   let isSubmittingService = false;
+  const pendingServiceReferences = new Map();
+
+  function getPendingServiceReference() {
+    const user = BD22_DB.get('currentUser') || {};
+    if (!user.id) throw new Error('Sign in before booking an appointment.');
+
+    const storageKey = `bd22_pending_service_request_${user.id}`;
+    let reference = pendingServiceReferences.get(storageKey);
+    if (!reference) {
+      try {
+        reference = sessionStorage.getItem(storageKey);
+      } catch (storageError) {
+        console.warn('Unable to restore the pending appointment reference:', storageError);
+      }
+    }
+    if (!reference) reference = BD22_DB.generateServiceRequestRef();
+    pendingServiceReferences.set(storageKey, reference);
+
+    try {
+      sessionStorage.setItem(storageKey, reference);
+    } catch (storageError) {
+      console.warn('Unable to persist the pending appointment reference:', storageError);
+    }
+    return { reference, storageKey };
+  }
 
   async function validateAndSubmitServiceForm(e) {
     if (e) {
@@ -1538,7 +1571,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     try {
+      const pendingRequest = getPendingServiceReference();
       const ref = await BD22_DB.addServiceRequest({
+        reference: pendingRequest.reference,
         service_type: srvType,
         urgency: urgency,
         preferred_date: preferredDate,
@@ -1553,6 +1588,12 @@ document.addEventListener('DOMContentLoaded', () => {
         contact_phone: contactPhone,
         contact_email: contactEmail
       });
+      pendingServiceReferences.delete(pendingRequest.storageKey);
+      try {
+        sessionStorage.removeItem(pendingRequest.storageKey);
+      } catch (storageError) {
+        console.warn('Unable to clear the completed appointment reference:', storageError);
+      }
 
       // Show positive completion feedback on button
       if (btn) {
@@ -1606,7 +1647,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       if (errBanner) {
         errBanner.style.display = 'block';
-        errBanner.textContent = 'Unable to complete service request submission. Please check all required fields and try again.';
+        errBanner.textContent = `Unable to complete service request submission: ${err.message || 'Please try again.'}`;
       }
       showToast('Failed to submit service request. Please try again.');
     } finally {

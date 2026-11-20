@@ -336,18 +336,27 @@ document.addEventListener('DOMContentLoaded', () => {
       const updatedStaff = document.getElementById('modalInqStaffSelect').value;
       const updatedNotes = document.getElementById('modalInqNotes').value;
 
-      await BD22_DB.updateServiceRequest(ref, {
-        service: updatedService,
-        status: updatedStatus,
-        assignedStaff: updatedStaff,
-        trackingNote: updatedNotes
-      });
+      saveInquiryBtn.disabled = true;
+      try {
+        const result = await BD22_DB.updateServiceRequest(ref, {
+          service: updatedService,
+          status: updatedStatus,
+          assignedStaff: updatedStaff,
+          trackingNote: updatedNotes
+        });
+        if (!result?.success) {
+          showToast(`Unable to update inquiry: ${result?.error || 'Please try again.'}`, 'error');
+          return;
+        }
 
-      inquiryModal.classList.remove('active');
-      renderAdminInquiries();
-      renderAdminServiceRequests();
-      renderAdminDashboard();
-      showToast(`Inquiry ${ref} updated successfully!`, 'success');
+        inquiryModal.classList.remove('active');
+        renderAdminInquiries();
+        renderAdminServiceRequests();
+        renderAdminDashboard();
+        showToast(`Inquiry ${ref} updated successfully!`, 'success');
+      } finally {
+        saveInquiryBtn.disabled = false;
+      }
     });
   }
 

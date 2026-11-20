@@ -129,7 +129,7 @@ const BD22_DB = {
     localStorage.setItem(`bd22_${key}`, JSON.stringify(val));
   },
 
-  // Persistent appointment overrides (status, schedule, staff, payment) to guarantee UI responsiveness
+  // Persistent non-status appointment overrides for local schedule and billing details.
   getAppointmentOverrides() {
     try {
       const data = localStorage.getItem('bd22_appointment_overrides');
@@ -227,13 +227,13 @@ const BD22_DB = {
 
       // 4. Fetch Core Business Data via Supabase Client (Protected by PostgreSQL RLS)
       const [
-        { data: inqRows },
-        { data: srRows },
-        { data: projRows },
-        { data: payRows },
-        { data: warrRows },
-        { data: maintRows },
-        { data: histRows }
+        { data: inqRows, error: inqError },
+        { data: srRows, error: srError },
+        { data: projRows, error: projError },
+        { data: payRows, error: payError },
+        { data: warrRows, error: warrError },
+        { data: maintRows, error: maintError },
+        { data: histRows, error: histError }
       ] = await Promise.all([
         window.supabaseClient.from('inquiries').select('*').order('id', { ascending: false }),
         window.supabaseClient.from('service_requests').select('*').order('id', { ascending: false }),
@@ -243,11 +243,19 @@ const BD22_DB = {
         window.supabaseClient.from('maintenance_schedules').select('*').order('scheduled_date', { ascending: true }),
         window.supabaseClient.from('service_history').select('*').order('service_date', { ascending: false })
       ]);
+      if (inqError) console.warn('Inquiries sync note:', inqError);
+      if (srError) console.warn('Service requests sync note:', srError);
+      if (projError) console.warn('Projects sync note:', projError);
+      if (payError) console.warn('Payments sync note:', payError);
+      if (warrError) console.warn('Warranties sync note:', warrError);
+      if (maintError) console.warn('Maintenance sync note:', maintError);
+      if (histError) console.warn('Service history sync note:', histError);
 
       // Map inquiries
       const appointmentOverrides = this.getAppointmentOverrides();
+      let mappedInquiries = [];
       if (inqRows && Array.isArray(inqRows)) {
-        const mappedInquiries = inqRows.map(r => {
+        mappedInquiries = inqRows.map(r => {
           let meta = {};
           if (r.tracking_note && (r.tracking_note.startsWith('{') || r.tracking_note.startsWith('['))) {
             try {
@@ -256,7 +264,7 @@ const BD22_DB = {
           }
           const ref = r.reference_no;
           const ovr = appointmentOverrides[ref] || {};
-          const status = ovr.status || r.status || meta.extended_status || 'Pending Review';
+          const status = r.status || meta.extended_status || 'Pending Review';
           const payStatus = ovr.payment_status || meta.payment_status || r.payment_status || 'Unpaid';
           const confirmedDate = ovr.confirmed_schedule || meta.confirmed_schedule || '';
           const assignedStaff = ovr.assigned_staff || r.assigned_staff || 'Awaiting Staff Assignment';
@@ -285,22 +293,12 @@ const BD22_DB = {
             lastUpdate: formatDate(r.last_update || r.created_at)
           };
         });
-
-        // Preserve any newly submitted local items not yet returned by Supabase
-        const currentLocal = this.get('inquiries') || [];
-        const syncedRefs = new Set(mappedInquiries.map(i => i.reference || i.reference_no));
-        currentLocal.forEach(localItem => {
-          const ref = localItem.reference || localItem.reference_no;
-          if (ref && !syncedRefs.has(ref) && localItem.lastUpdate === 'Just now') {
-            mappedInquiries.unshift(localItem);
-          }
-        });
-        this.set('inquiries', mappedInquiries);
       }
 
       // Map service requests
+      let mappedSr = [];
       if (srRows && Array.isArray(srRows)) {
-        const mappedSr = srRows.map(r => {
+        mappedSr = srRows.map(r => {
           let meta = {};
           if (r.notes && (r.notes.startsWith('{') || r.notes.startsWith('['))) {
             try {
@@ -314,7 +312,7 @@ const BD22_DB = {
 
           const ref = r.reference_no;
           const ovr = appointmentOverrides[ref] || {};
-          const status = ovr.status || r.status || meta.extended_status || 'Pending Review';
+          const status = r.status || meta.extended_status || 'Pending Review';
           const payStatus = ovr.payment_status || meta.payment_status || r.payment_status || 'Unpaid';
           const confirmedDate = ovr.confirmed_schedule || meta.confirmed_schedule || (r.scheduled_date ? formatDate(r.scheduled_date) : '');
           const assignedStaff = ovr.assigned_staff || r.assigned_staff || 'Awaiting Staff Assignment';
@@ -356,69 +354,29 @@ const BD22_DB = {
             lastUpdate: formatDate(r.last_update || r.created_at)
           };
         });
+      }
 
-        // Preserve any newly submitted local items not yet returned by Supabase
-        const currentSrLocal = this.get('serviceRequests') || [];
-        const syncedSrRefs = new Set(mappedSr.map(s => s.reference || s.reference_no));
-        currentSrLocal.forEach(localItem => {
-          const ref = localItem.reference || localItem.reference_no;
-          if (ref && !syncedSrRefs.has(ref) && localItem.lastUpdate === 'Just now') {
-            mappedSr.unshift(localItem);
-          }
+      // Apply strict customer privacy isolation or store full business records
+      if (userRole === 'customer') {
+        const cId = (currentUser.id || '').toLowerCase().trim();
+        const cEmail = (currentUser.email || '').toLowerCase().trim();
+        const cName = (currentUser.full_name || currentUser.name || '').toLowerCase().trim();
+
+        const filterForCust = (items) => items.filter(item => {
+          const uId = (item.user_id || item.auth_user_id || '').toLowerCase().trim();
+          if (uId && cId && uId === cId) return true;
+          const email = (item.email || item.contact_email || '').toLowerCase().trim();
+          if (email && cEmail && (email === cEmail || email.includes(cEmail))) return true;
+          const name = (item.customer || item.customer_name || '').toLowerCase().trim();
+          if (name && cName && (name === cName || name.includes(cName))) return true;
+          return false;
         });
+
+        this.set('inquiries', filterForCust(mappedInquiries));
+        this.set('serviceRequests', filterForCust(mappedSr));
+      } else {
+        this.set('inquiries', mappedInquiries);
         this.set('serviceRequests', mappedSr);
-
-        // Keep inquiries in sync with all service requests so all user inputs exist in both views
-        const mergedInqsMap = new Map();
-        (this.get('inquiries') || []).forEach(inq => {
-          const ref = inq.reference || inq.reference_no;
-          if (ref) mergedInqsMap.set(ref, inq);
-        });
-        (this.get('serviceRequests') || []).forEach(sr => {
-          const ref = sr.reference || sr.reference_no;
-          if (ref) {
-            if (mergedInqsMap.has(ref)) {
-              const inquiry = mergedInqsMap.get(ref);
-              mergedInqsMap.set(ref, {
-                ...inquiry,
-                ...sr,
-                user_id: sr.user_id || inquiry.user_id || null,
-                auth_user_id: sr.user_id || inquiry.auth_user_id || null,
-                payment_status: sr.payment_status || inquiry.payment_status || 'Unpaid',
-                paymentStatus: sr.payment_status || inquiry.payment_status || 'Unpaid',
-                submission_source: inquiry.submission_source && inquiry.submission_source !== 'legacy_unknown'
-                  ? inquiry.submission_source
-                  : (sr.submission_source || inquiry.submission_source || 'legacy_unknown')
-              });
-            } else {
-              mergedInqsMap.set(ref, sr);
-            }
-          }
-        });
-        const combinedInquiries = Array.from(mergedInqsMap.values());
-
-        // Apply strict customer privacy isolation
-        if (userRole === 'customer') {
-          const cId = (currentUser.id || '').toLowerCase().trim();
-          const cEmail = (currentUser.email || '').toLowerCase().trim();
-          const cName = (currentUser.full_name || currentUser.name || '').toLowerCase().trim();
-
-          const filterForCust = (items) => items.filter(item => {
-            const uId = (item.user_id || item.auth_user_id || '').toLowerCase().trim();
-            if (uId && cId && uId === cId) return true;
-            const email = (item.email || item.contact_email || '').toLowerCase().trim();
-            if (email && cEmail && (email === cEmail || email.includes(cEmail))) return true;
-            const name = (item.customer || item.customer_name || '').toLowerCase().trim();
-            if (name && cName && (name === cName || name.includes(cName))) return true;
-            return false;
-          });
-
-          this.set('inquiries', filterForCust(combinedInquiries));
-          this.set('serviceRequests', filterForCust(mappedSr));
-        } else {
-          this.set('inquiries', combinedInquiries);
-          this.set('serviceRequests', mappedSr);
-        }
       }
 
       // Map projects
@@ -755,7 +713,6 @@ const BD22_DB = {
           { data: notifRows },
           { data: invRows },
           { data: profileRows },
-          inquiryCountResult,
           projectCountResult,
           userCountResult,
           warrantyCountResult,
@@ -765,7 +722,6 @@ const BD22_DB = {
           window.supabaseClient.from('admin_notifications').select('*').order('id', { ascending: false }),
           window.supabaseClient.from('inventory_items').select('*').order('id', { ascending: true }),
           window.supabaseClient.from('profiles').select('id, full_name, email, company, role'),
-          window.supabaseClient.from('inquiries').select('id', { count: 'exact', head: true }),
           window.supabaseClient.from('projects').select('id', { count: 'exact', head: true }).eq('status', 'In Progress'),
           window.supabaseClient.from('profiles').select('id', { count: 'exact', head: true }),
           window.supabaseClient.from('warranties').select('id', { count: 'exact', head: true })
@@ -780,7 +736,6 @@ const BD22_DB = {
         }
 
         const dashboardMetricResults = {
-          inquiries: inquiryCountResult,
           projects: projectCountResult,
           users: userCountResult,
           warranties: warrantyCountResult,
@@ -796,12 +751,14 @@ const BD22_DB = {
             dashboardStats[metric] = result.count ?? 0;
           }
         });
-        const totalBookingsCount = (this.get('inquiries') || []).length;
-        if (dashboardStats.inquiries !== null) {
-          dashboardStats.inquiries = Math.max(dashboardStats.inquiries || 0, totalBookingsCount);
-        } else {
-          dashboardStats.inquiries = totalBookingsCount;
-        }
+        const bookingKeys = new Set();
+        (inqRows || []).forEach(row => {
+          bookingKeys.add(row.reference_no ? `ref:${row.reference_no}` : `inquiry:${row.id}`);
+        });
+        (srRows || []).forEach(row => {
+          bookingKeys.add(row.reference_no ? `ref:${row.reference_no}` : `service-request:${row.id}`);
+        });
+        dashboardStats.inquiries = bookingKeys.size;
         this.adminDashboardStats = dashboardStats;
 
         if (notifRows) {
@@ -1093,78 +1050,58 @@ const BD22_DB = {
       assessment_notes: 'Service request queued for engineering review.'
     };
 
-    let finalRef = refCode;
-    if (window.supabaseClient) {
-      try {
-        const { data: { session } } = await window.supabaseClient.auth.getSession();
-        const authUid = session?.user?.id || user.id || null;
-
-        // Authoritative insert into inquiries table in Supabase
-        try {
-          const inqPayload = {
-            reference_no: finalRef,
-            submission_source: authUid ? 'customer_account_verified' : 'public_visitor',
-            customer_name: customerDisplayName,
-            email: reqData.contact_email || user.email || 'customer@bd22fire.com',
-            phone: cleanPhone,
-            service_name: reqData.service_type || reqData.serviceType || 'Fire Protection Service',
-            message: metaPayload.description || 'Service request submitted from Customer Portal.',
-            status: 'Pending Review',
-            tracking_note: JSON.stringify(metaPayload)
-          };
-          if (authUid) {
-            inqPayload.auth_user_id = authUid;
-            if (!window._bd22_inq_user_id_is_legacy_integer) {
-              inqPayload.user_id = authUid;
-            }
-          }
-          let { data: inqRes, error: inqErr } = await window.supabaseClient.from('inquiries').insert(inqPayload).select().single();
-          if (inqErr && (inqErr.code === '22P02' || /invalid input syntax for type integer/i.test(inqErr.message || ''))) {
-            window._bd22_inq_user_id_is_legacy_integer = true;
-            delete inqPayload.user_id;
-            const retry = await window.supabaseClient.from('inquiries').insert(inqPayload).select().single();
-            inqRes = retry.data;
-            inqErr = retry.error;
-          }
-          if (inqErr) {
-            console.warn('Supabase inquiries insert notice:', inqErr.message || inqErr);
-          } else if (inqRes?.reference_no) {
-            finalRef = inqRes.reference_no;
-          }
-        } catch (inqDbErr) {
-          console.warn('Supabase inquiries insert error:', inqDbErr);
-        }
-
-        // Mirror insert to service_requests table in Supabase (packing metadata into notes)
-        try {
-          const srPayload = {
-            reference_no: finalRef,
-            customer_name: customerDisplayName,
-            service_type: reqData.service_type || reqData.serviceType || 'Fire Protection Service',
-            urgency: cleanUrgency,
-            status: 'Pending Review',
-            notes: JSON.stringify(metaPayload)
-          };
-          if (authUid && !window._bd22_sr_user_id_is_legacy_integer) {
-            srPayload.user_id = authUid;
-          }
-          let { error: srErr } = await window.supabaseClient.from('service_requests').insert(srPayload);
-          if (srErr && (srErr.code === '22P02' || /invalid input syntax for type integer/i.test(srErr.message || ''))) {
-            window._bd22_sr_user_id_is_legacy_integer = true;
-            delete srPayload.user_id;
-            await window.supabaseClient.from('service_requests').insert(srPayload);
-          }
-        } catch (srErr) {
-          console.warn('Supabase service_requests mirror note:', srErr);
-        }
-      } catch (err) {
-        console.warn('Supabase service_requests network warning (persisted locally):', err);
-      }
+    if (!window.supabaseClient) {
+      throw new Error('Appointment booking is unavailable because Supabase is not connected.');
     }
+
+    const { data: { session }, error: sessionError } = await window.supabaseClient.auth.getSession();
+    if (sessionError) throw sessionError;
+    const authUid = session?.user?.id || user.id;
+    if (!authUid) throw new Error('Sign in before booking an appointment.');
+
+    const serviceRequestPayload = {
+      reference_no: refCode,
+      user_id: authUid,
+      customer_name: customerDisplayName,
+      service_type: reqData.service_type || reqData.serviceType || 'Fire Protection Service',
+      urgency: cleanUrgency,
+      notes: JSON.stringify(metaPayload),
+      description: metaPayload.description,
+      preferred_timeline: metaPayload.preferred_timeline,
+      preferred_date: metaPayload.preferred_date || null,
+      establishment_name: metaPayload.establishment_name,
+      building_type: metaPayload.building_type,
+      floors: metaPayload.floors,
+      site_address: metaPayload.site_address,
+      google_maps_link: metaPayload.google_maps_link,
+      contact_name: metaPayload.contact_name,
+      contact_phone: metaPayload.contact_phone,
+      contact_email: metaPayload.contact_email,
+      contact_position: metaPayload.contact_position,
+      attachments: metaPayload.attachments,
+      additional_concerns: metaPayload.additional_concerns,
+      quotation_amount: 0,
+      assessment_notes: metaPayload.assessment_notes,
+      payment_status: 'Unpaid',
+      status: 'Pending Review'
+    };
+    const { data: createdRequest, error: insertError } = await window.supabaseClient
+      .from('service_requests')
+      .insert(serviceRequestPayload)
+      .select('id, reference_no')
+      .single();
+
+    if (insertError) throw insertError;
+    if (!createdRequest?.id || !createdRequest.reference_no) {
+      throw new Error('Appointment was saved without a record ID or reference number.');
+    }
+    const finalRef = createdRequest.reference_no;
 
     // Update local cache immediately
     const existingList = this.get('serviceRequests') || [];
     const localRecord = {
+      id: createdRequest.id,
+      user_id: authUid,
       reference: finalRef,
       reference_no: finalRef,
       customer: customerDisplayName,
@@ -1182,28 +1119,6 @@ const BD22_DB = {
     };
     
     this.set('serviceRequests', [localRecord, ...existingList.filter(item => (item.reference || item.reference_no) !== finalRef)]);
-
-    // Mirror to inquiries collection so it is immediately visible in Customer Inquiries as well
-    const existingInqs = this.get('inquiries') || [];
-    const inqMirror = {
-      reference: finalRef,
-      reference_no: finalRef,
-      customer: customerDisplayName,
-      customer_name: customerDisplayName,
-      service: localRecord.service,
-      service_name: localRecord.service_type,
-      status: 'Pending Review',
-      payment_status: 'Unpaid',
-      paymentStatus: 'Unpaid',
-      email: localRecord.contact_email || user.email || '',
-      phone: localRecord.contact_phone || user.phone || '',
-      trackingNote: `Site: ${localRecord.establishment_name || 'Project Site'} • Preferred: ${localRecord.preferred_date || 'Target Date'}`,
-      message: localRecord.description || '',
-      dateSubmitted: localRecord.dateSubmitted,
-      lastUpdate: 'Just now',
-      ...metaPayload
-    };
-    this.set('inquiries', [inqMirror, ...existingInqs.filter(i => (i.reference || i.reference_no) !== finalRef)]);
     
     try {
       await this.sync();
@@ -1220,8 +1135,15 @@ const BD22_DB = {
     try {
       const currentList = this.get('serviceRequests') || [];
       const currentInqs = this.get('inquiries') || [];
-      const item = currentList.find(r => r.reference === reference || r.reference_no === reference) ||
-                   currentInqs.find(i => i.reference === reference || i.reference_no === reference);
+      const request = currentList.find(r => r.reference === reference || r.reference_no === reference);
+      const inquiry = currentInqs.find(i => i.reference === reference || i.reference_no === reference);
+      const item = request || inquiry;
+      if (!item || item.id === undefined || item.id === null) {
+        throw new Error(`Could not find the existing appointment record for ${reference}.`);
+      }
+      if (!window.supabaseClient) {
+        throw new Error('Appointment updates are unavailable because Supabase is not connected.');
+      }
       
       const newStatus = updatedFields.status || item?.status || 'Pending Review';
       const assignedStaff = updatedFields.assignedStaff || updatedFields.assigned_staff || item?.assignedStaff || item?.assigned_staff || 'M. Velasco';
@@ -1268,40 +1190,50 @@ const BD22_DB = {
         last_update: new Date().toISOString(),
         assigned_staff: assignedStaff,
         status: newStatus,
+        payment_status: paymentStatus,
         quotation_amount: quotationAmt,
         scheduled_date: confirmedDate ? confirmedDate : null,
         assessment_notes: assessmentNotes,
         notes: JSON.stringify(meta)
       };
+      if (updatedFields.service) updates.service_type = updatedFields.service;
 
-      if (window.supabaseClient) {
-        try {
-          await window.supabaseClient
-            .from('service_requests')
-            .update(updates)
-            .eq('reference_no', reference);
-        } catch (srErr) {
-          console.warn('Supabase service_requests update notice:', srErr);
+      if (request) {
+        const { data: updatedRequests, error: requestError } = await window.supabaseClient
+          .from('service_requests')
+          .update(updates)
+          .eq('id', request.id)
+          .eq('reference_no', reference)
+          .select('id');
+
+        if (requestError) throw requestError;
+        if (!updatedRequests || updatedRequests.length === 0) {
+          throw new Error(`The appointment ${reference} was not updated. Refresh and try again.`);
         }
+      } else {
+        const inquiryUpdates = {
+          status: newStatus,
+          assigned_staff: assignedStaff,
+          payment_status: paymentStatus,
+          last_update: updates.last_update,
+          tracking_note: JSON.stringify(meta)
+        };
+        if (updatedFields.service) inquiryUpdates.service_name = updatedFields.service;
+        const { data: updatedInquiries, error: inquiryError } = await window.supabaseClient
+          .from('inquiries')
+          .update(inquiryUpdates)
+          .eq('id', inquiry.id)
+          .eq('reference_no', reference)
+          .select('id');
 
-        try {
-          const inqUpdate = {
-            status: newStatus,
-            assigned_staff: assignedStaff,
-            last_update: new Date().toISOString(),
-            tracking_note: JSON.stringify(meta)
-          };
-          await window.supabaseClient
-            .from('inquiries')
-            .update(inqUpdate)
-            .eq('reference_no', reference);
-        } catch (inqErr) {
-          console.warn('Supabase inquiries update notice:', inqErr);
+        if (inquiryError) throw inquiryError;
+        if (!updatedInquiries || updatedInquiries.length === 0) {
+          throw new Error(`The inquiry ${reference} was not updated. Refresh and try again.`);
         }
       }
 
       // If user_id exists on item, send customer notification message
-      if (item?.user_id && window.supabaseClient) {
+      if (item.user_id) {
         let notifMsg = `Your service request ${reference} at ${item.establishment_name || 'site'} status has been updated to "${newStatus}".`;
         if (updatedFields.payment_status === 'Paid') {
           notifMsg = `Payment confirmed: Your appointment (${reference}) has been marked as PAID by BD22 operations.`;
@@ -1328,85 +1260,32 @@ const BD22_DB = {
         }
       }
 
-      // Update local storage for serviceRequests
-      let foundInSr = false;
-      const updatedSrList = currentList.map(r => {
-        if (r.reference === reference || r.reference_no === reference) {
-          foundInSr = true;
-          return {
-            ...r,
-            ...meta,
-            status: newStatus,
-            payment_status: paymentStatus,
-            paymentStatus: paymentStatus,
-            assignedStaff: assignedStaff,
-            assigned_staff: assignedStaff,
-            confirmed_schedule: confirmedDate,
-            quotation_amount: quotationAmt,
-            assessment_notes: assessmentNotes,
-            lastUpdate: 'Just now'
-          };
-        }
-        return r;
-      });
-      if (!foundInSr && item) {
-        updatedSrList.unshift({
-          ...item,
-          ...meta,
-          status: newStatus,
-          payment_status: paymentStatus,
-          paymentStatus: paymentStatus,
-          assignedStaff: assignedStaff,
-          assigned_staff: assignedStaff,
-          confirmed_schedule: confirmedDate,
-          quotation_amount: quotationAmt,
-          assessment_notes: assessmentNotes,
-          lastUpdate: 'Just now'
-        });
+      const updatedItem = {
+        ...item,
+        ...meta,
+        ...(updatedFields.service ? { service: updatedFields.service, service_type: updatedFields.service } : {}),
+        status: newStatus,
+        payment_status: paymentStatus,
+        paymentStatus: paymentStatus,
+        assignedStaff: assignedStaff,
+        assigned_staff: assignedStaff,
+        confirmed_schedule: confirmedDate,
+        quotation_amount: quotationAmt,
+        assessment_notes: assessmentNotes,
+        lastUpdate: 'Just now'
+      };
+      if (request) {
+        this.set('serviceRequests', currentList.map(r =>
+          r.id === request.id ? updatedItem : r
+        ));
+      } else {
+        this.set('inquiries', currentInqs.map(i =>
+          i.id === inquiry.id ? updatedItem : i
+        ));
       }
-      this.set('serviceRequests', updatedSrList);
-
-      // Update local storage for inquiries
-      let foundInInq = false;
-      const updatedInqList = currentInqs.map(i => {
-        if (i.reference === reference || i.reference_no === reference) {
-          foundInInq = true;
-          return {
-            ...i,
-            ...meta,
-            status: newStatus,
-            payment_status: paymentStatus,
-            paymentStatus: paymentStatus,
-            assignedStaff: assignedStaff,
-            assigned_staff: assignedStaff,
-            confirmed_schedule: confirmedDate,
-            quotation_amount: quotationAmt,
-            assessment_notes: assessmentNotes,
-            lastUpdate: 'Just now'
-          };
-        }
-        return i;
-      });
-      if (!foundInInq && item) {
-        updatedInqList.unshift({
-          ...item,
-          ...meta,
-          status: newStatus,
-          payment_status: paymentStatus,
-          paymentStatus: paymentStatus,
-          assignedStaff: assignedStaff,
-          assigned_staff: assignedStaff,
-          confirmed_schedule: confirmedDate,
-          quotation_amount: quotationAmt,
-          assessment_notes: assessmentNotes,
-          lastUpdate: 'Just now'
-        });
-      }
-      this.set('inquiries', updatedInqList);
 
       // Record persistent override so sync() never reverts this update
       this.setAppointmentOverride(reference, {
-        status: newStatus,
         payment_status: paymentStatus,
         assigned_staff: assignedStaff,
         confirmed_schedule: confirmedDate,
@@ -1419,7 +1298,7 @@ const BD22_DB = {
       return { success: true };
     } catch (err) {
       console.error('Service request update error:', err);
-      return { success: false, error: err };
+      return { success: false, error: err.message || String(err) };
     }
   },
 
@@ -2044,8 +1923,12 @@ const BD22_DB = {
   async createProject(projData) {
     try {
       const userId = projData.user_id;
-      if (!userId || typeof userId !== 'string' || !userId.trim()) {
+      const isUuid = typeof userId === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userId.trim());
+      if (!isUuid) {
         return { success: false, error: 'A valid registered customer account must be assigned.' };
+      }
+      if (!window.supabaseClient) {
+        return { success: false, error: 'Supabase is unavailable. The project was not created; please try again when the connection is restored.' };
       }
 
       const registered = this.getRegisteredCustomers();
@@ -2130,13 +2013,11 @@ const BD22_DB = {
 
       // Insert the project first so the invoice can reference its database ID.
       let createdProjectId = null;
-      if (window.supabaseClient) {
+      {
         try {
-          const isUuid = typeof userId === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userId.trim());
-          const isNumericUserId = typeof userId === 'number' || (typeof userId === 'string' && /^\d+$/.test(userId.trim()));
-
           const fullProjectPayload = {
             project_code: projCode,
+            user_id: userId,
             name: projectRecord.name,
             customer_name: projectRecord.customer_name,
             description: projectRecord.description || '',
@@ -2155,48 +2036,32 @@ const BD22_DB = {
             notes: projectRecord.notes,
             attachments: projectRecord.attachments
           };
-          if (isNumericUserId) {
-            fullProjectPayload.user_id = Number(userId);
-          } else if (isUuid && !window._bd22_projects_user_id_is_legacy_integer) {
-            fullProjectPayload.user_id = userId;
-          }
 
-          const getBaseProjectPayload = (includeUser) => {
-            const p = {
+          const getBaseProjectPayload = () => {
+            return {
               project_code: projCode,
+              user_id: userId,
               name: projectRecord.name,
               customer_name: projectRecord.customer_name,
+              start_date: projectRecord.start_date,
+              project_manager: projectRecord.manager,
+              budget: projectRecord.budget,
               assigned_team: projectRecord.team || 'Team Alpha (Operations)',
               progress: projectRecord.progress || 0,
               target_date: projectRecord.target_date || null,
               status: projectRecord.status || 'In Progress',
               milestones: projectRecord.milestones || '',
-              description: projectRecord.description
-                ? (projectRecord.description.includes('[auth_user_id:') ? projectRecord.description : `${projectRecord.description}\n[auth_user_id:${userId}]`)
-                : `[auth_user_id:${userId}]`
+              description: projectRecord.description || ''
             };
-            if (includeUser) {
-              p.user_id = isNumericUserId ? Number(userId) : userId;
-            }
-            return p;
           };
 
           let insertedProject = null;
           let pErr = null;
 
-          // Try full project payload first
-          let projectPayloadToTry = { ...fullProjectPayload };
-          if (window._bd22_projects_user_id_is_legacy_integer && isUuid) {
-            delete projectPayloadToTry.user_id;
-            if (!projectPayloadToTry.description?.includes('[auth_user_id:')) {
-              projectPayloadToTry.description = projectPayloadToTry.description ? `${projectPayloadToTry.description}\n[auth_user_id:${userId}]` : `[auth_user_id:${userId}]`;
-            }
-          }
-
           let res = await window.supabaseClient
             .from('projects')
-            .insert(projectPayloadToTry)
-            .select('id')
+            .insert(fullProjectPayload)
+            .select('id,user_id')
             .single();
 
           if (!res.error) {
@@ -2205,47 +2070,25 @@ const BD22_DB = {
             pErr = res.error;
             console.warn('Full projects insert note:', pErr.message);
 
-            const isIntegerErr = (pErr.code === '22P02' || /invalid input syntax for type integer/i.test(pErr.message || ''));
-            if (isIntegerErr) {
-              window._bd22_projects_user_id_is_legacy_integer = true;
-            }
-
-            // Fallback to verified base columns
-            let tryWithUser = !window._bd22_projects_user_id_is_legacy_integer;
-            let basePayload = getBaseProjectPayload(tryWithUser);
-
             let baseRes = await window.supabaseClient
               .from('projects')
-              .insert(basePayload)
-              .select('id')
+              .insert(getBaseProjectPayload())
+              .select('id,user_id')
               .single();
 
             if (!baseRes.error) {
               insertedProject = baseRes.data;
               pErr = null;
-            } else if (isIntegerErr || baseRes.error.code === '22P02' || /invalid input syntax for type integer/i.test(baseRes.error.message || '')) {
-              // Retry without user_id in integer column
-              window._bd22_projects_user_id_is_legacy_integer = true;
-              let baseWithoutUser = getBaseProjectPayload(false);
-              let retryRes = await window.supabaseClient
-                .from('projects')
-                .insert(baseWithoutUser)
-                .select('id')
-                .single();
-
-              if (!retryRes.error) {
-                insertedProject = retryRes.data;
-                pErr = null;
-              } else {
-                pErr = retryRes.error;
-              }
             } else {
               pErr = baseRes.error;
             }
           }
 
           if (pErr) {
-            console.warn('Supabase projects remote save note (project saved locally):', pErr.message || pErr);
+            return { success: false, error: `Project could not be saved to Supabase: ${pErr.message || 'Unknown database error.'}` };
+          }
+          if (!insertedProject?.id || String(insertedProject.user_id || '').toLowerCase() !== userId.toLowerCase()) {
+            return { success: false, error: 'Supabase did not confirm the project owner. The project was not added to local state.' };
           }
 
           projectRecord.db_id = insertedProject?.id || null;
@@ -2257,6 +2100,7 @@ const BD22_DB = {
             const fullPayPayload = {
               invoice_no: invCode,
               project_id: projectRecord.db_id,
+              user_id: userId,
               project_name: invoiceRecord.project_name,
               customer_name: invoiceRecord.customer_name,
               amount: invoiceRecord.amount,
@@ -2268,33 +2112,21 @@ const BD22_DB = {
               billing_notes: invoiceRecord.billing_notes,
               payment_history: []
             };
-            if (isNumericUserId) {
-              fullPayPayload.user_id = Number(userId);
-            } else if (isUuid && !window._bd22_payments_user_id_is_legacy_integer) {
-              fullPayPayload.user_id = userId;
-            }
 
-            const getBasePayPayload = (includeUser, statusVal = 'Unpaid') => {
-              const p = {
+            const getBasePayPayload = (statusVal = 'Unpaid') => {
+              return {
                 invoice_no: invCode,
                 project_id: projectRecord.db_id,
+                user_id: userId,
                 customer_name: invoiceRecord.customer_name,
                 amount: invoiceRecord.amount,
                 due_date: invoiceRecord.due_date || null,
                 status: statusVal,
                 payment_reference: `[auth_user_id:${userId}]`
               };
-              if (includeUser) {
-                p.user_id = isNumericUserId ? Number(userId) : userId;
-              }
-              return p;
             };
 
             let payPayloadToTry = { ...fullPayPayload };
-            if (window._bd22_payments_user_id_is_legacy_integer && isUuid) {
-              delete payPayloadToTry.user_id;
-              payPayloadToTry.payment_reference = `[auth_user_id:${userId}]`;
-            }
 
             let payResult = await window.supabaseClient
               .from('payments')
@@ -2304,13 +2136,7 @@ const BD22_DB = {
 
             if (payResult?.error) {
               console.warn('Full payments insert note:', payResult.error.message);
-              const isPayIntErr = (payResult.error.code === '22P02' || /invalid input syntax for type integer/i.test(payResult.error.message || ''));
-              if (isPayIntErr) {
-                window._bd22_payments_user_id_is_legacy_integer = true;
-              }
-
-              let basePayWithUser = !window._bd22_payments_user_id_is_legacy_integer;
-              let basePay = getBasePayPayload(basePayWithUser, 'Unpaid');
+              let basePay = getBasePayPayload('Unpaid');
 
               let basePayRes = await window.supabaseClient
                 .from('payments')
@@ -2325,19 +2151,18 @@ const BD22_DB = {
                   ? 'Pending'
                   : 'Unpaid';
 
-                window._bd22_payments_user_id_is_legacy_integer = true;
-                let basePayNoUser = getBasePayPayload(false, statusChoice);
+                let basePayFallback = getBasePayPayload(statusChoice);
 
                 let finalPayRes = await window.supabaseClient
                   .from('payments')
-                  .insert(basePayNoUser)
+                  .insert(basePayFallback)
                   .select('id')
                   .maybeSingle();
 
                 if (!finalPayRes.error) {
                   payResult = finalPayRes;
                 } else if (statusChoice === 'Unpaid' && (finalPayRes.error.code === '23514' || /check constraint/i.test(finalPayRes.error.message || ''))) {
-                  let pendingPay = getBasePayPayload(false, 'Pending');
+                  let pendingPay = getBasePayPayload('Pending');
                   payResult = await window.supabaseClient
                     .from('payments')
                     .insert(pendingPay)
@@ -2354,7 +2179,7 @@ const BD22_DB = {
             }
           }
         } catch (err) {
-          console.warn('Project creation remote sync note (saved locally):', err);
+          return { success: false, error: `Project could not be saved to Supabase: ${err.message || err}` };
         }
       }
 
