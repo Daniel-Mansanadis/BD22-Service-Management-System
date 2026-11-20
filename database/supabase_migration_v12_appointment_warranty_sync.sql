@@ -167,7 +167,7 @@ WITH CHECK (
     OR COALESCE(auth.jwt()->'user_metadata'->>'role', '') = 'admin'
 );
 
--- 8. Grant table permissions to authenticated
+-- 8. Grant table permissions to authenticated and anon
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.service_requests TO authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.inquiries TO authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.warranties TO authenticated;
@@ -175,6 +175,66 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON public.service_history TO authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.projects TO authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.payments TO authenticated;
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO authenticated;
+
+-- 9. Fix existing completed projects and service history in Supabase PostgreSQL
+UPDATE public.projects
+SET payment_status = 'Paid'
+WHERE status = 'Completed';
+
+-- Update linked invoice payments for completed projects
+UPDATE public.payments
+SET 
+    status = 'Paid',
+    amount_paid = COALESCE(amount, 0),
+    balance = 0.00
+WHERE project_id IN (SELECT id FROM public.projects WHERE status = 'Completed')
+   OR project_code IN (SELECT project_code FROM public.projects WHERE status = 'Completed')
+   OR project_id IN (SELECT project_code FROM public.projects WHERE status = 'Completed');
+
+-- Update service_history records for completed projects to Paid
+UPDATE public.service_history
+SET 
+    payment_status = 'Paid',
+    description = REPLACE(description, 'Payment Status: Unpaid', 'Payment Status: Paid')
+WHERE status = 'Completed' 
+   OR badge = 'Completed' 
+   OR title ILIKE '%Turnover%' 
+   OR title ILIKE '%Commissioning%'
+   OR description ILIKE '%Payment Status: Unpaid%';
+
+-- 10. Automatically insert 1-Year Warranty for completed projects if missing
+INSERT INTO public.warranties (
+    warranty_code,
+    project_code,
+    project_id,
+    user_id,
+    customer_name,
+    system_covered,
+    start_date,
+    expiry_date,
+    status,
+    notes
+)
+SELECT 
+    'BD22-WAR-' || EXTRACT(YEAR FROM CURRENT_DATE) || '-' || LPAD(p.id::text, 4, '0'),
+    p.project_code,
+    p.project_code,
+    p.user_id,
+    COALESCE(p.customer_name, 'Valued Customer'),
+    p.name,
+    COALESCE(p.actual_completion_date, CURRENT_DATE),
+    COALESCE(p.actual_completion_date, CURRENT_DATE) + INTERVAL '1 year',
+    CASE 
+        WHEN (COALESCE(p.actual_completion_date, CURRENT_DATE) + INTERVAL '1 year') >= CURRENT_DATE THEN 'Active'
+        ELSE 'Expired'
+    END,
+    'Auto-generated 1-year comprehensive warranty for completed project ' || p.project_code
+FROM public.projects p
+WHERE p.status = 'Completed'
+  AND NOT EXISTS (
+      SELECT 1 FROM public.warranties w 
+      WHERE w.project_code = p.project_code OR w.project_id = p.project_code
+  );
 
 -- Refresh PostgREST schema cache
 NOTIFY pgrst, 'reload schema';
